@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - MedicPulse</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>MedicPulse</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="admin_dashboard.html" class="active"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> <span>Manage Patients</span></a></li>
+                <li><a href="#"><i class="fas fa-user-md"></i> <span>Manage Doctors</span></a></li>
+                <li><a href="#"><i class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
+                <li><a href="analytics.html"><i class="fas fa-poll"></i> <span>Analytics</span></a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="nav-left">
+                    <span class="system-name">Admin Portal</span>
+                </div>
+                <div class="nav-right">
+                    <div class="user-profile">
+                        <span class="user-name">Admin User</span>
+                        <div class="notification-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                    </div>
+                    <a href="login.html" class="logout-btn">Logout</a>
+                </div>
+            </nav>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="page-header">
+                    <h1>Hospital Overview</h1>
+                    <p>Real-time statistics for today's operations.</p>
+                </div>
+
+                <div class="stats-container">
+                    <div class="card stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Patients</h3>
+                            <p class="stat-value">1,240</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Doctors</h3>
+                            <p class="stat-value">48</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-info">
+                            <h3>Appointments Today</h3>
+                            <p class="stat-value">124</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Completed Visits</h3>
+                            <p class="stat-value">86</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon" style="background-color: #ffebee; color: #c62828;"><i class="fas fa-times-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Cancelled</h3>
+                            <p class="stat-value">12</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">Recent Activity</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                border: none;
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Department</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Jane Smith</td>
+                                    <td>Dr. Williams</td>
+                                    <td>Neurology</td>
+                                    <td>11:00 AM</td>
+                                    <td><span class="status-badge status-completed">Completed</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Robert Fox</td>
+                                    <td>Dr. Adams</td>
+                                    <td>Orthopedics</td>
+                                    <td>11:30 AM</td>
+                                    <td><span class="status-badge status-pending">In Progress</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Emily Blunt</td>
+                                    <td>Dr. Rao</td>
+                                    <td>Cardiology</td>
+                                    <td>12:00 PM</td>
+                                    <td><span class="status-badge status-pending">Scheduled</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../js/script.js"></script>
+</body>
+</html>

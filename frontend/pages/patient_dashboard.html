@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - MedicPulse</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>MedicPulse</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="patient_dashboard.html" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="appointment.html"><i class="fas fa-calendar-plus"></i> <span>Book Appointment</span></a></li>
+                <li><a href="#"><i class="fas fa-calendar-check"></i> <span>My Appointments</span></a></li>
+                <li><a href="visit_history.html"><i class="fas fa-history"></i> <span>Visit History</span></a></li>
+                <li><a href="#"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main-wrapper">
+            <!-- Navbar -->
+            <nav class="navbar">
+                <div class="nav-left">
+                    <span class="system-name">Patient Dashboard</span>
+                </div>
+                <div class="nav-right">
+                    <div class="user-profile">
+                        <span class="user-name">John Doe</span>
+                        <div class="notification-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                    </div>
+                    <a href="login.html" class="logout-btn">Logout</a>
+                </div>
+            </nav>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="page-header">
+                    <h1>Welcome, John!</h1>
+                    <p>Here is an overview of your health activities.</p>
+                </div>
+
+                <div class="stats-container">
+                    <div class="card stat-card">
+                        <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="stat-info">
+                            <h3>Upcoming Appointment</h3>
+                            <p class="stat-value">12 March, 10:30 AM</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">Dr. Rao - Cardiology</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon"><i class="fas fa-file-medical"></i></div>
+                        <div class="stat-info">
+                            <h3>Past Visits</h3>
+                            <p class="stat-value">15 Visits</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">Last visit: 02 Feb 2024</p>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="stat-icon"><i class="fas fa-bell"></i></div>
+                        <div class="stat-info">
+                            <h3>Notifications</h3>
+                            <p class="stat-value">2 New</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">View all updates</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px;">Health Summary</h3>
+                    <p>Recent reports and upcoming checkups are listed here. Stay healthy and hydrated!</p>
+                    <div class="chart-placeholder" style="height: 150px;">
+                        Patient Health Progress Chart Placeholder
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../js/script.js"></script>
+</body>
+</html>

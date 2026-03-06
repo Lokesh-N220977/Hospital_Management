@@ -1,25 +1,49 @@
-# Hospital Appointment & Records System
+# MedicPulse Hospital Appointment Management System
 
-A web-based system to manage hospital appointments, patient records, and doctor schedules.
+A professional, modern, and minimal medical dashboard interface built with HTML and CSS.
 
 ## Features
-- Patient registration and login
-- Doctor schedule management
-- Appointment booking
-- Visit history tracking
-- Admin analytics dashboard
-- Appointment cancellation and rescheduling
+- **Login Page**: Role-based access simulation (Patient/Admin).
+- **Patient Dashboard**: Overview of upcoming appointments and medical notifications.
+- **Admin Dashboard**: Real-time hospital statistics and activity tracking.
+- **Appointment Booking**: Clean form for scheduling visits with time slot selection.
+- **Visit History**: Tabular view of past medical records.
+- **Analytics**: Data visualization placeholders for hospital performance.
 
-## Technology Stack
-Frontend: HTML, CSS, JavaScript
-Backend: Python
-Database: MongoDB
+## Design System
+- **Primary Color**: #1E88E5 (Professional Blue)
+- **Background**: #FFFFFF / #E3F2FD (Clean & Light)
+- **Typography**: Poppins (Modern Sans-Serif)
+- **Components**: Rounded corners, soft shadows, and responsive sidebar navigation.
 
 ## Project Structure
-frontend/ - UI components and pages
-backend/ - server-side logic
-database/ - database schema and configuration
+```
+hospital_project
+│
+├── frontend
+│   ├── css
+│   │   style.css
+│   │
+│   ├── js
+│   │   script.js
+│   │
+│   ├── components
+│   │   navbar.html
+│   │   sidebar.html
+│   │
+│   └── pages
+│       login.html
+│       patient_dashboard.html
+│       admin_dashboard.html
+│       appointment.html
+│       visit_history.html
+│       analytics.html
+│
+├── backend (ready for development)
+├── database (ready for migration)
+├── index.html
+└── README.md
+```
 
-## Team Workflow
-GitHub repository is used for version control.
-GitHub Projects is used for task management and assignment.
+## How to Run
+Simply open `index.html` in your web browser.

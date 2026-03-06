@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit History - MedicPulse</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>MedicPulse</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="patient_dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="appointment.html"><i class="fas fa-calendar-plus"></i> <span>Book Appointment</span></a></li>
+                <li><a href="#"><i class="fas fa-calendar-check"></i> <span>My Appointments</span></a></li>
+                <li><a href="visit_history.html" class="active"><i class="fas fa-history"></i> <span>Visit History</span></a></li>
+                <li><a href="#"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main-wrapper">
+            <nav class="navbar">
+                <div class="nav-left">
+                    <span class="system-name">Patient Records</span>
+                </div>
+                <div class="nav-right">
+                    <div class="user-profile">
+                        <span class="user-name">John Doe</span>
+                    </div>
+                    <a href="login.html" class="logout-btn">Logout</a>
+                </div>
+            </nav>
+
+            <main class="content-area">
+                <div class="page-header">
+                    <h1>Your Medical History</h1>
+                    <p>Review your past visits, diagnoses, and prescriptions.</p>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Doctor</th>
+                                <th>Department</th>
+                                <th>Diagnosis</th>
+                                <th>Prescription</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>15 Jan 2024</td>
+                                <td>Dr. Smith</td>
+                                <td>General</td>
+                                <td>Seasonal Flu</td>
+                                <td>Paracetamol, Rest</td>
+                                <td><span class="status-badge status-completed">Follow-up Done</span></td>
+                            </tr>
+                            <tr>
+                                <td>02 Dec 2023</td>
+                                <td>Dr. Rao</td>
+                                <td>Cardiology</td>
+                                <td>Minor Hypertension</td>
+                                <td>Enalapril 5mg</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>10 Oct 2023</td>
+                                <td>Dr. Adams</td>
+                                <td>Orthopedics</td>
+                                <td>Ankle Sprain</td>
+                                <td>Painkillers, Brace</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../js/script.js"></script>
+</body>
+</html>

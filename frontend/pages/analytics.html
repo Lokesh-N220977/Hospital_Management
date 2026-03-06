@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics - MedicPulse</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>MedicPulse</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="admin_dashboard.html"><i class="fas fa-chart-line"></i> <span>Dashboard</span></a></li>
+                <li><a href="#"><i class="fas fa-users"></i> <span>Manage Patients</span></a></li>
+                <li><a href="#"><i class="fas fa-user-md"></i> <span>Manage Doctors</span></a></li>
+                <li><a href="#"><i class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
+                <li><a href="analytics.html" class="active"><i class="fas fa-poll"></i> <span>Analytics</span></a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main-wrapper">
+            <nav class="navbar">
+                <div class="nav-left">
+                    <span class="system-name">Analytics Reports</span>
+                </div>
+                <div class="nav-right">
+                    <div class="user-profile">
+                        <span class="user-name">Admin User</span>
+                    </div>
+                    <a href="login.html" class="logout-btn">Logout</a>
+                </div>
+            </nav>
+
+            <main class="content-area">
+                <div class="page-header">
+                    <h1>Performance Analytics</h1>
+                    <p>Insights into hospital efficiency and patient care.</p>
+                </div>
+
+                <div class="stats-container" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+                    <div class="card">
+                        <h3>Daily Appointments Trend</h3>
+                        <div class="chart-placeholder">
+                            [Line Chart: Showing appointment volume over 7 days]
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Patient Registrations</h3>
+                        <div class="chart-placeholder">
+                            [Bar Chart: New patient signups per month]
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Doctor Workload</h3>
+                        <div class="chart-placeholder">
+                            [Pie Chart: Distribution by department]
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Cancellation Statistics</h3>
+                        <div class="chart-placeholder">
+                            [Doughnut Chart: Reasons for cancellations]
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="../js/script.js"></script>
+</body>
+</html>
