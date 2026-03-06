@@ -22,28 +22,34 @@ hospital_project
 │
 ├── frontend
 │   ├── css
-│   │   style.css
-│   │
 │   ├── js
-│   │   script.js
-│   │
 │   ├── components
-│   │   navbar.html
-│   │   sidebar.html
-│   │
 │   └── pages
-│       login.html
-│       patient_dashboard.html
-│       admin_dashboard.html
-│       appointment.html
-│       visit_history.html
-│       analytics.html
 │
-├── backend (ready for development)
-├── database (ready for migration)
-├── index.html
-└── README.md
+├── backend
+│   ├── app.py           # Application Entry points
+│   ├── config/          # Configurations
+│   ├── routes/          # API Blueprints
+│   ├── models/          # Schema definitions
+│   └── utils/           # Shared helpers
+│
+├── database
+│   └── db.py            # MongoDB connection
+│
+├── README.md
+└── .gitignore
 ```
 
+## Backend API Endpoints
+- **Status**: `GET /`
+- **Auth**: `/api/auth/login`, `/api/auth/register`
+- **Patients**: `GET /api/patients`, `POST /api/patients`
+- **Doctors**: `GET /api/doctors`
+- **Appointments**: `POST /api/appointments`, `GET /api/appointments`
+
 ## How to Run
-Simply open `index.html` in your web browser.
+1. **Frontend**: Simply open `index.html` in your web browser.
+2. **Backend**: 
+   - Ensure Python 3.x is installed.
+   - Install dependencies: `pip install flask flask-cors pymongo`
+   - Run: `python backend/app.py`
