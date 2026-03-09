@@ -1,14 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedicPulse - Hospital Management System</title>
-    <script>
-        window.location.href = "frontend/pages/login.html";
-    </script>
+    <title>MedicPulse - Professional Healthcare Booking Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="frontend/css/style.css">
 </head>
+
 <body>
-    <p>Redirecting to login...</p>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-notes-medical"></i> MedicPulse
+            </a>
+
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="frontend/pages/doctors.html">Doctors</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="frontend/pages/login.html" class="btn btn-outline nav-btn">Login</a></li>
+                <li><a href="frontend/pages/register.html" class="btn btn-primary nav-btn">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero fade-in-section">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <span class="hero-badge">Modern Healthcare Solution</span>
+                <h1>Book Doctor Appointments in Seconds</h1>
+                <p>Experience seamless healthcare access. Find top-rated doctors, book appointments instantly, and
+                    manage your health records securely online.</p>
+                <div class="hero-btns">
+                    <a href="frontend/pages/login.html" class="btn btn-primary">Book Appointment</a>
+                    <a href="frontend/pages/doctors.html" class="btn btn-outline">Find Doctors</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800"
+                    alt="Professional Doctor Consultation">
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Metrics Section -->
+    <section class="trust-metrics fade-in-section">
+        <div class="container trust-container">
+            <div class="trust-item">
+                <h3>10,000+</h3>
+                <p>Patients Served</p>
+            </div>
+            <div class="trust-item">
+                <h3>500+</h3>
+                <p>Verified Doctors</p>
+            </div>
+            <div class="trust-item">
+                <h3>50+</h3>
+                <p>Partner Hospitals</p>
+            </div>
+            <div class="trust-item">
+                <h3>24/7</h3>
+                <p>Support</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features fade-in-section" id="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose MedicPulse?</h2>
+                <p>We combine medical expertise with modern technology to provide you the best healthcare experience.
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <h3>Easy Appointment Booking</h3>
+                    <p>Schedule your visits in just a few clicks. Reschedule or cancel anytime without hassle.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-user-md"></i></div>
+                    <h3>Verified Doctors</h3>
+                    <p>Every practitioner is thoroughly vetted to ensure you receive care from qualified experts.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Secure Medical Records</h3>
+                    <p>Your privacy is our priority. We use strict encryption for all your health data.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-clock"></i></div>
+                    <h3>24/7 Access</h3>
+                    <p>Access your health dashboard, lab results, and upcoming appointments anytime.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Doctors Section -->
+    <section class="featured-doctors fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Meet Our Specialists</h2>
+                <p>Consult with our top-rated specialists who are dedicated to your overall well-being.</p>
+            </div>
+            <div class="doctors-grid">
+                <div class="doctor-card">
+                    <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Sarah Jenkins Cardiologist">
+                    <div class="doctor-info">
+                        <h3>Dr. Sarah Jenkins</h3>
+                        <p class="specialization">Cardiologist</p>
+                        <ul class="doc-meta">
+                            <li><i class="fas fa-briefcase"></i> 12+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.9 (120 Reviews)</li>
+                        </ul>
+                        <a href="frontend/pages/login.html" class="btn btn-outline btn-block">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-card">
+                    <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Michael Lee Dermatologist">
+                    <div class="doctor-info">
+                        <h3>Dr. Michael Lee</h3>
+                        <p class="specialization">Dermatologist</p>
+                        <ul class="doc-meta">
+                            <li><i class="fas fa-briefcase"></i> 8+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.8 (95 Reviews)</li>
+                        </ul>
+                        <a href="frontend/pages/login.html" class="btn btn-outline btn-block">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-card">
+                    <img src="https://images.unsplash.com/photo-1594824432258-f77f00f80bc8?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Emily Chen Dentist">
+                    <div class="doctor-info">
+                        <h3>Dr. Emily Chen</h3>
+                        <p class="specialization">Dentist</p>
+                        <ul class="doc-meta">
+                            <li><i class="fas fa-briefcase"></i> 10+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.9 (150 Reviews)</li>
+                        </ul>
+                        <a href="frontend/pages/login.html" class="btn btn-outline btn-block">Book Appointment</a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-40">
+                <a href="frontend/pages/doctors.html" class="btn btn-primary">View All Doctors</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Doctor Specialties Section -->
+    <section class="specialties fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Browse by Specialty</h2>
+                <p>Find experienced specialists across various medical departments.</p>
+            </div>
+            <div class="specialties-grid">
+                <a href="frontend/pages/doctors.html" class="specialty-card">
+                    <div class="specialty-icon"><i class="fas fa-heartbeat"></i></div>
+                    <div class="specialty-info">
+                        <h3>Cardiologist</h3>
+                        <p>Heart & blood vessel specialists</p>
+                    </div>
+                </a>
+                <a href="frontend/pages/doctors.html" class="specialty-card">
+                    <div class="specialty-icon"><i class="fas fa-allergies"></i></div>
+                    <div class="specialty-info">
+                        <h3>Dermatologist</h3>
+                        <p>Skin, hair, & nail specialists</p>
+                    </div>
+                </a>
+                <a href="frontend/pages/doctors.html" class="specialty-card">
+                    <div class="specialty-icon"><i class="fas fa-tooth"></i></div>
+                    <div class="specialty-info">
+                        <h3>Dentist</h3>
+                        <p>Oral health & hygiene specialists</p>
+                    </div>
+                </a>
+                <a href="frontend/pages/doctors.html" class="specialty-card">
+                    <div class="specialty-icon"><i class="fas fa-stethoscope"></i></div>
+                    <div class="specialty-info">
+                        <h3>General Physician</h3>
+                        <p>Primary care & family medicine</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>How It Works</h2>
+                <p>Your journey to better health begins with three simple steps.</p>
+            </div>
+            <div class="process-grid">
+                <div class="process-step">
+                    <div class="step-icon"><i class="fas fa-search"></i></div>
+                    <h3>Search Doctor</h3>
+                    <p>Find the right specialist based on symptoms, specialty, or location.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Book Appointment</h3>
+                    <p>Choose an available time slot and confirm your booking instantly.</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-icon"><i class="fas fa-clinic-medical"></i></div>
+                    <h3>Visit Clinic</h3>
+                    <p>Visit the doctor on time or consult online for a seamless experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials fade-in-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Patient Testimonials</h2>
+                <p>Read what our trusted patients have to say about their MedicPulse experience.</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <p class="feedback">"Booking an appointment for my mother was incredibly easy. We didn't have to
+                        wait in long queues, and the doctor was very professional."</p>
+                    <div class="patient-profile">
+                        <img src="https://ui-avatars.com/api/?name=Jane+Doe&background=0D8ABC&color=fff&size=50"
+                            alt="Jane Doe">
+                        <div>
+                            <h4>Jane Doe</h4>
+                            <p>Patient</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="feedback">"The app is so user-friendly! I was able to find a great dermatologist near me
+                        and schedule a visit the very next day. Highly recommended."</p>
+                    <div class="patient-profile">
+                        <img src="https://ui-avatars.com/api/?name=Mark+Smith&background=E53E3E&color=fff&size=50"
+                            alt="Mark Smith">
+                        <div>
+                            <h4>Mark Smith</h4>
+                            <p>Patient</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="feedback">"Having all my medical records in one secure place is a game changer. The 24/7
+                        access makes managing my health so much simpler."</p>
+                    <div class="patient-profile">
+                        <img src="https://ui-avatars.com/api/?name=Robert+Brown&background=38A169&color=fff&size=50"
+                            alt="Robert Brown">
+                        <div>
+                            <h4>Robert Brown</h4>
+                            <p>Patient</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call To Action -->
+    <section class="cta fade-in-section">
+        <div class="container text-center">
+            <h2>Ready to Book Your Appointment?</h2>
+            <p>Find trusted doctors and schedule your visit in seconds.</p>
+            <a href="frontend/pages/login.html" class="btn btn-primary cta-btn">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col about-col">
+                <a href="index.html" class="footer-logo">
+                    <i class="fas fa-notes-medical"></i> MedicPulse
+                </a>
+                <p>A modern, intuitive, and secure platform bridging the gap between patients and healthcare providers.
+                    Making quality healthcare accessible to everyone.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-col links-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="frontend/pages/doctors.html">Doctors</a></li>
+                    <li><a href="frontend/pages/login.html">Login</a></li>
+                    <li><a href="frontend/pages/register.html">Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-col contact-col">
+                <h4>Contact Info</h4>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Medical District Healthcare Center</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>+91 XXXXX XXXXX</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:support@medicpulse.com" style="color:inherit;">support@medicpulse.com</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container text-center">
+                <p>&copy; 2026 MedicPulse. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="frontend/js/main.js"></script>
 </body>
+
 </html>

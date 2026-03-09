@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors - MedicPulse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="../../index.html" class="logo">
+                <i class="fas fa-notes-medical"></i> MedicPulse
+            </a>
+
+            <div class="menu-toggle" id="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </div>
+
+            <ul class="nav-links" id="nav-links">
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="doctors.html" class="active">Doctors</a></li>
+                <li><a href="../../index.html#about">About</a></li>
+                <li><a href="login.html" class="btn btn-outline nav-btn">Login</a></li>
+                <li><a href="register.html" class="btn btn-primary nav-btn">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Banner -->
+    <section class="page-banner fade-in-section">
+        <div class="container">
+            <h1>Find the Right Doctor for Your Needs</h1>
+            <p>Browse verified specialists and book appointments instantly.</p>
+        </div>
+    </section>
+
+    <!-- Search & Filter Section -->
+    <div class="container">
+        <div class="search-filter-section fade-in-section">
+            <form class="search-form" onsubmit="event.preventDefault();">
+                <div class="search-group">
+                    <label>Search Doctor</label>
+                    <input id="doctorSearch" type="text" class="search-input" placeholder="Name or Specialization...">
+                </div>
+                <div class="search-group">
+                    <label>Specialization</label>
+                    <select id="specializationFilter" class="search-input">
+                        <option value="">All Specialties</option>
+                        <option value="cardiologist">Cardiologist</option>
+                        <option value="dermatologist">Dermatologist</option>
+                        <option value="dentist">Dentist</option>
+                        <option value="physician">General Physician</option>
+                        <option value="orthopedic">Orthopedic</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label>Location</label>
+                    <select id="locationFilter" class="search-input">
+                        <option value="">Any Location</option>
+                        <option value="new-york">New York</option>
+                        <option value="san-francisco">San Francisco</option>
+                        <option value="chicago">Chicago</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label>Experience</label>
+                    <select id="experienceFilter" class="search-input">
+                        <option value="">Any Experience</option>
+                        <option value="5-plus">5+ Years</option>
+                        <option value="10-plus">10+ Years</option>
+                        <option value="15-plus">15+ Years</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <button type="button" class="btn btn-primary search-btn"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Doctors Grid Section -->
+    <section class="container fade-in-section">
+        <!-- Container ID for dynamic data loading -->
+        <div class="doctors-page-grid" id="doctorsGrid">
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=1';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Rahul Sharma Cardiologist">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 12+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.8 Rating</li>
+                            <li><i class="fas fa-hospital"></i> City Heart Clinic</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Today 4:30 PM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. Rahul Sharma</h3>
+                    <p class="specialization">Cardiologist</p>
+                </div>
+            </div>
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=2';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Priya Patel Dermatologist">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 8+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.9 Rating</li>
+                            <li><i class="fas fa-hospital"></i> Skin & Glow Center</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Tomorrow 10:00 AM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. Priya Patel</h3>
+                    <p class="specialization">Dermatologist</p>
+                </div>
+            </div>
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=3';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1594824432258-f77f00f80bc8?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Ananya Singh Dentist">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 10+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.7 Rating</li>
+                            <li><i class="fas fa-hospital"></i> Smile Dental Care</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Today 5:15 PM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. Ananya Singh</h3>
+                    <p class="specialization">Dentist</p>
+                </div>
+            </div>
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=4';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Rohan Gupta Orthopedic">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 15+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.9 Rating</li>
+                            <li><i class="fas fa-hospital"></i> OrthoCare Hospital</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Wed 9:30 AM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. Rohan Gupta</h3>
+                    <p class="specialization">Orthopedic</p>
+                </div>
+            </div>
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=5';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1537368910025-702800a9513a?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. John Davis General Physician">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 20+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.6 Rating</li>
+                            <li><i class="fas fa-hospital"></i> Medicare Clinic</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Today 2:00 PM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. John Davis</h3>
+                    <p class="specialization">General Physician</p>
+                </div>
+            </div>
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=6';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Emily White Pediatrician">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 6+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.8 Rating</li>
+                            <li><i class="fas fa-hospital"></i> Kids Health Center</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Thu 11:00 AM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. Emily White</h3>
+                    <p class="specialization">Pediatrician</p>
+                </div>
+            </div>
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=7';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Vikram Rao Neurologist">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 14+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 5.0 Rating</li>
+                            <li><i class="fas fa-hospital"></i> Apollo Neuro Center</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Fri 4:00 PM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. Vikram Rao</h3>
+                    <p class="specialization">Neurologist</p>
+                </div>
+            </div>
+
+            <div class="doctor-card interactive-card" onclick="window.location.href='doctor-profile.html?id=8';">
+                <div class="card-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1594824432258-f77f00f80bc8?auto=format&fit=crop&q=80&w=300&h=300"
+                        alt="Dr. Chloe Smith Psychiatrist">
+                    <div class="card-overlay">
+                        <ul class="overlay-meta">
+                            <li><i class="fas fa-briefcase"></i> 9+ Years Experience</li>
+                            <li><i class="fas fa-star"></i> 4.7 Rating</li>
+                            <li><i class="fas fa-hospital"></i> Mind Wellness Clinic</li>
+                            <li class="availability"><i class="fas fa-clock"></i> Next Available: Today 6:00 PM</li>
+                        </ul>
+                        <a href="login.html" class="btn btn-primary btn-block overlay-btn"
+                            onclick="event.stopPropagation();">Book Appointment</a>
+                    </div>
+                </div>
+                <div class="doctor-info">
+                    <h3>Dr. Chloe Smith</h3>
+                    <p class="specialization">Psychiatrist</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-outline" style="padding: 12px 40px;">Load More Doctors</button>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials fade-in-section" style="margin-top: 60px;">
+        <div class="container">
+            <div class="section-header">
+                <h2>What Our Patients Say</h2>
+                <p>Read honest feedback from patients who booked specialists through our platform.</p>
+            </div>
+            <div class="testimonials-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                <div class="testimonial-card">
+                    <p class="feedback">"Booking with Dr. Sharma was very smooth and professional. The seamless platform
+                        matched me with the right specialist right away."</p>
+                    <div class="patient-profile">
+                        <img src="https://ui-avatars.com/api/?name=Arjun+K&background=0D8ABC&color=fff&size=50"
+                            alt="Arjun K">
+                        <div>
+                            <h4>Arjun K.</h4>
+                            <p>Cardiology Patient</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <p class="feedback">"I easily found Dr. Priya using the filter feature. Her acne treatment cleared
+                        my skin within weeks. Highly recommend this service!"</p>
+                    <div class="patient-profile">
+                        <img src="https://ui-avatars.com/api/?name=Samira+R&background=E53E3E&color=fff&size=50"
+                            alt="Samira R">
+                        <div>
+                            <h4>Samira R.</h4>
+                            <p>Dermatology Patient</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta fade-in-section">
+        <div class="container text-center">
+            <h2>Need medical consultation today?</h2>
+            <p>Find verified doctors and schedule your appointment in minutes.</p>
+            <a href="login.html" class="btn btn-primary cta-btn">Book Appointment</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col about-col">
+                <a href="../../index.html" class="footer-logo">
+                    <i class="fas fa-notes-medical"></i> MedicPulse
+                </a>
+                <p>A modern, intuitive, and secure platform bridging the gap between patients and healthcare providers.
+                    Making quality healthcare accessible to everyone.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-col links-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="doctors.html">Doctors</a></li>
+                    <li><a href="login.html">Login</a></li>
+                    <li><a href="register.html">Register</a></li>
+                </ul>
+            </div>
+            <div class="footer-col contact-col">
+                <h4>Contact Info</h4>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Medical District Healthcare Center</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <span>+91 XXXXX XXXXX</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <a href="mailto:support@medicpulse.com" style="color:inherit;">support@medicpulse.com</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container text-center">
+                <p>&copy; 2026 MedicPulse. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/main.js"></script>
+</body>
+
+</html>
