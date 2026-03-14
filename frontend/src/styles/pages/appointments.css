@@ -1,0 +1,214 @@
+/* Appointments List and History are handled by components/* Appointment Shared Table Styles */
+.appointments-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    overflow-x: auto;
+}
+
+.appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+    background: white;
+}
+
+.appointments-table th,
+.appointments-table td {
+    text-align: left;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+}
+
+.appointments-table th {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 500;
+}
+
+.appointments-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Animations */
+.content-area {
+    animation: fadeSlideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+    transform: translateY(15px);
+}
+
+@keyframes fadeSlideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.skeleton-box {
+    height: 20px;
+    background: #eee;
+    border-radius: 4px;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.appointments-table tbody tr {
+    animation: fadeInRow 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes fadeInRow {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.row-removing {
+    animation: fadeOutRow 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards !important;
+}
+
+@keyframes fadeOutRow {
+    to {
+        opacity: 0;
+        transform: translateX(30px) scale(0.95);
+    }
+}
+
+/* Page Specific Overrides */
+/* Booking form is handled by components/forms.css */
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.time-slot {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+
+.time-slot:hover {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.time-slot.selected {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.calendar-container {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendar-day-label {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #777;
+    padding-bottom: 5px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s;
+    position: relative;
+}
+
+.calendar-day:hover:not(.disabled) {
+    background-color: #f0f7ff;
+}
+
+.calendar-day.selected {
+    background-color: var(--primary) !important;
+    color: white !important;
+}
+
+.calendar-day.status-available {
+    color: #2e7d32;
+    background-color: #e8f5e9;
+}
+
+.calendar-day.status-leave {
+    background-color: #ffebee;
+    color: #c62828;
+    cursor: not-allowed;
+}
+
+.calendar-day.status-fully_booked {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+.calendar-day.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    background: none !important;
+}
+
+.calendar-legend {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+    font-size: 0.8rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.1);
+}

@@ -1,0 +1,62 @@
+/* Authentication Page Layouts */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f0f7ff 0%, var(--primary-light) 100%);
+    padding: var(--spacing-xxl) var(--spacing-md);
+    font-family: 'Poppins', sans-serif;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    background: var(--bg-white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.auth-banner {
+    flex: 1;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--bg-white);
+    padding: 50px var(--spacing-xxl);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=800') center/cover;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+@media (max-width: 900px) {
+    .auth-banner {
+        display: none;
+    }
+
+    .auth-container {
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-page {
+        padding: 20px 15px;
+    }
+}

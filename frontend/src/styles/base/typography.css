@@ -1,0 +1,21 @@
+section {
+    padding: var(--spacing-xxl) 0;
+}
+
+.section-header {
+    margin-bottom: var(--spacing-xxl);
+}
+
+.section-header h2 {
+    font-size: 2.2rem;
+    color: var(--text-dark);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.section-header p {
+    color: var(--text-gray);
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto;
+}

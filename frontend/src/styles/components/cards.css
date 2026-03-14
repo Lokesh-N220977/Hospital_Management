@@ -1,0 +1,303 @@
+.feature-card {
+    background: var(--bg-white);
+    padding: var(--spacing-xl) var(--spacing-lg);
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin: 0 auto var(--spacing-md);
+}
+
+.doctor-card {
+    background: var(--bg-white);
+    overflow: hidden;
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.doctor-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.doctor-info {
+    padding: var(--spacing-lg);
+}
+
+.doctor-info h3 {
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+}
+
+.doctor-info .specialization {
+    color: var(--primary);
+    font-weight: 500;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+.doc-meta {
+    margin-bottom: 20px;
+}
+
+.doc-meta li {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.doc-meta li i {
+    color: var(--text-muted);
+}
+
+.specialty-card {
+    background: var(--bg-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+}
+
+.specialty-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.specialty-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.specialty-info h3 {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+}
+
+.testimonial-card {
+    background: var(--bg-white);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid #edf2f7;
+}
+
+.card {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* Specific UI Cards */
+.login-card {
+    flex: 1;
+    padding: 50px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--bg-white);
+    max-width: none !important;
+    margin: 0 !important;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.trust-item {
+    flex: 1;
+    min-width: 150px;
+}
+
+.trust-item h3 {
+    font-size: 2.2rem;
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.process-step {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-white);
+    padding: 10px;
+}
+
+.step-icon {
+    width: 70px;
+    height: 70px;
+    background: var(--bg-white);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin: 0 auto var(--spacing-md);
+    box-shadow: 0 4px 10px rgba(0, 102, 204, 0.15);
+    transition: var(--transition);
+}
+
+@media (max-width: 900px) {
+    .login-card {
+        padding: 40px 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 20px;
+    }
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-lg);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-right: var(--spacing-sm);
+}
+
+.interactive-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-slow);
+    cursor: pointer;
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.interactive-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+}
+
+.card-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.interactive-card:hover .card-image-wrapper img {
+    transform: scale(1.08);
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.interactive-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.overlay-meta {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.overlay-meta li {
+    color: #ffffff;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(15px);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.interactive-card:hover .overlay-meta li {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.overlay-meta li i {
+    width: 16px;
+    text-align: center;
+    color: var(--primary-light);
+}
+
+.doctor-card.interactive-card .doctor-info {
+    padding: 20px;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

@@ -1,0 +1,107 @@
+import { NavLink, useNavigate } from "react-router-dom"
+import {
+  LayoutDashboard,
+  CalendarPlus,
+  CalendarCheck,
+  History,
+  Bell,
+  UserCircle,
+  LogOut,
+  X,
+  HeartPulse,
+  Settings
+} from "lucide-react"
+
+const navLinks = [
+  { to: "/patient/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/patient/book-appointment", label: "Book Appointment", icon: CalendarPlus },
+  { to: "/patient/appointments", label: "My Appointments", icon: CalendarCheck },
+  { to: "/patient/visit-history", label: "Visit History", icon: History },
+  { to: "/patient/notifications", label: "Notifications", icon: Bell, badge: 3 },
+  { to: "/patient/profile", label: "Profile", icon: UserCircle },
+  { to: "/patient/settings", label: "Settings", icon: Settings },
+]
+
+interface PatientSidebarProps {
+  mobileOpen?: boolean
+  onClose?: () => void
+}
+
+const PatientSidebar = ({ mobileOpen = false, onClose }: PatientSidebarProps) => {
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    navigate("/login")
+  }
+
+  return (
+    <>
+      {/* Overlay for mobile */}
+      {mobileOpen && (
+        <div className="ps-overlay ps-overlay-open" onClick={onClose} />
+      )}
+
+      <aside className={`patient-sidebar${mobileOpen ? " ps-open" : ""}`}>
+        {/* Logo */}
+        <div className="ps-logo">
+          <div className="ps-logo-icon">
+            <HeartPulse size={22} />
+          </div>
+          <span className="ps-logo-text">MedicPulse</span>
+          <button className="ps-close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* User Avatar */}
+        <div className="ps-user">
+          <div className="ps-avatar">
+            <span>JD</span>
+            <span className="ps-online-dot" />
+          </div>
+          <div className="ps-user-info">
+            <p className="ps-user-name">John Doe</p>
+            <p className="ps-user-role">Patient</p>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="ps-nav">
+          <p className="ps-nav-label">MAIN MENU</p>
+          <ul className="ps-menu">
+            {navLinks.map(({ to, label, icon: Icon, badge }) => (
+              <li key={to}>
+                <NavLink
+                  to={to}
+                  className={({ isActive }) =>
+                    `ps-link${isActive ? " ps-link-active" : ""}`
+                  }
+                  onClick={onClose}
+                >
+                  <span className="ps-link-icon">
+                    <Icon size={19} />
+                  </span>
+                  <span className="ps-link-label">{label}</span>
+                  {badge && (
+                    <span className="ps-badge">{badge}</span>
+                  )}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Logout at the bottom */}
+        <div className="ps-logout-wrap">
+          <div className="ps-divider" />
+          <button className="ps-logout-btn" onClick={handleLogout}>
+            <LogOut size={19} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
+  )
+}
+
+export default PatientSidebar

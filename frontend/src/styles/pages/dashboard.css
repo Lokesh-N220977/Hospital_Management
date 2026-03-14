@@ -1,0 +1,40 @@
+/* Dashbord Specific Components */
+.stat-info h3 {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-info .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    margin-right: var(--spacing-md);
+}
+
+.user-name {
+    margin-right: var(--spacing-xs);
+    font-weight: 500;
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-right: var(--spacing-md);
+    position: relative;
+}
+
+@media (max-width: 992px) {
+    .user-name {
+        display: none;
+    }
+
+    .notification-icon {
+        margin-right: var(--spacing-sm);
+    }
+}

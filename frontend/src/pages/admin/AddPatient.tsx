@@ -1,0 +1,1 @@
+export default function AddPatient() { return <div>AddPatient</div>; }

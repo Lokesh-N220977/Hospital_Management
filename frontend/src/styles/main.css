@@ -1,0 +1,43 @@
+/* Base styles */
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/typography.css');
+
+/* Layout Modules */
+@import url('layout/navbar.css');
+@import url('layout/sidebar.css');
+@import url('layout/dashboard.css');
+@import url('layout/auth.css');
+@import url('layout/landing.css');
+@import url('layout/page-headers.css');
+@import url('layout/grid.css');
+
+/* Component Modules */
+@import url('components/cards.css');
+@import url('components/tables.css');
+@import url('components/buttons.css');
+@import url('components/forms.css');
+@import url('components/badges.css');
+@import 'components/modals.css';
+
+/* Page Specific Overrides */
+@import url('pages/landing.css');
+@import url('pages/login.css');
+@import url('pages/dashboard.css');
+@import url('pages/appointments.css');
+@import url('pages/doctors.css');
+@import url('pages/profile.css');
+@import url('pages/admin.css');
+@import url('pages/doctor.css');
+@import url('pages/patient.css');
+@import url('pages/patient-pages.css');
+@import url('pages/patient-pages2.css');
+@import url('pages/patient-pages3.css');
+@import url('pages/patient-responsive.css');
+
+/* Utilities */
+@import url('utilities/spacing.css');
+@import url('utilities/helpers.css');
+
+/* React App Specific Styles */
+@import url('./components.css');

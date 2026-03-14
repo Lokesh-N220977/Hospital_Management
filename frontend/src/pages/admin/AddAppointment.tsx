@@ -1,0 +1,1 @@
+export default function AddAppointment() { return <div>AddAppointment</div>; }

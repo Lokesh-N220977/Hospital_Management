@@ -1,0 +1,137 @@
+/* Landing Page Unique Content */
+.hero h1 {
+    font-size: 3.2rem;
+    line-height: 1.2;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    color: var(--text-gray);
+    margin-bottom: 35px;
+    max-width: 500px;
+}
+
+.hero-btns {
+    display: flex;
+    gap: 15px;
+}
+
+.hero-image img {
+    width: 100%;
+    max-width: 600px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    object-fit: cover;
+    display: block;
+}
+
+.footer-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--bg-white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: var(--spacing-md);
+}
+
+.footer-logo i {
+    color: var(--primary);
+}
+
+.about-col p {
+    line-height: 1.7;
+    margin-bottom: 20px;
+    max-width: 400px;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.links-col h4,
+.contact-col h4 {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.links-col ul li {
+    margin-bottom: 12px;
+}
+
+.links-col ul li a {
+    transition: var(--transition);
+}
+
+.links-col ul li a:hover {
+    color: var(--primary);
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.contact-item i {
+    color: var(--primary);
+    margin-top: 5px;
+}
+
+.trust-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.trust-item p {
+    color: var(--text-gray);
+    font-weight: 500;
+}
+
+.cta h2 {
+    color: var(--bg-white);
+    font-size: 2.2rem;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 700;
+}
+
+.cta p {
+    color: var(--primary-light);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .hero-image {
+        display: none;
+    }
+
+    .hero p {
+        margin: 0 auto 35px;
+    }
+
+    .hero-btns {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .hero-btns {
+        flex-direction: column;
+    }
+}

@@ -1,55 +1,106 @@
-# MedicPulse Hospital Appointment Management System
+# MedicPulse - Advanced Hospital Management System
 
-A professional, modern, and minimal medical dashboard interface built with HTML and CSS.
+MedicPulse is a full-stack, state-of-the-art healthcare platform designed with a focus on premium aesthetics, dynamic data visualization, and robust role-based management.
 
-## Features
-- **Login Page**: Role-based access simulation (Patient/Admin).
-- **Patient Dashboard**: Overview of upcoming appointments and medical notifications.
-- **Admin Dashboard**: Real-time hospital statistics and activity tracking.
-- **Appointment Booking**: Clean form for scheduling visits with time slot selection.
-- **Visit History**: Tabular view of past medical records.
-- **Analytics**: Data visualization placeholders for hospital performance.
+## 🌟 Key Features
 
-## Design System
-- **Primary Color**: #1E88E5 (Professional Blue)
-- **Background**: #FFFFFF / #E3F2FD (Clean & Light)
-- **Typography**: Poppins (Modern Sans-Serif)
-- **Components**: Rounded corners, soft shadows, and responsive sidebar navigation.
+- **Role-Based Portals**: Tailored experiences for Patients, Doctors, and System Administrators.
+- **Dynamic Analytics**: Live charting of revenue, patient demographics, and departmental load using Recharts.
+- **Smart Scheduling**: Conflict-preventing appointment booking system with real-time slot availability.
+- **Responsive Design**: Fully optimized for Desktop, Tablet, and Mobile devices with modern glassmorphism and micro-animations.
+- **Secure Medical Records**: Structured visit history, prescriptions, and encrypted patient data management.
 
-## Project Structure
+---
+
+## 🏗️ Project Architecture
+
+The project is divided into two main sections: a modern React frontend and a robust FastAPI backend.
+
+### 🎨 Frontend (`/frontend`)
+Built with **React 18 + TypeScript + Vite** for maximum performance and type safety.
+
+- **`src/pages/`**: Organized by user role (Admin, Doctor, Patient, Public).
+- **`src/components/layout/`**: Modular layout engine using sidebars and navbars specific to each role.
+- **`src/styles/`**: Comprehensive design system with CSS variables, modular stylesheets, and utility classes.
+- **`src/services/`**: API abstraction layer for clean communication with the backend.
+
+### ⚙️ Backend (`/backend`)
+A high-performance asynchronous API built with **FastAPI (Python)**.
+
+- **`app/routes/`**: Domain-specific API endpoints (Users, Doctors, Appointments, Analytics, etc.).
+- **`app/models/`**: Data schemas and persistence logic.
+- **`app/services/`**: Business logic layer decoupled from API routing.
+- **`app/core/`**: Security (JWT), configuration, and global exceptions.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React, TypeScript, Vite, Recharts, Lucide Icons, FontAwesome |
+| **Backend** | Python, FastAPI, Pydantic, JWT Authentication |
+| **Database** | *Configurable (SQLAlchemy/MongoDB Ready)* |
+| **Aesthetics** | Vanilla CSS (Flexbox/Grid), Glassmorphism, Micro-animations |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v16+)
+- Python (v3.9+)
+
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd medicpulse
+   ```
+
+2. **Frontend Setup**:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. **Backend Setup**:
+   ```bash
+   cd backend
+   # Recommend creating a virtual environment
+   pip install -r requirements.txt
+   uvicorn main:app --reload
+   ```
+
+---
+
+## 📁 Detailed Directory Structure
+
 ```
-hospital_project
+MedicPulse/
+├── frontend/                 # React Application
+│   ├── src/
+│   │   ├── components/       # Layouts & Reusable UI
+│   │   ├── pages/            # Role-based views (Admin/Doctor/Patient)
+│   │   ├── styles/           # Modern CSS Design System
+│   │   └── services/         # API Layer
+│   └── vite.config.ts        # Build Configuration
 │
-├── frontend
-│   ├── css
-│   ├── js
-│   ├── components
-│   └── pages
+├── backend/                  # FastAPI Application
+│   ├── app/
+│   │   ├── routes/           # API Controllers
+│   │   ├── models/           # Data Structures
+│   │   ├── services/         # Logic Helpers
+│   │   └── core/             # Auth & Config
+│   └── main.py               # Entry Point
 │
-├── backend
-│   ├── app.py           # Application Entry points
-│   ├── config/          # Configurations
-│   ├── routes/          # API Blueprints
-│   ├── models/          # Schema definitions
-│   └── utils/           # Shared helpers
-│
-├── database
-│   └── db.py            # MongoDB connection
-│
-├── README.md
-└── .gitignore
+├── docs/                     # API & Architecture Docs
+└── README.md                 # Root Documentation
 ```
 
-## Backend API Endpoints
-- **Status**: `GET /`
-- **Auth**: `/api/auth/login`, `/api/auth/register`
-- **Patients**: `GET /api/patients`, `POST /api/patients`
-- **Doctors**: `GET /api/doctors`
-- **Appointments**: `POST /api/appointments`, `GET /api/appointments`
+---
 
-## How to Run
-1. **Frontend**: Simply open `index.html` in your web browser.
-2. **Backend**: 
-   - Ensure Python 3.x is installed.
-   - Install dependencies: `pip install flask flask-cors pymongo`
-   - Run: `python backend/app.py`
+## 📄 License
+© 2026 MedicPulse. All rights reserved.

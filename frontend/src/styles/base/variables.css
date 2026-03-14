@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+html {
+    scroll-behavior: smooth;
+}
+
+:root {
+
+    /* Colors */
+    --primary: #0066cc;
+    --primary-light: #f0f7ff;
+    --primary-dark: #004c99;
+    --primary-hover: #0056b3;
+    --secondary: #1a202c;
+    --accent: #3182ce;
+    --bg-white: #ffffff;
+    --bg-light: #f8fafc;
+    --bg-soft: #f1f5f9;
+    --text-dark: #1e293b;
+    --text-main: #334155;
+    --text-gray: #64748b;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --border-light: #f1f5f9;
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+
+    /* Dashboard & Layout */
+    --primary-color: var(--primary);
+    --sidebar-width: 260px;
+    --navbar-height: 80px;
+    --transition: all 0.3s ease;
+    --transition-fast: all 0.2s ease;
+    --transition-slow: all 0.4s ease;
+
+    /* Spacing & Shapes */
+    --spacing-xs: 8px;
+    --spacing-sm: 15px;
+    --spacing-md: 20px;
+    --spacing-lg: 25px;
+    --spacing-xl: 30px;
+    --spacing-xxl: 40px;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 20px;
+    --radius-full: 50%;
+
+    /* Status Colors */
+    --status-success-bg: #E8F5E9;
+    --status-success-text: #2E7D32;
+    --status-warning-bg: #FFF3E0;
+    --status-warning-text: #EF6C00;
+    --status-error-bg: #FFEBEE;
+    --status-error-text: #C62828;
+}

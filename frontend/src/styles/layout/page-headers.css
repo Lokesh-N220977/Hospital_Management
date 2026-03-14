@@ -1,0 +1,29 @@
+/* Shared Page Banners and Headers */
+.page-header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.page-banner {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--bg-white);
+    padding: 80px 0;
+    text-align: center;
+}
+
+.page-banner h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.page-banner p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
