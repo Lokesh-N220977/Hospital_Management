@@ -16,4 +16,10 @@ class DoctorResponse(BaseModel):
     specialization: str
     experience: int
     consultation_fee: int
-    available: bool
+from typing import Optional
+
+class DoctorUpdate(BaseModel):
+    specialization: Optional[str]
+    experience: Optional[int]
+    consultation_fee: Optional[int]
+    available: Optional[bool]

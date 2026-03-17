@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from app.services.availability_service import get_available_slots
+from app.services import scheduling_service
 
 router = APIRouter(
-    prefix="/api/availability",
+    prefix="/api/v1/availability",
     tags=["Availability"]
 )
 
@@ -10,7 +10,7 @@ router = APIRouter(
 @router.get("/{doctor_id}/{date}")
 async def check_availability(doctor_id: str, date: str):
 
-    slots = await get_available_slots(
+    slots = await scheduling_service.get_available_slots(
         doctor_id,
         date
     )
@@ -19,4 +19,4 @@ async def check_availability(doctor_id: str, date: str):
         "doctor_id": doctor_id,
         "date": date,
         "available_slots": slots
-    }
+    }

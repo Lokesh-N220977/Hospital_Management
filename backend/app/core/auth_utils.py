@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 from jose import jwt
+from app.config import JWT_SECRET, ACCESS_TOKEN_EXPIRE_MINUTES
 
-SECRET_KEY = "super_secret_hospital_key_change_this"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+SECRET_KEY = JWT_SECRET
+
 
 
 def create_access_token(data: dict):
