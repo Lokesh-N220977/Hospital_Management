@@ -15,7 +15,6 @@ const Register: React.FC = () => {
     return (
         <div className="split-auth-page reg-page">
 
-            {/* ── Left Panel ── */}
             <div className="split-left reg-left"
                  style={{ background: 'linear-gradient(155deg, #001354 0%, #003d99 50%, #0060cc 100%)' }}>
                 <div className="split-left-bg" />
@@ -50,7 +49,6 @@ const Register: React.FC = () => {
                 </div>
             </div>
 
-            {/* ── Right Panel ── */}
             <div className="split-right reg-right">
                 <div className="split-form-box split-form-box--wide reg-form-box">
 
@@ -63,7 +61,6 @@ const Register: React.FC = () => {
 
                     <form className="sf-form" onSubmit={e => { e.preventDefault(); navigate('/patient/dashboard'); }}>
 
-                        {/* Full Name */}
                         <div className="sf-field">
                             <label>Full Name</label>
                             <div className="sf-input-wrap">
@@ -72,7 +69,6 @@ const Register: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Email */}
                         <div className="sf-field">
                             <label>Email Address</label>
                             <div className="sf-input-wrap">
@@ -81,7 +77,6 @@ const Register: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Gender + Phone */}
                         <div className="sf-row">
                             <div className="sf-field">
                                 <label>Gender</label>
@@ -104,7 +99,6 @@ const Register: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Date of Birth */}
                         <div className="sf-field">
                             <label>Date of Birth</label>
                             <div className="sf-input-wrap">
@@ -113,7 +107,6 @@ const Register: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Password + Confirm */}
                         <div className="sf-row">
                             <div className="sf-field">
                                 <label>Password</label>
@@ -137,7 +130,6 @@ const Register: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Terms */}
                         <label className="sf-terms">
                             <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
                             I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
