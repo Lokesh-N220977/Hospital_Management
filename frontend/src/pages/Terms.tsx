@@ -1,4 +1,5 @@
 import React from 'react';
+import '../styles/legal-pages.css';
 
 const Terms: React.FC = () => {
     return (
