@@ -10,5 +10,24 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-router-dom": "^5.3.3",
     "typescript": "^5.9.3"
-  }
+  },
+  "name": "web_project",
+  "version": "1.0.0",
+  "description": "MedicPulse is a hospital appointment management platform designed to streamline interactions between patients, doctors, and administrators.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lokesh-N220977/web_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Lokesh-N220977/web_project/issues"
+  },
+  "homepage": "https://github.com/Lokesh-N220977/web_project#readme"
 }
