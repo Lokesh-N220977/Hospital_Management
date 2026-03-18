@@ -132,8 +132,9 @@ const Register: React.FC = () => {
 
                         <label className="sf-terms">
                             <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
-                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                            I agree to the <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link>
                         </label>
+                        
 
                         <button type="submit" className="sf-submit-btn reg-btn" disabled={!agreed}>
                             <FaUserPlus /> Create Account

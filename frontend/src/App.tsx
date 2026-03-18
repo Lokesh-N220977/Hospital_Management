@@ -36,6 +36,9 @@ import AdminAppointments from "./pages/admin/Appointments"
 import AdminAnalytics from "./pages/admin/Analytics"
 import AdminSettings from "./pages/admin/Settings"
 
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+
 function App() {
   return (
     <BrowserRouter>
@@ -79,6 +82,10 @@ function App() {
         <Route path="/admin/appointments" element={<AdminAppointments />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
+
+
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
       </Routes>
     </BrowserRouter>
   )
