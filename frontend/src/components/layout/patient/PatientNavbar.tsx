@@ -23,6 +23,7 @@ const PatientNavbar = ({ onMenuClick }: PatientNavbarProps) => {
   const [showDropdown, setShowDropdown] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -79,9 +80,9 @@ const PatientNavbar = ({ onMenuClick }: PatientNavbarProps) => {
           onClick={() => setShowDropdown(!showDropdown)}
           ref={dropdownRef}
         >
-          <div className="pn-avatar">JD</div>
+          <div className="pn-avatar">{(user.name || "U")[0].toUpperCase()}</div>
           <div className="pn-profile-info">
-            <span className="pn-name">John Doe</span>
+            <span className="pn-name">{user.name || "User"}</span>
             <span className="pn-role">Patient</span>
           </div>
           <ChevronDown size={16} className={`pn-chevron${showDropdown ? " pn-chevron-open" : ""}`} />

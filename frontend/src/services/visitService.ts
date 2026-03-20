@@ -12,6 +12,11 @@ export const recordVisit = async (visitData: {
   })
 }
 
-export const getPrescriptionUrl = (visitId: string) => {
-  return `http://localhost:8000/api/v1/visit-history/prescription/${visitId}`
+export const getPrescriptionUrl = (id: string, type: string = "visit") => {
+  if (type === "prescription") {
+    return `http://localhost:8000/api/v1/prescriptions/${id}/download`
+  }
+  return `http://localhost:8000/api/v1/visit-history/prescription/${id}`
 }
+
+export const getPatientVisitHistory = () => request("/visit-history/my-history")

@@ -1,13 +1,17 @@
 from pydantic import BaseModel, EmailStr, Field
-
+from typing import Optional
 
 class DoctorCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
+    phone: str
+    gender: str = "Male"
     specialization: str
+    degree: str
     experience: int
-    consultation_fee: int
-
+    consultation_fee: int = 500  # Default fee
+    department: Optional[str] = None
+    location: Optional[str] = None
 
 class DoctorResponse(BaseModel):
     id: str
@@ -16,10 +20,9 @@ class DoctorResponse(BaseModel):
     specialization: str
     experience: int
     consultation_fee: int
-from typing import Optional
 
 class DoctorUpdate(BaseModel):
     specialization: Optional[str]
     experience: Optional[int]
     consultation_fee: Optional[int]
-    available: Optional[bool]
+    available: Optional[bool]

@@ -1,15 +1,35 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Search, Filter, Calendar, Clock, Edit2, RotateCcw, Plus } from "lucide-react"
+import { Search, Filter, Calendar, Clock, Edit2, RotateCcw, Plus, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { getGlobalSchedules } from "../../services/adminService"
 
 function DoctorSchedules() {
-    const schedules = [
-        { id: 1, doctor: "Dr. Sarah Johnson", specialty: "Cardiology", days: "Mon, Wed, Fri", time: "09:00 AM - 05:00 PM", status: "active", slots: 18 },
-        { id: 2, doctor: "Dr. Robert Chen", specialty: "Neurology", days: "Tue, Thu", time: "10:00 AM - 06:00 PM", status: "active", slots: 12 },
-        { id: 3, doctor: "Dr. Emily Smith", specialty: "Pediatrics", days: "Mon-Thu", time: "08:00 AM - 04:00 PM", status: "active", slots: 24 },
-        { id: 4, doctor: "Dr. Michael Lee", specialty: "Orthopedics", days: "On Leave", time: "Not Available", status: "inactive", slots: 0 },
-        { id: 5, doctor: "Dr. Jessica Taylor", specialty: "Dermatology", days: "Fri, Sat", time: "01:00 PM - 08:00 PM", status: "active", slots: 14 },
-        { id: 6, doctor: "Dr. William Davis", specialty: "General Medicine", days: "Mon-Sat", time: "09:00 AM - 02:00 PM", status: "active", slots: 30 },
-    ]
+    const [schedules, setSchedules] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchSchedules = async () => {
+            try {
+                const data = await getGlobalSchedules()
+                setSchedules(Array.isArray(data) ? data : [])
+            } catch (err) {
+                console.error("Failed to fetch schedules", err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchSchedules()
+    }, [])
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+                    <Loader2 className="animate-spin" size={48} color="#3b82f6" />
+                </div>
+            </AdminLayout>
+        )
+    }
 
     return (
         <AdminLayout>
@@ -71,25 +91,25 @@ function DoctorSchedules() {
                             </thead>
                             <tbody>
                                 {schedules.map((schedule, i) => (
-                                    <tr key={i}>
+                                    <tr key={schedule._id || i}>
                                         <td>
                                             <div className="ad-user-cell">
                                                 <div className="ad-avatar" style={{ background: '#f1f5f9', color: '#3b82f6', border: '1px solid #e2e8f0' }}>
-                                                    {schedule.doctor.replace('Dr. ', '').charAt(0)}
+                                                    {(schedule.doctor_name || "D").replace('Dr. ', '').charAt(0)}
                                                 </div>
                                                 <div className="ad-user-info">
-                                                    <span className="ad-user-name" style={{ fontSize: '0.9rem' }}>{schedule.doctor}</span>
-                                                    <span className="ad-user-sub">#{schedule.id}00-S</span>
+                                                    <span className="ad-user-name" style={{ fontSize: '0.9rem' }}>{schedule.doctor_name || "Unknown Doctor"}</span>
+                                                    <span className="ad-user-sub">#{schedule._id?.slice(-6).toUpperCase() || "N/A"}</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><span className="ad-user-name" style={{ fontSize: '0.85rem', color: '#64748b' }}>{schedule.specialty}</span></td>
+                                        <td><span className="ad-user-name" style={{ fontSize: '0.85rem', color: '#64748b' }}>{schedule.specialization || "General"}</span></td>
                                         <td>
                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                                                {schedule.days === 'On Leave' ? (
-                                                    <span style={{ fontSize: '0.75rem', color: '#ef4444', fontWeight: 600 }}>Vacation Leave</span>
+                                                {(!schedule.working_days || schedule.working_days.length === 0) ? (
+                                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Not Configured</span>
                                                 ) : (
-                                                    schedule.days.split(', ').map((day, idx) => (
+                                                    schedule.working_days.map((day: string, idx: number) => (
                                                         <span key={idx} style={{ fontSize: '0.7rem', background: '#3b82f610', color: '#3b82f6', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>{day}</span>
                                                     ))
                                                 )}
@@ -98,15 +118,15 @@ function DoctorSchedules() {
                                         <td>
                                             <div className="ad-user-cell" style={{ gap: '6px' }}>
                                                 <Clock size={14} color="#64748b" />
-                                                <span className="ad-user-name" style={{ fontSize: '0.8rem', fontWeight: 700 }}>{schedule.time}</span>
+                                                <span className="ad-user-name" style={{ fontSize: '0.8rem', fontWeight: 700 }}>{schedule.working_hours || "09:00 - 17:00"}</span>
                                             </div>
                                         </td>
                                         <td>
-                                            <span className="ad-user-name" style={{ fontSize: '0.85rem', color: '#1e293b' }}>{schedule.slots}</span>
+                                            <span className="ad-user-name" style={{ fontSize: '0.85rem', color: '#1e293b' }}>{schedule.slots_per_day || 0}</span>
                                         </td>
                                         <td>
-                                            <span className={`ad-status ad-status--${schedule.status}`}>
-                                                {schedule.status === 'active' ? 'Reporting' : 'Absent'}
+                                            <span className={`ad-status ad-status--active`}>
+                                                Reporting
                                             </span>
                                         </td>
                                         <td>

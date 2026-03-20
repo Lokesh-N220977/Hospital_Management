@@ -1,29 +1,79 @@
 import DoctorLayout from "../../components/layout/doctor/DoctorLayout"
 import { useParams, useNavigate } from "react-router-dom"
-import { 
-  ArrowLeft, CheckCircle, Activity, FileText, Pill, 
-  History, Plus, Trash2 
+import {
+  ArrowLeft, CheckCircle, Activity, FileText, Pill,
+  History, Plus, Trash2, XCircle
 } from "lucide-react"
 import { useState } from "react"
+import { recordVisit } from "../../services/visitService"
 
 function Consultation() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("notes")
-  
-  // id will be used for patient data loading in future
-  console.log("Loading consultation for patient:", id)
+
+  // States for consultation data
+  const [diagnosis, setDiagnosis] = useState<{ id: string, name: string }[]>([
+    { id: "I10", name: "Hypertension" },
+    { id: "E11", name: "Type 2 Diabetes" }
+  ])
+  const [diagInput, setDiagInput] = useState("")
+
+  const [medicines, setMedicines] = useState<{ name: string, dosage: string, duration: string }[]>([
+    { name: "Amlodipine 5mg", dosage: "1-0-1 (After Food)", duration: "30 Days" }
+  ])
+  const [medInput, setMedInput] = useState({ name: "", dosage: "", duration: "" })
+
+  const [notes, setNotes] = useState("")
+  const [vitals, setVitals] = useState({
+    bp: "120/80", heartRate: "72", temp: "98.6", spo2: "98", weight: "70", height: "175"
+  })
+
+  const addDiagnosis = () => {
+    if (!diagInput) return
+    setDiagnosis([...diagnosis, { id: Date.now().toString(), name: diagInput }])
+    setDiagInput("")
+  }
+
+  const removeDiagnosis = (id: string) => {
+    setDiagnosis(diagnosis.filter(d => d.id !== id))
+  }
+
+  const addMedicine = () => {
+    if (!medInput.name || !medInput.dosage) return
+    setMedicines([...medicines, { ...medInput }])
+    setMedInput({ name: "", dosage: "", duration: "" })
+  }
+
+  const removeMedicine = (index: number) => {
+    setMedicines(medicines.filter((_, i) => i !== index))
+  }
+
+  const handleFinishVisit = async () => {
+    try {
+      if (!id) return
+      await recordVisit({
+        appointmentId: id,
+        diagnosis: diagnosis.map(d => d.name).join(", "),
+        medicines: medicines.map(m => `${m.name} (${m.dosage}, ${m.duration})`),
+        notes: notes
+      })
+      alert("Consultation recorded successfully!")
+      navigate("/doctor/schedule")
+    } catch (err: any) {
+      alert("Error saving consultation: " + err.message)
+    }
+  }
 
   return (
     <DoctorLayout>
       <div className="pd-page">
-        {/* Header with Back button and Patient Quick Info */}
         <div className="pd-header-top">
           <button className="pd-back-btn" onClick={() => navigate(-1)}>
             <ArrowLeft size={18} /> Back to Schedule
           </button>
           <div className="pd-header-actions">
-            <button className="pd-action-btn-primary" onClick={() => navigate("/doctor/dashboard")}>
+            <button className="pd-action-btn-primary" onClick={handleFinishVisit}>
               <CheckCircle size={18} /> Finish & Save
             </button>
           </div>
@@ -41,20 +91,18 @@ function Consultation() {
             </div>
           </div>
           <div className="pd-quick-vitals">
-            {/* Quick overview of previous vitals */}
             <div className="pd-mini-vital">
               <span className="pd-mv-label">BP</span>
-              <span className="pd-mv-val">120/80</span>
+              <span className="pd-mv-val">{vitals.bp}</span>
             </div>
             <div className="pd-mini-vital">
               <span className="pd-mv-label">Temp</span>
-              <span className="pd-mv-val">98.6°F</span>
+              <span className="pd-mv-val">{vitals.temp}°F</span>
             </div>
           </div>
         </div>
 
         <div className="pd-consultation-layout">
-          {/* Main Workspace Tabs */}
           <aside className="pd-consultation-tabs">
             {[
               { id: "notes", label: "Clinical Notes", icon: <FileText size={20} /> },
@@ -62,7 +110,7 @@ function Consultation() {
               { id: "presc", label: "Prescriptions", icon: <Pill size={20} /> },
               { id: "history", label: "Recent History", icon: <History size={20} /> },
             ].map(tab => (
-              <button 
+              <button
                 key={tab.id}
                 className={`pd-consultation-tab ${activeTab === tab.id ? "active" : ""}`}
                 onClick={() => setActiveTab(tab.id)}
@@ -73,27 +121,38 @@ function Consultation() {
             ))}
           </aside>
 
-          {/* Tab Content Areas */}
           <main className="pd-consultation-content">
             {activeTab === "notes" && (
               <div className="pd-card-grid">
                 <div className="pd-card pd-full-width">
                   <h3 className="pd-card-subtitle">Chief Complaints & History</h3>
-                  <textarea className="pd-textarea-large" placeholder="Enter patient complaints and subjective history..."></textarea>
-                </div>
-                <div className="pd-card">
-                  <h3 className="pd-card-subtitle">Physical Examination</h3>
-                  <textarea className="pd-textarea" placeholder="Type examination findings..."></textarea>
+                  <textarea
+                    className="pd-textarea-large"
+                    placeholder="Enter patient complaints and subjective history..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                  ></textarea>
                 </div>
                 <div className="pd-card">
                   <h3 className="pd-card-subtitle">Diagnosis (ICD-10)</h3>
                   <div className="pd-diagnosis-input-wrap">
-                    <input type="text" className="pd-input" placeholder="Search ICD-10 code..." />
-                    <button className="pd-add-btn"><Plus size={18} /></button>
+                    <input
+                      type="text"
+                      className="pd-input"
+                      placeholder="Enter ICD-10 code or name..."
+                      value={diagInput}
+                      onChange={(e) => setDiagInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && addDiagnosis()}
+                    />
+                    <button className="pd-add-btn" onClick={addDiagnosis}><Plus size={18} /></button>
                   </div>
                   <div className="pd-selected-tags">
-                    <span className="pd-tag">I10 - Hypertension <XCircleSmall /></span>
-                    <span className="pd-tag">E11 - Type 2 Diabetes <XCircleSmall /></span>
+                    {diagnosis.map(d => (
+                      <span key={d.id} className="pd-tag">
+                        {d.name}
+                        <XCircle size={14} className="pd-tag-remove" onClick={() => removeDiagnosis(d.id)} />
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -103,12 +162,12 @@ function Consultation() {
               <div className="pd-card">
                 <h3 className="pd-card-subtitle">Patient Vital Signs</h3>
                 <div className="pd-vitals-grid-consult">
-                  <VitalField label="BP" unit="mmHg" placeholder="120/80" />
-                  <VitalField label="Heart Rate" unit="bpm" placeholder="72" />
-                  <VitalField label="Temp" unit="°F" placeholder="98.6" />
-                  <VitalField label="SpO2" unit="%" placeholder="98" />
-                  <VitalField label="Weight" unit="kg" placeholder="70" />
-                  <VitalField label="Height" unit="cm" placeholder="175" />
+                  <VitalField label="BP" unit="mmHg" value={vitals.bp} onChange={(v: any) => setVitals({ ...vitals, bp: v })} />
+                  <VitalField label="Heart Rate" unit="bpm" value={vitals.heartRate} onChange={(v: any) => setVitals({ ...vitals, heartRate: v })} />
+                  <VitalField label="Temp" unit="°F" value={vitals.temp} onChange={(v: any) => setVitals({ ...vitals, temp: v })} />
+                  <VitalField label="SpO2" unit="%" value={vitals.spo2} onChange={(v: any) => setVitals({ ...vitals, spo2: v })} />
+                  <VitalField label="Weight" unit="kg" value={vitals.weight} onChange={(v: any) => setVitals({ ...vitals, weight: v })} />
+                  <VitalField label="Height" unit="cm" value={vitals.height} onChange={(v: any) => setVitals({ ...vitals, height: v })} />
                 </div>
               </div>
             )}
@@ -116,9 +175,46 @@ function Consultation() {
             {activeTab === "presc" && (
               <div className="pd-card">
                 <div className="pd-card-header">
-                  <h3 className="pd-card-subtitle">Active Prescriptions</h3>
-                  <button className="pd-action-btn-primary pd-btn-sm"><Plus size={16} /> Add Med</button>
+                  <h3 className="pd-card-subtitle">Add New Prescription</h3>
                 </div>
+                <div className="pd-form-grid" style={{ marginBottom: 20 }}>
+                  <div className="pd-field">
+                    <label>Medicine Name</label>
+                    <input
+                      type="text"
+                      className="pd-input"
+                      placeholder="e.g. Paracetamol 500mg"
+                      value={medInput.name}
+                      onChange={(e) => setMedInput({ ...medInput, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="pd-field">
+                    <label>Dosage</label>
+                    <input
+                      type="text"
+                      className="pd-input"
+                      placeholder="e.g. 1-0-1"
+                      value={medInput.dosage}
+                      onChange={(e) => setMedInput({ ...medInput, dosage: e.target.value })}
+                    />
+                  </div>
+                  <div className="pd-field">
+                    <label>Duration</label>
+                    <input
+                      type="text"
+                      className="pd-input"
+                      placeholder="e.g. 5 Days"
+                      value={medInput.duration}
+                      onChange={(e) => setMedInput({ ...medInput, duration: e.target.value })}
+                    />
+                  </div>
+                  <div className="pd-field" style={{ justifyContent: 'flex-end', display: 'flex' }}>
+                    <button className="pd-action-btn-primary" style={{ height: '48px', width: '100%' }} onClick={addMedicine}>
+                      <Plus size={18} /> Add Medicine
+                    </button>
+                  </div>
+                </div>
+
                 <div className="pd-presc-table-wrap">
                   <table className="pd-tiny-table">
                     <thead>
@@ -126,16 +222,23 @@ function Consultation() {
                         <th>Medicine</th>
                         <th>Dosage</th>
                         <th>Duration</th>
-                        <th></th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Amlodipine 5mg</td>
-                        <td>1-0-1 (After Food)</td>
-                        <td>30 Days</td>
-                        <td><button className="text-red-500"><Trash2 size={16} /></button></td>
-                      </tr>
+                      {medicines.map((m, i) => (
+                        <tr key={i}>
+                          <td>{m.name}</td>
+                          <td>{m.dosage}</td>
+                          <td>{m.duration}</td>
+                          <td><button className="pd-text-danger" onClick={() => removeMedicine(i)}><Trash2 size={16} /></button></td>
+                        </tr>
+                      ))}
+                      {medicines.length === 0 && (
+                        <tr>
+                          <td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>No medicines added yet.</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -163,20 +266,16 @@ function Consultation() {
   )
 }
 
-function VitalField({ label, unit, placeholder }: any) {
+function VitalField({ label, unit, value, onChange }: any) {
   return (
     <div className="pd-vital-field">
       <label>{label}</label>
       <div className="pd-vital-input-group">
-        <input type="text" placeholder={placeholder} />
+        <input type="text" value={value} onChange={(e) => onChange(e.target.value)} />
         <span>{unit}</span>
       </div>
     </div>
   )
-}
-
-function XCircleSmall() {
-  return <span style={{ marginLeft: '6px', cursor: 'pointer', color: '#ef4444' }}>×</span>
 }
 
 export default Consultation

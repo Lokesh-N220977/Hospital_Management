@@ -1,73 +1,88 @@
-from datetime import datetime, timedelta
-from app.database import doctor_slots_collection, doctor_schedules_collection
-from app.utils.date_utils import get_day_from_date
-from app.core.logger import logger
+from app.database import db, appointments_collection
+import datetime
 
-def generate_slots(start_time: str, end_time: str, slot_minutes: int = 15):
-    """Utility to generate a list of time slots."""
-    slots = []
-    start = datetime.strptime(start_time, "%H:%M")
-    end = datetime.strptime(end_time, "%H:%M")
-    current = start
-    while current < end:
-        slots.append(current.strftime("%H:%M"))
-        current += timedelta(minutes=slot_minutes)
-    return slots
+schedules_collection = db["doctor_schedules"]
 
-async def create_daily_slots(doctor_id: str, date: str):
-    """Initialize slots for a specific doctor on a specific date."""
-    day = get_day_from_date(date)
-    schedule = await doctor_schedules_collection.find_one({
-        "doctor_id": doctor_id,
-        "day": day
-    })
+def to_minutes(t):
+    h, m = map(int, t.split(":"))
+    return h * 60 + m
 
-    if not schedule:
-        logger.warning(f"No schedule found for doctor {doctor_id} on {day}")
-        return False
-
-    slots = generate_slots(schedule["start_time"], schedule["end_time"])
-    slot_objects = [{"time": s, "booked": False} for s in slots]
-
-    await doctor_slots_collection.update_one(
-        {"doctor_id": doctor_id, "date": date},
-        {"$set": {"slots": slot_objects}},
-        upsert=True
-    )
-    logger.info(f"Initialized slots for doctor {doctor_id} on {date}")
-    return True
+def to_time(m):
+    return f"{m//60:02d}:{m%60:02d}"
 
 async def get_available_slots(doctor_id: str, date: str):
-    """Retrieve all unbooked slots for a doctor on a given date."""
-    doc = await doctor_slots_collection.find_one({"doctor_id": doctor_id, "date": date})
-    if not doc:
+    """
+    Step 4: Slot Generation Engine (CRITICAL)
+    """
+    # Check leave (Step 3: Leave System Implementation)
+    leave = await db["doctor_leaves"].find_one({
+        "doctor_id": doctor_id,
+        "date": date
+    })
+    if leave:
         return []
-    return [s["time"] for s in doc["slots"] if not s["booked"]]
+
+    # 1. Get schedule
+    sched = await schedules_collection.find_one({"doctor_id": doctor_id})
+    if not sched:
+        return []
+
+    # 2. Check working day
+    try:
+        day = datetime.datetime.strptime(date, "%Y-%m-%d").strftime("%a")
+    except Exception:
+        return []
+
+    if day not in sched["working_days"]:
+        return []
+
+    # 3. Generate slots
+    start = to_minutes(sched["start_time"])
+    end = to_minutes(sched["end_time"])
+    duration = sched["slot_duration"]
+
+    all_slots = []
+    current = start
+
+    while current + duration <= end:
+        all_slots.append(to_time(current))
+        current += duration
+
+    # 4. Remove booked slots
+    booked = []
+    cursor = appointments_collection.find({
+        "doctor_id": doctor_id,
+        "date": date,
+        "status": {"$ne": "cancelled"}
+    })
+    async for appt in cursor:
+        booked.append(appt["time"])
+
+    # Returns list of {time, booked} objects as expected by the frontend
+    return [{"time": s, "booked": (s in booked)} for s in all_slots]
 
 async def book_slot(doctor_id: str, date: str, time: str):
-    """Atomically lock a slot."""
-    result = await doctor_slots_collection.update_one(
-        {
-            "doctor_id": doctor_id,
-            "date": date,
-            "slots.time": time,
-            "slots.booked": False
-        },
-        {"$set": {"slots.$.booked": True}}
-    )
-    if result.modified_count > 0:
-        logger.info(f"Slot booked: {doctor_id} on {date} at {time}")
-        return True
-    return False
+    """Checks if a slot is available before booking."""
+    # 1. Check leave
+    leave = await db["doctor_leaves"].find_one({
+        "doctor_id": doctor_id,
+        "date": date
+    })
+    if leave:
+        return False
+        
+    # 2. Check existing appointment
+    existing = await appointments_collection.find_one({
+        "doctor_id": doctor_id,
+        "date": date,
+        "time": time,
+        "status": {"$ne": "cancelled"}
+    })
+    if existing:
+        return False
+        
+    return True
 
 async def release_slot(doctor_id: str, date: str, time: str):
-    """Unlock a previously booked slot."""
-    await doctor_slots_collection.update_one(
-        {
-            "doctor_id": doctor_id,
-            "date": date,
-            "slots.time": time
-        },
-        {"$set": {"slots.$.booked": False}}
-    )
-    logger.info(f"Slot released: {doctor_id} on {date} at {time}")
+    """Optional: Release a locked slot (currently no-op as appointments are source of truth)."""
+    return True

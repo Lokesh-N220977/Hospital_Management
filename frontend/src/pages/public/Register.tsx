@@ -1,22 +1,60 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
+import {
     FaPlusSquare, FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash,
     FaPhone, FaVenusMars, FaArrowLeft, FaUserPlus,
     FaCalendarAlt, FaHeartbeat, FaShieldAlt, FaClock
 } from 'react-icons/fa';
 
+import authService from '../../services/auth.service';
+
 const Register: React.FC = () => {
     const navigate = useNavigate();
-    const [showPass,    setShowPass]    = useState(false);
+    const [showPass, setShowPass] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-    const [agreed,      setAgreed]      = useState(false);
+    const [agreed, setAgreed] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [gender, setGender] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+        if (!phone) { setError('Phone number is required'); return; }
+
+        setError('');
+        setSubmitting(true);
+
+        try {
+            await authService.register({ name, phone, email: email || undefined, password, gender, role: "patient" });
+            navigate('/login', { state: { message: "Account created! You can now login with your phone number or email." } });
+        } catch (err: any) {
+            let errorMessage = "Registration failed. Please try again.";
+            const detail = err.response?.data?.detail;
+            if (typeof detail === 'string') errorMessage = detail;
+            else if (Array.isArray(detail)) errorMessage = detail.map((e: any) => e.msg).join(", ");
+            setError(errorMessage);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
 
     return (
         <div className="split-auth-page reg-page">
 
+            {/* ── Left Panel ── */}
             <div className="split-left reg-left"
-                 style={{ background: 'linear-gradient(155deg, #001354 0%, #003d99 50%, #0060cc 100%)' }}>
+                style={{ background: 'linear-gradient(155deg, #001354 0%, #003d99 50%, #0060cc 100%)' }}>
                 <div className="split-left-bg" />
                 <div className="auth-shape auth-shape-1" />
                 <div className="auth-shape auth-shape-2" />
@@ -49,6 +87,7 @@ const Register: React.FC = () => {
                 </div>
             </div>
 
+            {/* ── Right Panel ── */}
             <div className="split-right reg-right">
                 <div className="split-form-box split-form-box--wide reg-form-box">
 
@@ -59,30 +98,54 @@ const Register: React.FC = () => {
                         <p>Join thousands of patients using MedicPulse — it's free!</p>
                     </div>
 
-                    <form className="sf-form" onSubmit={e => { e.preventDefault(); navigate('/patient/dashboard'); }}>
+                    <form className="sf-form" onSubmit={handleSubmit}>
+                        {error && (
+                            <div style={{ backgroundColor: '#fef2f2', color: '#b91c1c', padding: '10px', borderRadius: '6px', fontSize: '0.9rem', marginBottom: '15px', border: '1px solid #fee2e2' }}>
+                                {error}
+                            </div>
+                        )}
 
+
+                        {/* Full Name */}
                         <div className="sf-field">
                             <label>Full Name</label>
                             <div className="sf-input-wrap">
                                 <FaUser className="sf-icon" />
-                                <input type="text" placeholder="Enter your full name" required />
+                                <input
+                                    type="text"
+                                    placeholder="Enter your full name"
+                                    required
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                />
                             </div>
                         </div>
 
+                        {/* Email */}
                         <div className="sf-field">
-                            <label>Email Address</label>
+                            <label>Email Address <span style={{ color: '#94a3b8', fontWeight: 400, fontSize: '0.78rem' }}>(optional — for email login)</span></label>
                             <div className="sf-input-wrap">
                                 <FaEnvelope className="sf-icon" />
-                                <input type="email" placeholder="email@example.com" required />
+                                <input
+                                    type="email"
+                                    placeholder="your@email.com"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                />
                             </div>
                         </div>
 
+                        {/* Gender + Phone */}
                         <div className="sf-row">
                             <div className="sf-field">
                                 <label>Gender</label>
                                 <div className="sf-input-wrap">
                                     <FaVenusMars className="sf-icon" />
-                                    <select required>
+                                    <select
+                                        required
+                                        value={gender}
+                                        onChange={e => setGender(e.target.value)}
+                                    >
                                         <option value="">Select Gender</option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
@@ -94,25 +157,30 @@ const Register: React.FC = () => {
                                 <label>Phone Number</label>
                                 <div className="sf-input-wrap">
                                     <FaPhone className="sf-icon" />
-                                    <input type="tel" placeholder="+91 234 567 890" required />
+                                    <input
+                                        type="tel"
+                                        placeholder="+91 234 567 890"
+                                        required
+                                        value={phone}
+                                        onChange={e => setPhone(e.target.value)}
+                                    />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="sf-field">
-                            <label>Date of Birth</label>
-                            <div className="sf-input-wrap">
-                                <FaCalendarAlt className="sf-icon" />
-                                <input type="date" required />
-                            </div>
-                        </div>
-
+                        {/* Password + Confirm */}
                         <div className="sf-row">
                             <div className="sf-field">
                                 <label>Password</label>
                                 <div className="sf-input-wrap">
                                     <FaLock className="sf-icon" />
-                                    <input type={showPass ? 'text' : 'password'} placeholder="Min. 8 characters" required />
+                                    <input
+                                        type={showPass ? 'text' : 'password'}
+                                        placeholder="Min. 8 characters"
+                                        required
+                                        value={password}
+                                        onChange={e => setPassword(e.target.value)}
+                                    />
                                     <button type="button" className="sf-eye" onClick={() => setShowPass(p => !p)}>
                                         {showPass ? <FaEyeSlash /> : <FaEye />}
                                     </button>
@@ -122,7 +190,13 @@ const Register: React.FC = () => {
                                 <label>Confirm Password</label>
                                 <div className="sf-input-wrap">
                                     <FaLock className="sf-icon" />
-                                    <input type={showConfirm ? 'text' : 'password'} placeholder="Repeat password" required />
+                                    <input
+                                        type={showConfirm ? 'text' : 'password'}
+                                        placeholder="Repeat password"
+                                        required
+                                        value={confirmPassword}
+                                        onChange={e => setConfirmPassword(e.target.value)}
+                                    />
                                     <button type="button" className="sf-eye" onClick={() => setShowConfirm(p => !p)}>
                                         {showConfirm ? <FaEyeSlash /> : <FaEye />}
                                     </button>
@@ -130,15 +204,24 @@ const Register: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Terms */}
                         <label className="sf-terms">
                             <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} />
-                            I agree to the <Link to="/terms">Terms of Service</Link> and <Link to="/privacy">Privacy Policy</Link>
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
                         </label>
-                        
 
-                        <button type="submit" className="sf-submit-btn reg-btn" disabled={!agreed}>
-                            <FaUserPlus /> Create Account
+                        <button
+                            type="submit"
+                            className="sf-submit-btn reg-btn"
+                            disabled={!agreed || submitting}
+                            style={{
+                                background: (!agreed || submitting) ? '#94a3b8' : 'linear-gradient(135deg, #003d99, #0060cc)',
+                                cursor: (!agreed || submitting) ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            <FaUserPlus /> {submitting ? "Creating Account..." : "Create Account"}
                         </button>
+
 
                         <p className="sf-footer-text">
                             Already have an account? <Link to="/login">Login here</Link>

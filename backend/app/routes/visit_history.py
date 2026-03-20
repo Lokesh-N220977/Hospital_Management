@@ -4,7 +4,14 @@ from app.services import visit_service
 from fastapi.responses import FileResponse
 from app.core.logger import logger
 
+from app.core.dependencies import get_current_user
+
 router = APIRouter(prefix="/api/v1/visit-history", tags=["Visit History"])
+
+@router.get("/my-history")
+async def get_my_history(current_user=Depends(get_current_user)):
+    user_id = str(current_user["_id"])
+    return await visit_service.get_user_all_visits(user_id)
 
 @router.post("/add")
 async def add_visit(visit: VisitCreate):

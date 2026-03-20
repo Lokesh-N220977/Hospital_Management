@@ -1,5 +1,7 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Download, MoreVertical, TrendingUp, Users, Activity, CreditCard, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Download, MoreVertical, TrendingUp, Users, Activity, CreditCard, ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { getAdminDashboardData } from "../../services/adminService"
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
     PieChart, Pie, Cell,
@@ -8,12 +10,39 @@ import {
 } from 'recharts'
 
 function Analytics() {
-    // Realistic Dummy Data
+    const [stats, setStats] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchAnalytics = async () => {
+            try {
+                const data = await getAdminDashboardData()
+                setStats(data)
+            } catch (err) {
+                console.error("Failed to fetch analytics", err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchAnalytics()
+    }, [])
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+                    <Loader2 className="animate-spin" size={48} color="#3b82f6" />
+                </div>
+            </AdminLayout>
+        )
+    }
+
+    // Realistic Dummy Data augmented with real stats
     const summaryStats = [
-        { title: "Total Revenue", value: "$245,892", growth: "+12.5%", isPositive: true, icon: <CreditCard size={20} />, color: "#22c55e" },
-        { title: "Avg. Daily Patients", value: "84", growth: "+5.2%", isPositive: true, icon: <Users size={20} />, color: "#3b82f6" },
-        { title: "Appointment Success", value: "94.2%", growth: "-0.8%", isPositive: false, icon: <Activity size={20} />, color: "#8b5cf6" },
-        { title: "New Registrations", value: "128", growth: "+24%", isPositive: true, icon: <TrendingUp size={20} />, color: "#f59e0b" },
+        { title: "Total Doctors", value: stats?.total_doctors?.toString() || "0", growth: "+4.2%", isPositive: true, icon: <Activity size={20} />, color: "#22c55e" },
+        { title: "Total Patients", value: stats?.total_patients?.toString() || "0", growth: "+8.5%", isPositive: true, icon: <Users size={20} />, color: "#3b82f6" },
+        { title: "Today's Visits", value: stats?.today_appointments?.toString() || "0", growth: "+5.8%", isPositive: true, icon: <Activity size={20} />, color: "#8b5cf6" },
+        { title: "Total Appointments", value: stats?.total_appointments?.toString() || "0", growth: "+12.4%", isPositive: true, icon: <TrendingUp size={20} />, color: "#f59e0b" },
     ];
 
     const volumeData = [

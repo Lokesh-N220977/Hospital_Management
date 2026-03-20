@@ -1,70 +1,74 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import PatientLayout from "../../components/layout/patient/PatientLayout"
 import {
   CalendarCheck, Clock, CheckCircle2,
   AlertCircle, XCircle, ChevronDown,
-  Search, Filter, Video, MapPin
+  Search, User
 } from "lucide-react"
-
-const allAppointments = [
-  {
-    id: "APT001", doctor: "Dr. Rahul Sharma", specialty: "Cardiology",
-    date: "Nov 24, 2024", time: "10:00 AM", status: "confirmed",
-    type: "in-person", avatar: "RS", reason: "Chest pain checkup",
-    location: "Block A, Room 204", color: "#3b82f6",
-  },
-  {
-    id: "APT002", doctor: "Dr. Priya Mehta", specialty: "Dermatology",
-    date: "Dec 2, 2024", time: "2:30 PM", status: "pending",
-    type: "online", avatar: "PM", reason: "Skin rash follow-up",
-    location: "Video Call", color: "#8b5cf6",
-  },
-  {
-    id: "APT003", doctor: "Dr. Anil Kumar", specialty: "Orthopedics",
-    date: "Oct 15, 2024", time: "11:00 AM", status: "completed",
-    type: "in-person", avatar: "AK", reason: "Knee pain",
-    location: "Block C, Room 301", color: "#10b981",
-  },
-  {
-    id: "APT004", doctor: "Dr. Sneha Patel", specialty: "Neurology",
-    date: "Sep 30, 2024", time: "3:00 PM", status: "cancelled",
-    type: "in-person", avatar: "SP", reason: "Headache evaluation",
-    location: "Block A, Room 108", color: "#ef4444",
-  },
-  {
-    id: "APT005", doctor: "Dr. Kiran Desai", specialty: "Pediatrics",
-    date: "Nov 10, 2024", time: "9:30 AM", status: "completed",
-    type: "online", avatar: "KD", reason: "General checkup",
-    location: "Video Call", color: "#f59e0b",
-  },
-]
+import { appointmentService } from "../../services/appointment.service"
 
 const statusIcons: Record<string, React.ReactNode> = {
   confirmed: <CheckCircle2 size={14} />,
   pending: <AlertCircle size={14} />,
   completed: <CheckCircle2 size={14} />,
   cancelled: <XCircle size={14} />,
+  booked: <CheckCircle2 size={14} />,
 }
 
-const filters = ["All", "Confirmed", "Pending", "Completed", "Cancelled"]
+const avatarColors = [
+  "#6366f1", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"
+]
+
+const filters = ["All", "Confirmed", "Pending", "Completed", "Cancelled", "Booked"]
 
 function MyAppointments() {
+  const [appointments, setAppointments] = useState<any[]>([])
   const [activeFilter, setActiveFilter] = useState("All")
   const [search, setSearch] = useState("")
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const filtered = allAppointments.filter(a => {
-    const matchFilter = activeFilter === "All" || a.status === activeFilter.toLowerCase()
-    const matchSearch = a.doctor.toLowerCase().includes(search.toLowerCase()) ||
-      a.specialty.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      setLoading(true)
+      try {
+        const data = await appointmentService.getMyAppointments()
+        setAppointments(data)
+      } catch (err) {
+        setError("Failed to load appointments.")
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAppointments()
+  }, [])
+
+  const filtered = appointments.filter(a => {
+    const statusVal = a.status || "booked";
+    const matchFilter = activeFilter === "All" || statusVal === activeFilter.toLowerCase()
+    const matchSearch = (a.doctor_name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (a.specialization || "").toLowerCase().includes(search.toLowerCase())
     return matchFilter && matchSearch
   })
 
+  const handleCancel = async (id: string) => {
+    if (window.confirm("Are you sure you want to cancel this appointment?")) {
+      try {
+        await appointmentService.cancelAppointment(id);
+        // Refresh list
+        const data = await appointmentService.getMyAppointments();
+        setAppointments(data);
+      } catch (err) {
+        alert("Failed to cancel appointment.");
+      }
+    }
+  }
+
   return (
     <PatientLayout>
-      <div className="ma-page">
 
-        {/* Header */}
+      <div className="ma-page">
         <div className="ma-header">
           <div>
             <h2 className="ma-title">My Appointments</h2>
@@ -75,13 +79,12 @@ function MyAppointments() {
           </a>
         </div>
 
-        {/* Summary Chips */}
         <div className="ma-summary-row">
           {[
-            { label: "Total", count: allAppointments.length, color: "#3b82f6" },
-            { label: "Upcoming", count: allAppointments.filter(a => a.status === "confirmed" || a.status === "pending").length, color: "#10b981" },
-            { label: "Completed", count: allAppointments.filter(a => a.status === "completed").length, color: "#8b5cf6" },
-            { label: "Cancelled", count: allAppointments.filter(a => a.status === "cancelled").length, color: "#ef4444" },
+            { label: "Total", count: appointments.length, color: "#3b82f6" },
+            { label: "Upcoming", count: appointments.filter(a => (a.status === "confirmed" || a.status === "pending" || a.status === "booked")).length, color: "#10b981" },
+            { label: "Completed", count: appointments.filter(a => a.status === "completed").length, color: "#8b5cf6" },
+            { label: "Cancelled", count: appointments.filter(a => a.status === "cancelled").length, color: "#ef4444" },
           ].map(({ label, count, color }) => (
             <div className="ma-summary-chip" key={label} style={{ borderLeft: `4px solid ${color}` }}>
               <span className="ma-chip-count" style={{ color }}>{count}</span>
@@ -90,13 +93,12 @@ function MyAppointments() {
           ))}
         </div>
 
-        {/* Filters & Search */}
         <div className="ma-controls">
           <div className="ma-search-box">
             <Search size={16} />
             <input
               type="text"
-              placeholder="Search doctor or specialty..."
+              placeholder="Search appointments..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="ma-search-input"
@@ -113,28 +115,27 @@ function MyAppointments() {
           </div>
         </div>
 
-        {/* Appointment Cards */}
         <div className="ma-list">
-          {filtered.length === 0 && (
+          {loading && <div style={{ padding: '40px', textAlign: 'center' }}>Loading your appointments...</div>}
+          
+          {!loading && filtered.length === 0 && (
             <div className="ma-empty">
               <CalendarCheck size={48} />
-              <p>No appointments found</p>
+              <p>{error || "No appointments found"}</p>
             </div>
           )}
-          {filtered.map(appt => (
-            <div key={appt.id} className="ma-card">
-              <div
-                className="ma-card-accent"
-                style={{ background: appt.color }}
-              />
+          
+          {!loading && filtered.map((appt, idx) => (
+            <div key={appt._id} className="ma-card">
+              <div className="ma-card-accent" style={{ background: avatarColors[idx % avatarColors.length] }} />
               <div className="ma-card-body">
                 <div className="ma-card-top">
-                  <div className="ma-doc-avatar" style={{ background: appt.color }}>
-                    {appt.avatar}
+                  <div className="ma-doc-avatar" style={{ background: avatarColors[idx % avatarColors.length] }}>
+                    {((appt.doctor_name || "D")[0]).toUpperCase()}
                   </div>
                   <div className="ma-doc-details">
-                    <h4 className="ma-doc-name">{appt.doctor}</h4>
-                    <p className="ma-doc-spec">{appt.specialty}</p>
+                    <h4 className="ma-doc-name">{appt.doctor_name || "Doctor"}</h4>
+                    <p className="ma-doc-spec">{appt.specialization || "Specialist"}</p>
                   </div>
                   <div className="ma-appt-datetime">
                     <p className="ma-appt-date">
@@ -143,58 +144,54 @@ function MyAppointments() {
                     <p className="ma-appt-time">
                       <Clock size={13} /> {appt.time}
                     </p>
+                    <p className="ma-appt-patient" style={{ fontSize: '12px', color: '#6366f1', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                       <User size={12} /> {appt.patient_name || "Self"}
+                    </p>
                   </div>
-                  <span className={`ma-status-badge ma-status-${appt.status}`}>
-                    {statusIcons[appt.status]} {appt.status}
+                  <span className={`ma-status-badge ma-status-${appt.status || 'booked'}`}>
+                    {statusIcons[appt.status || 'booked']} {appt.status || 'booked'}
                   </span>
                   <button
                     className="ma-expand-btn"
-                    onClick={() => setExpanded(expanded === appt.id ? null : appt.id)}
+                    onClick={() => setExpanded(expanded === appt._id ? null : appt._id)}
                   >
                     <ChevronDown
                       size={18}
-                      style={{ transform: expanded === appt.id ? "rotate(180deg)" : "none", transition: "0.3s" }}
+                      style={{ transform: expanded === appt._id ? "rotate(180deg)" : "none", transition: "0.3s" }}
                     />
                   </button>
                 </div>
 
-                {/* Expanded Details */}
-                <div className={`ma-card-expand${expanded === appt.id ? " ma-card-expand-open" : ""}`}>
+                <div className={`ma-card-expand${expanded === appt._id ? " ma-card-expand-open" : ""}`}>
                   <div className="ma-expand-grid">
                     <div>
                       <p className="ma-expand-label">Appointment ID</p>
-                      <p className="ma-expand-val">{appt.id}</p>
+                      <p className="ma-expand-val">{appt._id}</p>
                     </div>
                     <div>
                       <p className="ma-expand-label">Reason</p>
-                      <p className="ma-expand-val">{appt.reason}</p>
+                      <p className="ma-expand-val">{appt.reason || "General Consultation"}</p>
                     </div>
                     <div>
-                      <p className="ma-expand-label">Type</p>
-                      <p className="ma-expand-val">
-                        {appt.type === "online"
-                          ? <><Video size={13} /> Online</>
-                          : <><MapPin size={13} /> In-Person</>}
-                      </p>
+                      <p className="ma-expand-label">Doctor ID</p>
+                      <p className="ma-expand-val">{appt.doctor_id}</p>
                     </div>
-                    <div>
-                      <p className="ma-expand-label">Location</p>
-                      <p className="ma-expand-val">{appt.location}</p>
-                    </div>
+                    {appt.status === "cancelled" && appt.cancellation_reason && (
+                      <div style={{ gridColumn: 'span 2' }}>
+                        <p className="ma-expand-label" style={{ color: '#ef4444' }}>Cancellation Reason</p>
+                        <p className="ma-expand-val" style={{ color: '#b91c1c', fontWeight: 600 }}>{appt.cancellation_reason}</p>
+                      </div>
+                    )}
                   </div>
-                  {(appt.status === "confirmed" || appt.status === "pending") && (
-                    <div className="ma-expand-actions">
-                      <button className="ma-action-btn ma-reschedule">Reschedule</button>
-                      <button className="ma-action-btn ma-cancel">Cancel</button>
-                      {appt.type === "online" && (
-                        <button className="ma-action-btn ma-join"><Video size={14} /> Join Call</button>
-                      )}
-                    </div>
-                  )}
-                  {appt.status === "completed" && (
-                    <div className="ma-expand-actions">
-                      <button className="ma-action-btn ma-view-report">View Report</button>
-                      <button className="ma-action-btn ma-rebook">Rebook</button>
+                  {(appt.status === "booked" || appt.status === "confirmed") && (
+                    <div className="ma-expand-actions" style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                       <button 
+                         className="ma-action-btn ma-cancel" 
+                         onClick={() => handleCancel(appt._id)}
+                         style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
+                       >
+                         Cancel Appointment
+                       </button>
                     </div>
                   )}
                 </div>

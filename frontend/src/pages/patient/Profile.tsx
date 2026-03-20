@@ -1,234 +1,471 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import PatientLayout from "../../components/layout/patient/PatientLayout"
 import {
-  User, Mail, Phone, MapPin, Calendar,
-  Pencil, Save, X, Camera, Shield,
-  Heart, AlertCircle, Droplets
+  User, Mail, Phone, Camera, Shield,
+  Save, X, Pencil, Calendar, PlusCircle,
+  Users, Trash2, CheckCircle2, AlertCircle, LogOut
 } from "lucide-react"
+import { getPatientProfile, updatePatientProfile } from "../../services/patientService"
+import { appointmentService } from "../../services/appointment.service"
+import api from "../../services/api"
+import { useAuth } from "../../context/AuthContext"
+import { useNavigate } from "react-router-dom"
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface FamilyMember {
+  _id: string;
+  name: string;
+  phone: string;
+  gender?: string;
+  relation?: string;
+  created_by?: string;
+}
+
+// ─── Shared Modal Wrapper ─────────────────────────────────────────────────────
+function ModalWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 1000, padding: "20px"
+    }}>
+      <div style={{
+        background: "white", borderRadius: "16px", padding: "28px",
+        width: "100%", maxWidth: "440px",
+        boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+      }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─── Add / Edit Member Modal ──────────────────────────────────────────────────
+function MemberModal({
+  mode, existing, onClose, onDone
+}: {
+  mode: "add" | "edit";
+  existing?: FamilyMember;
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [name, setName] = useState(existing?.name || "");
+  const [phone, setPhone] = useState(existing?.phone || "");
+  const [gender, setGender] = useState(existing?.gender || "male");
+  const [relation, setRelation] = useState(existing?.relation || "Spouse");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone) { setError("Name and phone are required"); return; }
+    setLoading(true); setError("");
+    try {
+      if (mode === "add") {
+        await api.post("/patients/add", { name, phone, gender, relation });
+      } else {
+        await api.put(`/patients/${existing!._id}`, { name, phone, gender, relation });
+      }
+      onDone();
+      onClose();
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Operation failed");
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <ModalWrapper>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "22px" }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700, color: "#1e293b" }}>
+            {mode === "add" ? "Add Family Member" : "Edit Member"}
+          </h3>
+          <p style={{ margin: "4px 0 0", fontSize: "13px", color: "#64748b" }}>
+            {mode === "add" ? "They can be selected when booking appointments" : "Update member details"}
+          </p>
+        </div>
+        <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#94a3b8" }}>
+          <X size={20} />
+        </button>
+      </div>
+
+      {error && (
+        <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: "8px", fontSize: "14px", marginBottom: "16px", display: "flex", gap: "8px" }}>
+          <AlertCircle size={16} style={{ flexShrink: 0, marginTop: "1px" }} /> {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit}>
+        <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "5px" }}>Full Name *</label>
+        <input type="text" required placeholder="e.g. Priya Sharma" value={name} onChange={e => setName(e.target.value)}
+          style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px", boxSizing: "border-box", marginBottom: "14px" }} />
+
+        <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "5px" }}>Phone Number *</label>
+        <input type="tel" required placeholder="+91 9876543210" value={phone} onChange={e => setPhone(e.target.value)}
+          style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px", boxSizing: "border-box", marginBottom: "14px" }} />
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "22px" }}>
+          <div>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "5px" }}>Relation</label>
+            <select value={relation} onChange={e => setRelation(e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px" }}>
+              {["Spouse", "Child", "Parent", "Sibling", "Other"].map(r => <option key={r}>{r}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "5px" }}>Gender</label>
+            <select value={gender} onChange={e => setGender(e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px" }}>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button type="button" onClick={onClose}
+            style={{ flex: 1, padding: "11px", borderRadius: "8px", border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontWeight: 600, cursor: "pointer" }}>
+            Cancel
+          </button>
+          <button type="submit" disabled={loading}
+            style={{ flex: 2, padding: "11px", borderRadius: "8px", border: "none", background: loading ? "#94a3b8" : "linear-gradient(135deg,#3b82f6,#2563eb)", color: "white", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer" }}>
+            {loading ? "Saving..." : mode === "add" ? "Add Member" : "Save Changes"}
+          </button>
+        </div>
+      </form>
+    </ModalWrapper>
+  );
+}
+
+// ─── Confirm Delete Modal ─────────────────────────────────────────────────────
+function ConfirmDeleteModal({
+  title, message, confirmLabel, danger,
+  onConfirm, onCancel, loading
+}: {
+  title: string; message: string; confirmLabel: string; danger?: boolean;
+  onConfirm: () => void; onCancel: () => void; loading?: boolean;
+}) {
+  return (
+    <ModalWrapper>
+      <div style={{ textAlign: "center", padding: "0 8px" }}>
+        <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: danger ? "#fee2e2" : "#fef3c7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <AlertCircle size={26} color={danger ? "#ef4444" : "#f59e0b"} />
+        </div>
+        <h3 style={{ margin: "0 0 8px", fontSize: "18px", fontWeight: 700, color: "#1e293b" }}>{title}</h3>
+        <p style={{ margin: "0 0 24px", fontSize: "14px", color: "#64748b", lineHeight: 1.6 }}>{message}</p>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={onCancel}
+            style={{ flex: 1, padding: "11px", borderRadius: "8px", border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontWeight: 600, cursor: "pointer" }}>
+            Cancel
+          </button>
+          <button onClick={onConfirm} disabled={loading}
+            style={{ flex: 1, padding: "11px", borderRadius: "8px", border: "none", background: danger ? "#ef4444" : "#f59e0b", color: "white", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}>
+            {loading ? "..." : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </ModalWrapper>
+  );
+}
+
+// ─── Main Profile Page ────────────────────────────────────────────────────────
+const avatarColors = ["#6366f1", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
 
 function Profile() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const [editing, setEditing] = useState(false)
-  const [activeTab, setActiveTab] = useState<"personal" | "medical" | "security">("personal")
-  const [saved, setSaved] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
-  const [form, setForm] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+91 98765 43210",
-    dob: "1990-05-15",
-    gender: "Male",
-    address: "123 Main Street, Mumbai, MH 400001",
-    bloodGroup: "O+",
-    emergencyContact: "Jane Doe - +91 98765 00000",
-    allergies: "Penicillin, Pollen",
-    chronicConditions: "Hypertension",
-    height: "175",
-    weight: "68",
-  })
+  const [form, setForm] = useState({ name: "", email: "", phone: "", gender: "Male", age: 0 })
+  const [family, setFamily] = useState<FamilyMember[]>([])
+  const [familyLoading, setFamilyLoading] = useState(true)
 
-  const handleSave = () => {
-    setEditing(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+  // Modal state
+  const [showAdd, setShowAdd] = useState(false)
+  const [editMember, setEditMember] = useState<FamilyMember | null>(null)
+  const [deleteMember, setDeleteMember] = useState<FamilyMember | null>(null)
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+
+  useEffect(() => { fetchProfile(); fetchFamily(); }, [])
+
+  const fetchProfile = async () => {
+    try {
+      const data = await getPatientProfile();
+      setForm({ name: data.name || "", email: data.email || "", phone: data.phone || "", gender: data.gender || "Male", age: data.age || 0 })
+    } catch { setError("Failed to load profile.") }
+    finally { setLoading(false) }
   }
 
-  const change = (field: string, val: string) =>
-    setForm(f => ({ ...f, [field]: val }))
+  const fetchFamily = async () => {
+    setFamilyLoading(true);
+    try { setFamily(await appointmentService.getMyPatients()); }
+    catch {/* silent */}
+    finally { setFamilyLoading(false) }
+  }
 
-  const InputField = ({
-    icon: Icon, label, field, type = "text", options
-  }: {
-    icon: React.ElementType, label: string, field: keyof typeof form, type?: string, options?: string[]
-  }) => (
-    <div className="pf-field">
-      <label className="pf-label">
-        <Icon size={14} /> {label}
-      </label>
-      {options ? (
-        <select
-          className={`pf-input${editing ? " pf-input-edit" : ""}`}
-          value={form[field]}
-          onChange={e => change(field, e.target.value)}
-          disabled={!editing}
-        >
-          {options.map(o => <option key={o}>{o}</option>)}
-        </select>
-      ) : (
-        <input
-          type={type}
-          className={`pf-input${editing ? " pf-input-edit" : ""}`}
-          value={form[field]}
-          onChange={e => change(field, e.target.value)}
-          readOnly={!editing}
-        />
-      )}
-    </div>
-  )
+  const handleSave = async () => {
+    setSaving(true); setError(""); setSuccess("");
+    try {
+      await updatePatientProfile(form);
+      setSuccess("Profile updated successfully!")
+      setEditing(false)
+      setTimeout(() => setSuccess(""), 3000)
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      user.name = form.name;
+      localStorage.setItem('user', JSON.stringify(user));
+    } catch { setError("Failed to update profile.") }
+    finally { setSaving(false) }
+  }
+
+  const handleDeleteMember = async () => {
+    if (!deleteMember) return;
+    setDeleteLoading(true);
+    try {
+      await api.delete(`/patients/${deleteMember._id}`);
+      setDeleteMember(null);
+      setSuccess("Member removed.");
+      setTimeout(() => setSuccess(""), 3000);
+      fetchFamily();
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Failed to remove member.");
+      setDeleteMember(null);
+    } finally { setDeleteLoading(false); }
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      await api.delete("/auth/my-account");
+    } catch {/* account may not exist — proceed */}
+    logout();
+    navigate("/login");
+  }
+
+  const getInitials = (name: string) =>
+    name.split(" ").filter(Boolean).map(n => n[0]).join("").toUpperCase().slice(0, 2) || "?";
+
+  const change = (f: string, v: any) => setForm(p => ({ ...p, [f]: v }));
+
+  if (loading) return <PatientLayout><div style={{ padding: "100px", textAlign: "center" }}>Loading...</div></PatientLayout>;
 
   return (
     <PatientLayout>
-      <div className="pf-page">
+      {/* Modals */}
+      {showAdd && <MemberModal mode="add" onClose={() => setShowAdd(false)} onDone={fetchFamily} />}
+      {editMember && <MemberModal mode="edit" existing={editMember} onClose={() => setEditMember(null)} onDone={fetchFamily} />}
+      {deleteMember && (
+        <ConfirmDeleteModal
+          title="Remove Family Member?"
+          message={`This will remove ${deleteMember.name} from your family list. Their appointment history will be preserved.`}
+          confirmLabel="Remove"
+          danger
+          loading={deleteLoading}
+          onConfirm={handleDeleteMember}
+          onCancel={() => setDeleteMember(null)}
+        />
+      )}
+      {showDeleteAccount && (
+        <ConfirmDeleteModal
+          title="Delete Your Account?"
+          message="This action is permanent. Your account, login access, and all linked data will be removed. Appointment records may still be retained for hospital records."
+          confirmLabel="Yes, Delete My Account"
+          danger
+          loading={deleteLoading}
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setShowDeleteAccount(false)}
+        />
+      )}
 
-        {saved && (
-          <div className="pf-toast">
-            <Shield size={16} /> Profile updated successfully!
+      <div className="pf-page">
+        {/* Toast */}
+        {success && (
+          <div style={{ background: "#10b981", color: "white", padding: "12px 16px", borderRadius: "10px", marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <CheckCircle2 size={16} /> {success}
+          </div>
+        )}
+        {error && (
+          <div style={{ background: "#ef4444", color: "white", padding: "12px 16px", borderRadius: "10px", marginBottom: "20px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <X size={16} /> {error}
+            <button onClick={() => setError("")} style={{ marginLeft: "auto", background: "none", border: "none", color: "white", cursor: "pointer" }}><X size={14} /></button>
           </div>
         )}
 
-        {/* Profile Hero */}
-        <div className="pf-hero">
-          <div className="pf-avatar-wrap">
-            <div className="pf-avatar">JD</div>
-            <button className="pf-avatar-edit">
-              <Camera size={14} />
+        {/* ── Hero Card ── */}
+        <div style={{ background: "white", padding: "28px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", display: "flex", alignItems: "center", gap: "24px", marginBottom: "24px", flexWrap: "wrap" }}>
+          <div style={{ position: "relative" }}>
+            <div style={{ width: "80px", height: "80px", borderRadius: "50%", background: "#eff6ff", color: "#3b82f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "28px", fontWeight: "bold" }}>
+              {(form.name || "U")[0].toUpperCase()}
+            </div>
+            <button style={{ position: "absolute", bottom: 0, right: 0, background: "white", border: "1px solid #e2e8f0", borderRadius: "50%", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <Camera size={13} />
             </button>
           </div>
-          <div className="pf-hero-info">
-            <h2 className="pf-hero-name">{form.firstName} {form.lastName}</h2>
-            <p className="pf-hero-email">{form.email}</p>
-            <span className="pf-hero-badge">
-              <Shield size={13} /> Verified Patient
+          <div style={{ flex: 1, minWidth: "140px" }}>
+            <h2 style={{ fontSize: "22px", fontWeight: 700, margin: "0", color: "#1e293b" }}>{form.name || "Your Name"}</h2>
+            <p style={{ color: "#64748b", margin: "4px 0 8px", fontSize: "14px" }}>
+              {form.phone}{form.email ? ` • ${form.email}` : ""}
+            </p>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontSize: "12px", background: "#f0fdf4", color: "#16a34a", padding: "4px 10px", borderRadius: "20px" }}>
+              <Shield size={12} /> Verified Profile
             </span>
           </div>
-          <div className="pf-hero-actions">
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             {editing ? (
               <>
-                <button className="pf-save-btn" onClick={handleSave}>
-                  <Save size={15} /> Save Changes
+                <button onClick={handleSave} disabled={saving}
+                  style={{ background: "#3b82f6", color: "white", border: "none", padding: "10px 20px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", fontWeight: 500 }}>
+                  <Save size={16} /> {saving ? "Saving..." : "Save Changes"}
                 </button>
-                <button className="pf-cancel-btn" onClick={() => setEditing(false)}>
-                  <X size={15} /> Cancel
+                <button onClick={() => setEditing(false)}
+                  style={{ background: "#f1f5f9", color: "#64748b", border: "none", padding: "10px 20px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <X size={16} /> Cancel
                 </button>
               </>
             ) : (
-              <button className="pf-edit-btn" onClick={() => setEditing(true)}>
-                <Pencil size={15} /> Edit Profile
+              <button onClick={() => setEditing(true)}
+                style={{ background: "white", border: "1px solid #3b82f6", color: "#3b82f6", padding: "10px 20px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", fontWeight: 500 }}>
+                <Pencil size={16} /> Edit Profile
               </button>
             )}
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="pf-tabs">
-          {(["personal", "medical", "security"] as const).map(tab => (
-            <button
-              key={tab}
-              className={`pf-tab${activeTab === tab ? " pf-tab-active" : ""}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab === "personal" && <User size={15} />}
-              {tab === "medical" && <Heart size={15} />}
-              {tab === "security" && <Shield size={15} />}
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} Info
-            </button>
-          ))}
+        {/* ── Personal Details ── */}
+        <div style={{ background: "white", padding: "28px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", marginBottom: "24px" }}>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, marginBottom: "20px", borderBottom: "1px solid #f1f5f9", paddingBottom: "14px", margin: "0 0 20px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <User size={16} color="#3b82f6" /> Personal Details
+          </h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px" }}>
+            {[
+              { label: "Full Name", field: "name", type: "text", icon: <User size={13} />, readOnly: false },
+              { label: "Email Address", field: "email", type: "email", icon: <Mail size={13} />, readOnly: true },
+              { label: "Phone Number", field: "phone", type: "tel", icon: <Phone size={13} />, readOnly: true },
+              { label: "Age", field: "age", type: "number", icon: <Calendar size={13} />, readOnly: false },
+            ].map(({ label, field, type, icon, readOnly }) => (
+              <div key={field}>
+                <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "6px" }}>
+                  {icon} {label} {readOnly && <span style={{ fontSize: "11px", color: "#94a3b8" }}>(locked)</span>}
+                </label>
+                <input type={type} min={type === "number" ? 0 : undefined} max={type === "number" ? 120 : undefined}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: editing && !readOnly ? "1px solid #3b82f6" : "1px solid #e2e8f0", background: editing && !readOnly ? "white" : "#f8fafc", boxSizing: "border-box", fontSize: "14px", color: readOnly ? "#94a3b8" : "#1e293b" }}
+                  value={(form as any)[field]}
+                  onChange={e => change(field, type === "number" ? parseInt(e.target.value) || 0 : e.target.value)}
+                  readOnly={!editing || readOnly}
+                />
+              </div>
+            ))}
+            <div>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "6px" }}>
+                <User size={13} /> Gender
+              </label>
+              <select style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: editing ? "1px solid #3b82f6" : "1px solid #e2e8f0", background: editing ? "white" : "#f8fafc", boxSizing: "border-box", fontSize: "14px" }}
+                value={form.gender} onChange={e => change("gender", e.target.value)} disabled={!editing}>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="pf-content">
+        {/* ═══════════════════════ FAMILY MEMBERS ═══════════════════════ */}
+        <div style={{ background: "white", padding: "28px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", marginBottom: "24px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", borderBottom: "1px solid #f1f5f9", paddingBottom: "14px" }}>
+            <h3 style={{ fontSize: "16px", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+              <Users size={16} color="#3b82f6" /> Family Members
+              <span style={{ fontSize: "12px", background: "#eff6ff", color: "#3b82f6", padding: "2px 8px", borderRadius: "10px" }}>{family.length}</span>
+            </h3>
+            <button onClick={() => setShowAdd(true)}
+              style={{ background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "white", border: "none", padding: "9px 16px", borderRadius: "8px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, fontSize: "14px" }}>
+              <PlusCircle size={15} /> Add Member
+            </button>
+          </div>
 
-          {activeTab === "personal" && (
-            <div className="pf-section">
-              <h3 className="pf-section-title">Personal Information</h3>
-              <div className="pf-grid">
-                <InputField icon={User} label="First Name" field="firstName" />
-                <InputField icon={User} label="Last Name" field="lastName" />
-                <InputField icon={Mail} label="Email Address" field="email" type="email" />
-                <InputField icon={Phone} label="Phone Number" field="phone" />
-                <InputField icon={Calendar} label="Date of Birth" field="dob" type="date" />
-                <InputField icon={User} label="Gender" field="gender" options={["Male", "Female", "Other"]} />
-                <div className="pf-field pf-field-full">
-                  <label className="pf-label"><MapPin size={14} /> Address</label>
-                  <input
-                    type="text"
-                    className={`pf-input${editing ? " pf-input-edit" : ""}`}
-                    value={form.address}
-                    onChange={e => change("address", e.target.value)}
-                    readOnly={!editing}
-                  />
-                </div>
-              </div>
+          <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "10px", padding: "12px 16px", fontSize: "13px", color: "#1e40af", marginBottom: "18px" }}>
+            ℹ️ Each family member has their own medical identity used when booking appointments. Visit history is kept separate per member.
+          </div>
+
+          {familyLoading ? (
+            <p style={{ textAlign: "center", color: "#94a3b8", padding: "20px" }}>Loading...</p>
+          ) : family.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "36px", color: "#94a3b8" }}>
+              <Users size={36} style={{ marginBottom: "10px", opacity: 0.4 }} />
+              <p style={{ margin: 0, fontWeight: 500 }}>No family members added yet</p>
+              <p style={{ margin: "4px 0 0", fontSize: "13px" }}>Click "Add Member" to get started</p>
             </div>
-          )}
-
-          {activeTab === "medical" && (
-            <div className="pf-section">
-              <h3 className="pf-section-title">Medical Information</h3>
-              <div className="pf-med-cards">
-                {[
-                  { icon: Droplets, label: "Blood Group", value: form.bloodGroup, color: "#ef4444" },
-                  { icon: User, label: "Height (cm)", value: form.height, color: "#3b82f6" },
-                  { icon: User, label: "Weight (kg)", value: form.weight, color: "#10b981" },
-                ].map(({ icon: Icon, label, value, color }) => (
-                  <div className="pf-med-card" key={label}>
-                    <div className="pf-med-icon" style={{ background: `${color}18`, color }}>
-                      <Icon size={22} />
-                    </div>
-                    <p className="pf-med-label">{label}</p>
-                    <p className="pf-med-value">{value}</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {family.map((member, i) => (
+                <div key={member._id} style={{
+                  display: "flex", alignItems: "center", gap: "14px",
+                  padding: "14px 16px", borderRadius: "10px",
+                  border: "1px solid #f1f5f9",
+                  background: member.created_by === "self" ? "#f8faff" : "white"
+                }}>
+                  {/* Avatar */}
+                  <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: avatarColors[i % avatarColors.length] + "20", color: avatarColors[i % avatarColors.length], display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "16px", flexShrink: 0 }}>
+                    {getInitials(member.name)}
                   </div>
-                ))}
-              </div>
-              <div className="pf-grid">
-                <div className="pf-field pf-field-full">
-                  <label className="pf-label"><AlertCircle size={14} /> Known Allergies</label>
-                  <input
-                    type="text"
-                    className={`pf-input${editing ? " pf-input-edit" : ""}`}
-                    value={form.allergies}
-                    onChange={e => change("allergies", e.target.value)}
-                    readOnly={!editing}
-                  />
-                </div>
-                <div className="pf-field pf-field-full">
-                  <label className="pf-label"><Heart size={14} /> Chronic Conditions</label>
-                  <input
-                    type="text"
-                    className={`pf-input${editing ? " pf-input-edit" : ""}`}
-                    value={form.chronicConditions}
-                    onChange={e => change("chronicConditions", e.target.value)}
-                    readOnly={!editing}
-                  />
-                </div>
-                <div className="pf-field pf-field-full">
-                  <label className="pf-label"><Phone size={14} /> Emergency Contact</label>
-                  <input
-                    type="text"
-                    className={`pf-input${editing ? " pf-input-edit" : ""}`}
-                    value={form.emergencyContact}
-                    onChange={e => change("emergencyContact", e.target.value)}
-                    readOnly={!editing}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "security" && (
-            <div className="pf-section">
-              <h3 className="pf-section-title">Security Settings</h3>
-              <div className="pf-security-items">
-                {[
-                  { label: "Change Password", desc: "Update your login password regularly", action: "Update" },
-                  { label: "Two-Factor Authentication", desc: "Add an extra layer of security", action: "Enable" },
-                  { label: "Login History", desc: "View your recent login sessions", action: "View" },
-                  { label: "Delete Account", desc: "Permanently delete your account", action: "Delete", danger: true },
-                ].map(({ label, desc, action, danger }) => (
-                  <div className={`pf-security-item${danger ? " pf-security-danger" : ""}`} key={label}>
-                    <div>
-                      <p className="pf-sec-label">{label}</p>
-                      <p className="pf-sec-desc">{desc}</p>
-                    </div>
-                    <button className={`pf-sec-btn${danger ? " pf-sec-btn-danger" : ""}`}>
-                      {action}
-                    </button>
+                  {/* Info */}
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontWeight: 600, color: "#1e293b", fontSize: "15px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px" }}>
+                      {member.name}
+                      {member.created_by === "self" ? (
+                        <span style={{ fontSize: "11px", background: "#dcfce7", color: "#16a34a", padding: "2px 7px", borderRadius: "10px", fontWeight: 600 }}>You (Primary)</span>
+                      ) : member.relation ? (
+                        <span style={{ fontSize: "11px", background: "#eff6ff", color: "#3b82f6", padding: "2px 7px", borderRadius: "10px", fontWeight: 600 }}>{member.relation}</span>
+                      ) : (
+                        <span style={{ fontSize: "11px", background: "#f3f4f6", color: "#6b7280", padding: "2px 7px", borderRadius: "10px", fontWeight: 600 }}>Family</span>
+                      )}
+                    </p>
+                    <p style={{ margin: "3px 0 0", fontSize: "13px", color: "#64748b" }}>
+                      📞 {member.phone}{member.gender ? ` • ${member.gender}` : ""}
+                    </p>
                   </div>
-                ))}
-              </div>
+                  {/* Actions — only for family members */}
+                  {member.created_by !== "self" && (
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button title="Edit member" onClick={() => setEditMember(member)}
+                        style={{ background: "#eff6ff", border: "none", borderRadius: "8px", padding: "8px", cursor: "pointer", color: "#3b82f6", display: "flex" }}>
+                        <Pencil size={15} />
+                      </button>
+                      <button title="Remove member" onClick={() => setDeleteMember(member)}
+                        style={{ background: "#fee2e2", border: "none", borderRadius: "8px", padding: "8px", cursor: "pointer", color: "#ef4444", display: "flex" }}>
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
+        </div>
 
+        {/* ═══════════════════════ DANGER ZONE ═══════════════════════ */}
+        <div style={{ background: "white", padding: "28px", borderRadius: "16px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)", border: "1px solid #fee2e2" }}>
+          <h3 style={{ fontSize: "16px", fontWeight: 700, margin: "0 0 6px", color: "#b91c1c", display: "flex", alignItems: "center", gap: "8px" }}>
+            <AlertCircle size={16} /> Danger Zone
+          </h3>
+          <p style={{ margin: "0 0 20px", fontSize: "13px", color: "#64748b" }}>
+            Actions below are permanent and cannot be undone.
+          </p>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", background: "#fef2f2", borderRadius: "10px", border: "1px solid #fecaca" }}>
+            <div>
+              <p style={{ margin: 0, fontWeight: 600, color: "#1e293b", fontSize: "14px" }}>Delete My Account</p>
+              <p style={{ margin: "3px 0 0", fontSize: "12px", color: "#64748b" }}>Permanently removes your login access and associated data.</p>
+            </div>
+            <button onClick={() => setShowDeleteAccount(true)}
+              style={{ background: "#ef4444", color: "white", border: "none", padding: "10px 18px", borderRadius: "8px", cursor: "pointer", fontWeight: 600, fontSize: "14px", display: "flex", alignItems: "center", gap: "7px", whiteSpace: "nowrap" }}>
+              <LogOut size={15} /> Delete Account
+            </button>
+          </div>
         </div>
       </div>
     </PatientLayout>

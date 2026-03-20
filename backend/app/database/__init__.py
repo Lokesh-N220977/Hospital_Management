@@ -5,6 +5,9 @@ from .collections import (
     doctor_schedules_collection,
     doctor_slots_collection,
     doctor_leaves_collection,
-    visit_history_collection
+    visit_history_collection,
+    patients_collection,
+    prescriptions_collection,
+    otp_collection
 )
 from .connection import client, db

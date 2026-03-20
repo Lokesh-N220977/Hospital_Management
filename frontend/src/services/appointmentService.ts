@@ -11,3 +11,9 @@ export const cancelAppointment = (id: string, reason: string) =>
 
 export const getAvailableSlots = (doctorId: string, date: string) =>
     request(`/availability/${doctorId}/${date}`);
+
+export const getDoctorAppointments = () => 
+    request("/appointments/doctor/me");
+
+export const updateAppointmentStatus = (id: string, status: string) =>
+    request(`/appointments/${id}/status?status=${status}`, { method: "PATCH" });

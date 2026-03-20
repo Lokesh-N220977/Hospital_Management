@@ -1,17 +1,45 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Search, Plus, Filter, Edit2, Eye, Trash2, Mail, Phone, MapPin } from "lucide-react"
+import { Search, Plus, Filter, Edit2, Eye, Trash2, Mail, Phone, MapPin, Loader2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { getAllDoctors } from "../../services/adminService"
 
 function Doctors() {
     const navigate = useNavigate()
-    const doctorsList = [
-        { id: "DOC-2041", name: "Dr. Sarah Johnson", specialty: "Cardiology", email: "sarah.j@medicpulse.com", phone: "+1 234 567 8901", status: "active", patients: 142, experience: "12 Yrs" },
-        { id: "DOC-2042", name: "Dr. Robert Chen", specialty: "Neurology", email: "r.chen@medicpulse.com", phone: "+1 234 567 8902", status: "active", patients: 85, experience: "8 Yrs" },
-        { id: "DOC-2043", name: "Dr. Emily Smith", specialty: "Pediatrics", email: "e.smith@medicpulse.com", phone: "+1 234 567 8903", status: "inactive", patients: 210, experience: "5 Yrs" },
-        { id: "DOC-2044", name: "Dr. Michael Lee", specialty: "Orthopedics", email: "m.lee@medicpulse.com", phone: "+1 234 567 8904", status: "active", patients: 320, experience: "15 Yrs" },
-        { id: "DOC-2045", name: "Dr. Jessica Taylor", specialty: "Dermatology", email: "j.taylor@medicpulse.com", phone: "+1 234 567 8905", status: "pending", patients: 56, experience: "6 Yrs" },
-        { id: "DOC-2046", name: "Dr. William Davis", specialty: "General Medicine", email: "w.davis@medicpulse.com", phone: "+1 234 567 8906", status: "active", patients: 180, experience: "10 Yrs" },
-    ]
+    const [doctors, setDoctors] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    const [searchTerm, setSearchTerm] = useState("")
+    const [page, setPage] = useState(1)
+
+    const fetchDoctors = async (search: string, p: number) => {
+        setLoading(true)
+        try {
+            const data = await getAllDoctors(search, p)
+            setDoctors(Array.isArray(data) ? data : [])
+        } catch (err) {
+            console.error("Failed to fetch doctors", err)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            fetchDoctors(searchTerm, page)
+        }, 300)
+        return () => clearTimeout(timeoutId)
+    }, [searchTerm, page])
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+                    <Loader2 className="animate-spin" size={48} color="#3b82f6" />
+                </div>
+            </AdminLayout>
+        )
+    }
 
     return (
         <AdminLayout>
@@ -21,7 +49,7 @@ function Doctors() {
                         <h1 className="ad-page-title">Manage Doctors</h1>
                         <p className="ad-page-sub">View, edit, and manage all healthcare professionals on the platform.</p>
                     </div>
-                    <button className="ad-btn-duo" onClick={() => navigate("/admin/doctors/add")}>
+                    <button className="ad-btn-duo" onClick={() => navigate("/admin/add-doctor")}>
                         <Plus size={18} />
                         <span>Add New Doctor</span>
                     </button>
@@ -31,7 +59,15 @@ function Doctors() {
                     <div className="ad-list-header">
                         <div className="ad-search-bar">
                             <Search size={18} color="#94a3b8" />
-                            <input type="text" placeholder="Search doctors by name, ID or specialty..." />
+                            <input 
+                                type="text" 
+                                placeholder="Search doctors by name, ID or specialty..." 
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setPage(1); // Reset to first page on search
+                                }}
+                            />
                         </div>
                         <div className="ad-filter-bar">
                             <div style={{ display: 'flex', gap: '8px' }}>
@@ -66,8 +102,8 @@ function Doctors() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {doctorsList.map((doc, i) => (
-                                    <tr key={i}>
+                                {doctors.map((doc, i) => (
+                                    <tr key={doc._id || i}>
                                         <td>
                                             <div className="ad-user-cell">
                                                 <div className="ad-avatar" style={{
@@ -76,11 +112,11 @@ function Doctors() {
                                                     height: '40px',
                                                     fontSize: '0.9rem'
                                                 }}>
-                                                    {doc.name.replace('Dr. ', '').charAt(0)}
+                                                    {(doc.name || "D").replace('Dr. ', '').charAt(0)}
                                                 </div>
                                                 <div className="ad-user-info">
                                                     <span className="ad-user-name" style={{ fontSize: '0.95rem' }}>{doc.name}</span>
-                                                    <span className="ad-user-sub" style={{ fontWeight: 600, color: '#3b82f6' }}>{doc.specialty}</span>
+                                                    <span className="ad-user-sub" style={{ fontWeight: 600, color: '#3b82f6' }}>{doc.specialization || doc.specialty || "General"}</span>
                                                 </div>
                                             </div>
                                         </td>
@@ -90,24 +126,24 @@ function Doctors() {
                                                     <Mail size={12} /> {doc.email}
                                                 </div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
-                                                    <Phone size={12} /> {doc.phone}
+                                                    <Phone size={12} /> {doc.phone || "N/A"}
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span className="ad-user-name" style={{ fontSize: '0.85rem' }}>{doc.experience}</span>
+                                            <span className="ad-user-name" style={{ fontSize: '0.85rem' }}>{doc.experience ? `${doc.experience} Yrs` : "N/A"}</span>
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                <span className="ad-user-name" style={{ color: '#1e293b' }}>{doc.patients}</span>
+                                                <span className="ad-user-name" style={{ color: '#1e293b' }}>{doc.patients || 0}</span>
                                                 <div style={{ width: '60px', height: '4px', background: '#f1f5f9', borderRadius: '2px', marginTop: '4px' }}>
-                                                    <div style={{ width: `${Math.min(100, (doc.patients / 400) * 100)}%`, height: '100%', background: '#3b82f6', borderRadius: '2px' }}></div>
+                                                    <div style={{ width: `${Math.min(100, ((doc.patients || 0) / 400) * 100)}%`, height: '100%', background: '#3b82f6', borderRadius: '2px' }}></div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <span className={`ad-status ad-status--${doc.status}`}>
-                                                {doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+                                            <span className={`ad-status ad-status--${doc.status || 'active'}`}>
+                                                {(doc.status || 'active').charAt(0).toUpperCase() + (doc.status || 'active').slice(1)}
                                             </span>
                                         </td>
                                         <td>
@@ -124,7 +160,7 @@ function Doctors() {
                     </div>
 
                     <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9' }}>
-                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing 6 of 48 doctors</span>
+                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {doctors.length} doctors total</span>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#fff', fontSize: '0.8rem', cursor: 'pointer' }}>Previous</button>
                             <button style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #e2e8f0', background: '#3b82f6', color: '#fff', fontSize: '0.8rem', cursor: 'pointer' }}>1</button>

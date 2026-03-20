@@ -29,6 +29,8 @@ interface PatientSidebarProps {
 
 const PatientSidebar = ({ mobileOpen = false, onClose }: PatientSidebarProps) => {
   const navigate = useNavigate()
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const initials = (user.name || "U").split(" ").map((n: string) => n[0]).join("").toUpperCase();
 
   const handleLogout = () => {
     navigate("/login")
@@ -56,11 +58,11 @@ const PatientSidebar = ({ mobileOpen = false, onClose }: PatientSidebarProps) =>
         {/* User Avatar */}
         <div className="ps-user">
           <div className="ps-avatar">
-            <span>JD</span>
+            <span>{ initials }</span>
             <span className="ps-online-dot" />
           </div>
           <div className="ps-user-info">
-            <p className="ps-user-name">John Doe</p>
+            <p className="ps-user-name">{ user.name || "User" }</p>
             <p className="ps-user-role">Patient</p>
           </div>
         </div>
