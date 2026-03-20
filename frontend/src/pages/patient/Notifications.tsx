@@ -193,4 +193,3 @@ function Notifications() {
 }
 
 export default Notifications
-export default function Notifications() { return <div>Notifications</div>; }
