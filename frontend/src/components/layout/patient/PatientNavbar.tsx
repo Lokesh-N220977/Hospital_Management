@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react"
-import { Bell, Menu, ChevronDown, Search, X, User, LogOut, Settings } from "lucide-react"
+import { Menu, ChevronDown, User, LogOut, Settings } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
+import NotificationDropdown from "../../ui/NotificationDropdown"
 
 const pageTitles: Record<string, string> = {
   "/patient/dashboard": "Dashboard",
@@ -21,7 +22,6 @@ const PatientNavbar = ({ onMenuClick }: PatientNavbarProps) => {
   const navigate = useNavigate()
   const title = pageTitles[location.pathname] || "Patient Portal"
   const [showDropdown, setShowDropdown] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -53,27 +53,7 @@ const PatientNavbar = ({ onMenuClick }: PatientNavbarProps) => {
       </div>
 
       <div className="pn-right">
-        <div className="pn-search pn-search-desktop">
-          <Search size={16} />
-          <input type="text" placeholder="Search..." className="pn-search-input" />
-        </div>
-
-        <button
-          className="pn-icon-btn pn-search-mobile-btn"
-          onClick={() => setShowSearch(s => !s)}
-          aria-label="Search"
-        >
-          {showSearch ? <X size={20} /> : <Search size={20} />}
-        </button>
-
-        <button
-          className="pn-icon-btn pn-bell"
-          onClick={() => navigate("/patient/notifications")}
-          aria-label="Notifications"
-        >
-          <Bell size={20} />
-          <span className="pn-bell-dot">3</span>
-        </button>
+        <NotificationDropdown />
 
         <div
           className="pn-profile"
@@ -116,12 +96,6 @@ const PatientNavbar = ({ onMenuClick }: PatientNavbarProps) => {
         </div>
       </div>
 
-      {showSearch && (
-        <div className="pn-mobile-search">
-          <Search size={16} />
-          <input type="text" placeholder="Search..." className="pn-search-input" autoFocus />
-        </div>
-      )}
     </header>
   )
 }

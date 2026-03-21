@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PublicNavbar from '../../components/layout/public/PublicNavbar';
 import PublicFooter from '../../components/layout/public/PublicFooter';
@@ -8,6 +8,9 @@ import {
     FaStar, FaCalendarAlt, FaUserCheck, FaShieldAlt, FaClock,
     FaArrowRight, FaUsers, FaHospital, FaHeadset, FaBriefcase
 } from 'react-icons/fa';
+import { getPublicStats, getAllDoctors } from '../../services/doctorService';
+
+const SERVER_URL = "http://localhost:8000";
 
 // Removed animated counter hook and components for static display
 
@@ -24,6 +27,36 @@ const HeroParticles: React.FC = () => (
 );
 
 const Home: React.FC = () => {
+    const [stats, setStats] = useState({
+        total_doctors: 0,
+        total_patients: 0,
+        total_appointments: 0
+    });
+    const [specialists, setSpecialists] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const statsData = await getPublicStats();
+                if (statsData) setStats(statsData);
+
+                const doctorsData = await getAllDoctors();
+                if (doctorsData) {
+                    // Sort by experience (descending) and take top 3
+                    const topSpecialists = [...doctorsData].sort((a, b) => {
+                        const expA = parseInt(String(a.experience)) || 0;
+                        const expB = parseInt(String(b.experience)) || 0;
+                        return expB - expA;
+                    }).slice(0, 3);
+                    
+                    setSpecialists(topSpecialists);
+                }
+            } catch (error) {
+                console.error("Error fetching home page data:", error);
+            }
+        };
+        fetchData();
+    }, []);
 
     const whyChooseUs = [
         { icon: <FaCalendarAlt />, title: "Easy Appointment Booking",  desc: "Schedule your visits in just a few clicks. Reschedule or cancel anytime without any hassle." },
@@ -43,30 +76,6 @@ const Home: React.FC = () => {
         { text: "Booking an appointment for my mother was incredibly easy. We didn't have to wait in long queues, and the doctor was very professional.", author: "Jane Doe",    role: "Patient", initials: "JD", color: "#007bff" },
         { text: "The app is so user-friendly! I was able to find a great dermatologist near me and schedule a visit the very next day. Highly recommended.", author: "Mark Smith",  role: "Patient", initials: "MS", color: "#dc3545" },
         { text: "Having all my medical records in one secure place is a game changer. The 24/7 access makes managing my health so much simpler.",           author: "Robert Brown", role: "Patient", initials: "RB", color: "#28a745" },
-    ];
-
-    const specialists = [
-        {
-            name: "Dr. Sarah Jenkins",
-            specialization: "Cardiologist",
-            image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=500&h=600&q=80",
-            experience: "12+ Years Experience",
-            rating: "4.9 (200 Reviews)"
-        },
-        {
-            name: "Dr. Michael Lee",
-            specialization: "Dermatologist",
-            image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=500&h=600&q=80",
-            experience: "8+ Years Experience",
-            rating: "4.8 (95 Reviews)"
-        },
-        {
-            name: "Dr. Emily Chen",
-            specialization: "Dentist",
-            image: "https://images.unsplash.com/photo-1559839734-2b71f1536780?auto=format&fit=crop&w=500&h=600&q=80",
-            experience: "10+ Years Experience",
-            rating: "4.9 (150 Reviews)"
-        },
     ];
 
     return (
@@ -98,18 +107,18 @@ const Home: React.FC = () => {
                     <div className="trust-grid">
                         <div className="trust-item no-anim">
                             <div className="trust-icon"><FaUsers /></div>
-                            <h3>10,000+</h3>
+                            <h3>{stats.total_patients > 0 ? `${stats.total_patients.toLocaleString()}+` : "1,000+"}</h3>
                             <p>Patients Served</p>
                         </div>
                         <div className="trust-item no-anim">
                             <div className="trust-icon"><FaUserCheck /></div>
-                            <h3>500+</h3>
+                            <h3>{stats.total_doctors > 0 ? `${stats.total_doctors}+` : "50+"}</h3>
                             <p>Verified Doctors</p>
                         </div>
                         <div className="trust-item no-anim">
                             <div className="trust-icon"><FaHospital /></div>
-                            <h3>50+</h3>
-                            <p>Partner Hospitals</p>
+                            <h3>{stats.total_appointments > 0 ? `${stats.total_appointments.toLocaleString()}+` : "500+"}</h3>
+                            <p>Appointments Completed</p>
                         </div>
                         <div className="trust-item no-anim">
                             <div className="trust-icon"><FaHeadset /></div>
@@ -143,11 +152,17 @@ const Home: React.FC = () => {
                     <h2 className="section-title">Meet Our <span className="blue">Specialists</span></h2>
                     <p className="section-subtitle">Consult with our top-rated specialists who are dedicated to your overall well-being.</p>
                     <div className="specialists-grid-v">
-                        {specialists.map((s, idx) => (
+                        {specialists.length > 0 ? specialists.map((s, idx) => (
                             <div key={idx} className="specialist-card-v">
                                 {/* Top part: Image with name overlay */}
                                 <div className="sc-img">
-                                    <img src={s.image} alt={s.name} />
+                                    <img 
+                                        src={s.profile_image_url 
+                                            ? (s.profile_image_url.startsWith('http') ? s.profile_image_url : `${SERVER_URL}${s.profile_image_url}`)
+                                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=random&size=500`
+                                        } 
+                                        alt={s.name} 
+                                    />
                                     <div className="sc-img-badge">{s.specialization}</div>
                                     <div className="sc-img-overlay">
                                         <div className="sc-name-row">
@@ -161,10 +176,10 @@ const Home: React.FC = () => {
                                 <div className="sc-body">
                                     <div className="sc-meta">
                                         <span className="sc-meta-item">
-                                            <FaBriefcase /> {s.experience}
+                                            <FaBriefcase /> {String(s.experience).split(' ')[0]} Years
                                         </span>
                                         <span className="sc-meta-item">
-                                            <FaStar className="sc-star" /> {s.rating.split(' ')[0]}
+                                            <FaStar className="sc-star" /> 4.9
                                         </span>
                                     </div>
                                     <Link to="/login" className="sc-btn">
@@ -172,7 +187,9 @@ const Home: React.FC = () => {
                                     </Link>
                                 </div>
                             </div>
-                        ))}
+                        )) : (
+                            <div className="loading-placeholder">Loading specialists...</div>
+                        )}
                     </div>
                     <div className="view-all-home">
                         <Link to="/doctors" className="btn-view-all">View All Doctors</Link>

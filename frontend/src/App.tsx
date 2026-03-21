@@ -46,7 +46,9 @@ import AdminAddAppointment from "./pages/admin/AddAppointment"
 import AdminAppointments from "./pages/admin/Appointments"
 import AdminSettings from "./pages/admin/Settings"
 import AdminSchedules from "./pages/admin/DoctorSchedules"
+import AdminEditDoctor from "./pages/admin/EditDoctor"
 const AdminLeaves = lazy(() => import("./pages/admin/LeaveRequests"))
+import AdminNotifications from "./pages/admin/Notifications"
 
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
@@ -106,6 +108,7 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/doctors" element={<AdminDoctors />} />
               <Route path="/admin/add-doctor" element={<AdminAddDoctor />} />
+              <Route path="/admin/edit-doctor/:id" element={<AdminEditDoctor />} />
               <Route path="/admin/patients" element={<AdminPatients />} />
               <Route path="/admin/add-patient" element={<AdminAddPatient />} />
               <Route path="/admin/appointments" element={<AdminAppointments />} />
@@ -114,6 +117,7 @@ function App() {
               <Route path="/admin/settings" element={<AdminSettings />} />
               <Route path="/admin/schedules" element={<AdminSchedules />} />
               <Route path="/admin/leaves" element={<Suspense fallback={<div>Loading...</div>}><AdminLeaves /></Suspense>} />
+              <Route path="/admin/notifications" element={<AdminNotifications />} />
             </Route>
           </Route>
 

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DoctorLayout from '../../components/layout/doctor/DoctorLayout';
-import { FaLock, FaKey, FaShieldAlt, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { FaLock, FaKey, FaShieldAlt, FaCheckCircle, FaExclamationTriangle, FaPlusSquare } from 'react-icons/fa';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import DoctorLayout from '../../components/layout/doctor/DoctorLayout';
 
 const ChangePassword: React.FC = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { logout } = useAuth();
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,15 +35,13 @@ const ChangePassword: React.FC = () => {
                 old_password: oldPassword,
                 new_password: newPassword
             });
+            
+            // Clear session and logout
             setSuccess(true);
-            // After success, we might want to logout or refresh user state
             setTimeout(() => {
-                // If they were forced to change, they should probably log in again with new password
-                // or we just redirect to dashboard if we updated the token/state.
-                // For safety, let's just go to dashboard.
-                navigate('/doctor/dashboard');
-                window.location.reload(); // Refresh to update user state globally
-            }, 2000);
+                logout();
+                navigate('/login');
+            }, 2500);
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to update password');
         } finally {
@@ -53,111 +51,230 @@ const ChangePassword: React.FC = () => {
 
     return (
         <DoctorLayout>
-            <div className="pd-page" style={{ maxWidth: '600px', margin: '0 auto' }}>
-                <div className="pd-header">
-                    <h1 className="pd-page-title">Change Password</h1>
-                    <p className="pd-page-sub">Secure your account by updating your password.</p>
-                </div>
+            <div className="force-change-overlay" style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(8px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '20px',
+                zIndex: 1000,
+                animation: 'fadeIn 0.4s ease-out'
+            }}>
+                <div className="cp-card" style={{ 
+                    maxWidth: '480px', 
+                    width: '100%', 
+                    background: '#fff', 
+                    borderRadius: '24px',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+                    padding: success ? '60px 40px' : '40px',
+                    border: '1px solid rgba(226, 232, 240, 0.8)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Decorative Top Bar */}
+                    <div style={{ 
+                        position: 'absolute', 
+                        top: 0, 
+                        left: 0, 
+                        right: 0, 
+                        height: '6px', 
+                        background: 'linear-gradient(90deg, #3b82f6, #6366f1)' 
+                    }} />
 
-                <div className="pd-card">
+                    <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            gap: '12px', 
+                            color: '#3b82f6', 
+                            marginBottom: '20px',
+                            background: '#eff6ff',
+                            width: 'fit-content',
+                            margin: '0 auto 20px',
+                            padding: '10px 20px',
+                            borderRadius: '12px'
+                        }}>
+                            <FaPlusSquare size={28} />
+                            <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1e3a8a', letterSpacing: '-0.5px' }}>MedicPulse</span>
+                        </div>
+                        <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: '#0f172a', marginBottom: '10px', letterSpacing: '-0.025em' }}>
+                            {success ? 'Account Secured' : 'Update Password'}
+                        </h1>
+                        <p style={{ color: '#64748b', fontSize: '1rem', lineHeight: 1.5 }}>
+                            {success ? 'Your security credentials have been updated.' : 'For your protection, please replace your temporary password.'}
+                        </p>
+                    </div>
+
                     {success ? (
-                        <div style={{ textAlign: 'center', padding: '40px' }}>
+                        <div style={{ textAlign: 'center' }}>
                             <div style={{ 
-                                width: '70px', height: '70px', borderRadius: '50%', 
-                                background: '#f0fdf4', color: '#16a34a', 
+                                width: '90px', height: '90px', borderRadius: '50%', 
+                                background: '#ecfdf5', color: '#10b981', 
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                margin: '0 auto 20px'
+                                margin: '0 auto 24px',
+                                animation: 'scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
                             }}>
-                                <FaCheckCircle size={40} />
+                                <FaCheckCircle size={48} />
                             </div>
-                            <h2 style={{ marginBottom: '10px' }}>Password Updated!</h2>
-                            <p style={{ color: '#64748b' }}>Your password has been changed successfully. Redirecting you to your dashboard...</p>
+                            <p style={{ color: '#475569', fontSize: '1.1rem', fontWeight: 500 }}>Redirecting you to log in with your new credentials...</p>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="ad-form">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff9eb', color: '#d97706', padding: '15px', borderRadius: '8px', marginBottom: '25px', border: '1px solid #fde68a' }}>
-                                <FaShieldAlt size={20} />
-                                <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
-                                    If this is your first time logging in, you must change the temporary password provided by the administrator.
-                                </span>
+                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'flex-start', 
+                                gap: '12px', 
+                                background: '#fffbeb', 
+                                color: '#92400e', 
+                                padding: '16px', 
+                                borderRadius: '14px', 
+                                border: '1px solid #fde68a', 
+                                fontSize: '0.9rem',
+                                lineHeight: 1.5
+                            }}>
+                                <FaShieldAlt size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+                                <span><strong>Security Notice:</strong> Your administrator has requested a password update to ensure your medical records remain private.</span>
                             </div>
 
                             {error && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fef2f2', color: '#ef4444', padding: '12px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #fee2e2' }}>
-                                    <FaExclamationTriangle />
-                                    <span style={{ fontSize: '0.9rem' }}>{error}</span>
+                                <div style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '10px', 
+                                    background: '#fef2f2', 
+                                    color: '#b91c1c', 
+                                    padding: '14px', 
+                                    borderRadius: '12px', 
+                                    border: '1px solid #fee2e2', 
+                                    fontSize: '0.875rem' 
+                                }}>
+                                    <FaExclamationTriangle style={{ flexShrink: 0 }} />
+                                    <span>{error}</span>
                                 </div>
                             )}
 
-                            <div className="ad-field">
-                                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>
-                                    Old Password
-                                </label>
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '8px', display: 'block' }}>Current Temporary Password</label>
                                 <div style={{ position: 'relative' }}>
-                                    <FaKey style={{ position: 'absolute', left: '12px', top: '14px', color: '#94a3b8' }} />
+                                    <FaKey style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                                     <input
                                         type="password"
-                                        className="ad-input"
-                                        style={{ paddingLeft: '40px' }}
+                                        style={{ 
+                                            width: '100%',
+                                            padding: '14px 14px 14px 48px', 
+                                            borderRadius: '12px', 
+                                            border: '1.5px solid #e2e8f0',
+                                            fontSize: '1rem',
+                                            transition: 'all 0.2s',
+                                            outline: 'none'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                                        onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                                         value={oldPassword}
                                         onChange={(e) => setOldPassword(e.target.value)}
-                                        placeholder="Enter current password"
+                                        placeholder="••••••••"
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <div className="ad-field" style={{ marginTop: '20px' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>
-                                    New Password
-                                </label>
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '8px', display: 'block' }}>New Secure Password</label>
                                 <div style={{ position: 'relative' }}>
-                                    <FaLock style={{ position: 'absolute', left: '12px', top: '14px', color: '#94a3b8' }} />
+                                    <FaLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                                     <input
                                         type="password"
-                                        className="ad-input"
-                                        style={{ paddingLeft: '40px' }}
+                                        style={{ 
+                                            width: '100%',
+                                            padding: '14px 14px 14px 48px', 
+                                            borderRadius: '12px', 
+                                            border: '1.5px solid #e2e8f0',
+                                            fontSize: '1rem',
+                                            transition: 'all 0.2s',
+                                            outline: 'none'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                                        onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
-                                        placeholder="Enter new secure password"
+                                        placeholder="Minimum 6 characters"
                                         required
                                     />
                                 </div>
-                                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '5px' }}>Must be at least 6 characters long.</p>
                             </div>
 
-                            <div className="ad-field" style={{ marginTop: '20px' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: 600, color: '#475569', marginBottom: '8px', display: 'block' }}>
-                                    Confirm New Password
-                                </label>
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '8px', display: 'block' }}>Confirm New Password</label>
                                 <div style={{ position: 'relative' }}>
-                                    <FaLock style={{ position: 'absolute', left: '12px', top: '14px', color: '#94a3b8' }} />
+                                    <FaLock style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                                     <input
                                         type="password"
-                                        className="ad-input"
-                                        style={{ paddingLeft: '40px' }}
+                                        style={{ 
+                                            width: '100%',
+                                            padding: '14px 14px 14px 48px', 
+                                            borderRadius: '12px', 
+                                            border: '1.5px solid #e2e8f0',
+                                            fontSize: '1rem',
+                                            transition: 'all 0.2s',
+                                            outline: 'none'
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+                                        onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        placeholder="Confirm your new password"
+                                        placeholder="Repeat new password"
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <div style={{ marginTop: '30px' }}>
-                                <button 
-                                    type="submit" 
-                                    disabled={loading}
-                                    className="ad-btn-duo"
-                                    style={{ width: '100%', justifyContent: 'center', padding: '12px' }}
-                                >
-                                    {loading ? 'Updating...' : 'Update Password'}
-                                </button>
-                            </div>
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                style={{ 
+                                    width: '100%', 
+                                    padding: '16px', 
+                                    marginTop: '8px',
+                                    borderRadius: '12px',
+                                    background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+                                    color: '#fff',
+                                    fontWeight: 700,
+                                    fontSize: '1rem',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '12px',
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                                }}
+                            >
+                                {loading ? 'Updating Credentials...' : 'Securing Account'}
+                            </button>
                         </form>
                     )}
                 </div>
             </div>
+
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { transform: scale(0.8); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+                .cp-card:hover { transform: translateY(-2px); transition: transform 0.3s ease; }
+            `}</style>
         </DoctorLayout>
     );
 };

@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react"
 import DoctorLayout from "../../components/layout/doctor/DoctorLayout"
 import { Search, XCircle, Clock, Calendar as CalendarIcon, Loader2, Check } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 import { getPortalProfile, getDoctorAppointments, updateAppointmentStatus } from "../../services/doctorService"
 
 function Appointments() {
-  const navigate = useNavigate()
-  const [profile, setProfile] = useState<any>(null)
   const [apptList, setApptList] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<"Today" | "Upcoming" | "History">("Today")
@@ -19,9 +16,8 @@ function Appointments() {
       setLoading(true)
       try {
         const prof = await getPortalProfile()
-        setProfile(prof)
         if (prof && prof.doctor_id) {
-            const data = await getDoctorAppointments(prof.doctor_id)
+            const data = await getDoctorAppointments()
             setApptList(Array.isArray(data) ? data : [])
         }
       } catch (err) {

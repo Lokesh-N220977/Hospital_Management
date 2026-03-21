@@ -1,6 +1,6 @@
 import DoctorLayout from "../../components/layout/doctor/DoctorLayout"
-import { Search, PlusCircle, Download, Calendar, Pill, X, CheckCircle, Clock, Loader2, User } from "lucide-react"
-import { useState, useRef, useEffect } from "react"
+import { Search, PlusCircle, Download, Calendar, Pill, X, CheckCircle, Clock, Loader2, User, FileText, ArrowRight } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useLocation } from "react-router-dom"
 import { 
     getPortalProfile, 
@@ -23,7 +23,6 @@ function Prescriptions() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<any>(null)
 
-  const formRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
 
   const [newPresc, setNewPresc] = useState({
@@ -142,7 +141,7 @@ function Prescriptions() {
             <button
               className="pd-action-btn-primary"
               onClick={() => setShowNewForm(true)}
-              style={{ padding: '12px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+              style={{ padding: '12px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.2)' }}
             >
               <PlusCircle size={20} />
               <span>Issue New Order</span>
@@ -151,74 +150,78 @@ function Prescriptions() {
         </div>
 
         {/* Prescription Cards Grid */}
-        <div className="pd-prescriptions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '24px' }}>
+        <div className="pd-prescriptions-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px', marginTop: '30px' }}>
           {prescList.length === 0 ? (
-            <div className="pd-card" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px', background: '#f8fafc', border: '2px dashed #e2e8f0' }}>
-               <Pill size={48} style={{ margin: '0 auto 16px', color: '#94a3b8' }} />
-               <h3 style={{ fontWeight: 800, color: '#475569' }}>No prescriptions issued yet</h3>
-               <p style={{ color: '#64748b' }}>Start by clicking the "Issue New Order" button.</p>
+            <div className="pd-card" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '80px', background: 'rgba(248, 250, 252, 0.8)', border: '2px dashed #cbd5e1', borderRadius: '24px' }}>
+               <Pill size={64} style={{ margin: '0 auto 16px', color: '#94a3b8', opacity: 0.5 }} />
+               <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#475569' }}>No prescriptions issued yet</h3>
+               <p style={{ color: '#64748b', maxWidth: '400px', margin: '8px auto' }}>Start by clicking the "Issue New Order" button to provide clinical medication guidance to your patients.</p>
             </div>
-          ) : prescList.map((presc) => (
-            <div key={presc.id} className="pd-card pd-presc-card" style={{ 
-              transition: 'all 0.3s ease',
-              border: '1px solid #e2e8f0',
-              overflow: 'hidden'
-            }}>
+          ) : Array.isArray(prescList) && prescList.map((presc) => (
+            <div key={presc.id} className="pd-presc-card">
               <div style={{ 
-                height: '4px', 
+                height: '6px', 
                 background: presc.status === 'Active' ? 'linear-gradient(90deg, #10b981, #3b82f6)' : '#cbd5e1' 
               }} />
               
-              <div style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981' }}>
-                      <User size={20} />
+              <div style={{ padding: '30px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '22px' }}>
+                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                    <div style={{ width: '52px', height: '52px', borderRadius: '16px', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+                      <User size={24} />
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800 }}>{presc.patient_name}</h3>
-                      <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>ID: {presc.patient_id?.substring(0,8)}...</p>
+                      <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#1e293b', letterSpacing: '-0.3px' }}>{presc.patient_name || "Unknown Patient"}</h3>
+                      <p style={{ margin: 0, fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase' }}>Reg ID: {String(presc.patient_id || "").substring(0,8)}</p>
                     </div>
                   </div>
-                  <span style={{ 
-                    fontSize: '0.7rem', 
-                    fontWeight: 800, 
-                    padding: '4px 10px', 
-                    borderRadius: '20px',
-                    background: presc.status === 'Active' ? '#f0fdf4' : '#f1f5f9',
-                    color: presc.status === 'Active' ? '#166534' : '#475569',
-                    textTransform: 'uppercase'
-                  }}>
+                  <span className={`pd-presc-status-badge ${presc.status === 'Active' ? 'active' : 'completed'}`}>
                     {presc.status}
                   </span>
                 </div>
 
-                <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #f1f5f9' }}>
-                  <p style={{ margin: '0 0 8px 0', fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>{presc.medicine} {presc.strength}</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                      <strong style={{ color: '#475569' }}>Dosage:</strong> {presc.dosage}
+                <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '20px', marginBottom: '24px', border: '1.5px solid #f1f5f9' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '12px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
+                      <Pill size={16} />
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                      <strong style={{ color: '#475569' }}>Dur:</strong> {presc.duration}
+                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>{presc.medicine}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', background: '#fff', padding: '4px 10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>{presc.strength}</span>
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dosage Protocol</span>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#475569', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={12} /> {presc.dosage}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Duration</span>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#475569' }}>{presc.duration}</span>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#94a3b8', fontSize: '0.75rem' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#94a3b8', fontSize: '0.8rem', fontWeight: 600 }}>
                      <Calendar size={14} />
                      <span>{presc.date}</span>
                    </div>
-                   <div style={{ display: 'flex', gap: '8px' }}>
-                     <button className="pd-action-btn-secondary" style={{ padding: '6px', borderRadius: '8px' }} onClick={() => handleDownload(presc.id)}>
-                       <Download size={16} />
+                   <div style={{ display: 'flex', gap: '12px' }}>
+                     <button 
+                        className="pd-action-icon-btn" 
+                        title="Download Document"
+                        style={{ width: '40px', height: '40px', borderRadius: '12px', border: '2px solid #f1f5f9' }}
+                        onClick={(e) => { e.stopPropagation(); handleDownload(presc.id); }}
+                     >
+                       <Download size={18} />
                      </button>
                      <button 
                         onClick={() => openViewModal(presc)}
-                        style={{ padding: '6px 16px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                        style={{ padding: '10px 24px', background: '#1e293b', color: 'white', border: 'none', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: '0 8px 15px rgba(30, 41, 59, 0.15)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = '#0f172a'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#1e293b'; }}
                      >
-                       DETAILS
+                       OPEN
                      </button>
                    </div>
                 </div>
@@ -229,123 +232,179 @@ function Prescriptions() {
 
         {/* In-page New Prescription Form */}
         {showNewForm && (
-          <div id="new-prescription-form" className="pd-modal-overlay" style={{ zIndex: 1000 }}>
-            <div className="pd-modal" style={{ maxWidth: '700px', width: '95%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Issue Clinical Prescription</h2>
-                  <p style={{ margin: '4px 0 0 0', color: '#64748b', fontSize: '0.9rem' }}>Fill in medication details for the patient's pharmacological record.</p>
+          <div id="new-prescription-form" className="pd-modal-overlay-premium">
+            <div className="pd-premium-modal">
+              {/* Close Button */}
+              <button 
+                onClick={() => setShowNewForm(false)} 
+                style={{ 
+                  position: 'absolute', top: '30px', right: '30px',
+                  background: '#f8fafc', border: '1.5px solid #f1f5f9', padding: '12px', borderRadius: '18px', cursor: 'pointer', color: '#94a3b8', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.transform = 'rotate(90deg)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.transform = 'rotate(0deg)'; }}
+              >
+                <X size={24} />
+              </button>
+
+              <div style={{ marginBottom: '48px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px' }}>
+                  <div style={{ width: '42px', height: '6px', borderRadius: '10px', background: '#10b981' }}></div>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '2px' }}>Pharmacology Board</span>
                 </div>
-                <button onClick={() => setShowNewForm(false)} style={{ background: '#f1f5f9', border: 'none', padding: '8px', borderRadius: '10px', cursor: 'pointer' }}>
-                  <X size={20} />
-                </button>
+                <h2 style={{ margin: 0, fontSize: '2.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-1.5px', lineHeight: 1.1 }}>Authorize New Prescription</h2>
+                <p style={{ margin: '14px 0 0 0', color: '#64748b', fontSize: '1.1rem', fontWeight: 500 }}>Securely issue digital medication orders directly to the patient's verified history.</p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div className="pd-field" style={{ gridColumn: '1 / -1', position: 'relative' }}>
-                  <label style={{ fontWeight: 700, marginBottom: '8px', display: 'block' }}>Search Patient</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '32px', marginBottom: '40px' }}>
+                {/* Patient Search */}
+                <div style={{ gridColumn: 'span 12', position: 'relative' }}>
+                  <label className="pd-label-premium">
+                    <User size={18} color="#10b981" /> PATIENT RECORD SELECTION
+                  </label>
                   <div style={{ position: 'relative' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                    <Search size={22} style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', color: '#cbd5e1' }} />
                     <input
                       type="text"
-                      className="pd-input"
-                      placeholder="Type patient name..."
-                      style={{ paddingLeft: '48px' }}
+                      className="pd-input-premium"
+                      placeholder="Search patient by full name or registry ID..."
+                      style={{ paddingLeft: '64px' }}
                       value={patientSearch}
                       onChange={(e) => {
                         setPatientSearch(e.target.value)
                         setShowPatientList(true)
                       }}
-                      onFocus={() => setShowPatientList(true)}
                     />
+                    {selectedPatient && !showPatientList && (
+                      <div style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: '#ffffff', padding: '10px 20px', borderRadius: '15px', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 8px 15px rgba(16, 185, 129, 0.2)' }}>
+                        <CheckCircle size={16} /> {selectedPatient.name}
+                      </div>
+                    )}
                   </div>
+                  
                   {showPatientList && (
-                    <div className="pd-card" style={{
-                      position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10,
-                      maxHeight: '200px', overflowY: 'auto', padding: '8px', marginTop: '8px',
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.15)', border: '1px solid #e2e8f0'
+                    <div style={{
+                      position: 'absolute', top: 'calc(100% + 12px)', left: 0, right: 0, zIndex: 100,
+                      maxHeight: '280px', overflowY: 'auto', padding: '16px',
+                      background: 'white', borderRadius: '24px',
+                      boxShadow: '0 30px 60px rgba(15, 23, 42, 0.15)', border: '1px solid #f1f5f9',
+                      scrollbarWidth: 'none'
                     }}>
-                      {patients
-                        .filter(p => !patientSearch || p.name?.toLowerCase().includes(patientSearch.toLowerCase()))
-                        .map((p, i) => (
-                          <div
-                            key={i}
-                            className="pd-break-item"
-                            style={{ padding: '12px', cursor: 'pointer', borderRadius: '8px', marginBottom: '4px' }}
-                            onClick={() => handleSelectPatient(p)}
-                          >
-                            <div style={{ fontWeight: 700 }}>{p.name}</div>
-                            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>ID: {p.id}</div>
-                          </div>
-                        ))
-                      }
-                      {patients.length === 0 && <div style={{ padding: '16px', textAlign: 'center', color: '#94a3b8' }}>No patients found</div>}
+                      {Array.isArray(patients) && patients.length > 0 ? (
+                        patients
+                          .filter(p => !patientSearch || (p.name && p.name.toLowerCase().includes(patientSearch.toLowerCase())))
+                          .map((p, i) => (
+                            <div
+                              key={i}
+                              style={{ padding: '16px 20px', cursor: 'pointer', borderRadius: '16px', marginBottom: '6px', transition: 'all 0.2s', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fcfdfe' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.transform = 'translateX(5px)'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = '#fcfdfe'; e.currentTarget.style.transform = 'translateX(0)'; }}
+                              onClick={() => handleSelectPatient(p)}
+                            >
+                              <div>
+                                <div style={{ fontWeight: 800, color: '#1e293b', fontSize: '1rem' }}>{p.name}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>Registry ID: {p.id}</div>
+                              </div>
+                              <ArrowRight size={18} color="#cbd5e1" />
+                            </div>
+                          ))
+                      ) : (
+                        <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                          <User size={48} style={{ margin: '0 auto 166px', opacity: 0.2 }} />
+                          <p style={{ fontWeight: 600 }}>No patient records found in your primary clinic network.</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
 
-                <div className="pd-field">
-                  <label style={{ fontWeight: 700, marginBottom: '8px', display: 'block' }}>Medicine Name</label>
-                  <input
-                    type="text"
-                    className="pd-input"
-                    placeholder="e.g. Paracetamol"
-                    value={newPresc.medicine}
-                    onChange={(e) => setNewPresc({ ...newPresc, medicine: e.target.value })}
-                  />
+                <div style={{ gridColumn: 'span 8' }}>
+                  <label className="pd-label-premium">MEDICATION NAME</label>
+                  <div style={{ position: 'relative' }}>
+                    <Pill size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#cbd5e1' }} />
+                    <input
+                      type="text"
+                      className="pd-input-premium"
+                      placeholder="Search or enter medicine..."
+                      style={{ paddingLeft: '56px' }}
+                      value={newPresc.medicine}
+                      onChange={(e) => setNewPresc({ ...newPresc, medicine: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <div className="pd-field">
-                  <label style={{ fontWeight: 700, marginBottom: '8px', display: 'block' }}>Strength/Pack</label>
+                
+                <div style={{ gridColumn: 'span 4' }}>
+                  <label className="pd-label-premium">STRENGTH</label>
                   <input
                     type="text"
-                    className="pd-input"
-                    placeholder="e.g. 500mg"
+                    className="pd-input-premium"
+                    placeholder="500mg, 10ml, etc."
                     value={newPresc.strength}
                     onChange={(e) => setNewPresc({ ...newPresc, strength: e.target.value })}
                   />
                 </div>
-                <div className="pd-field">
-                  <label style={{ fontWeight: 700, marginBottom: '8px', display: 'block' }}>Dosage (e.g. 1-0-1)</label>
-                  <input
-                    type="text"
-                    className="pd-input"
-                    placeholder="Morning-Noon-Night"
-                    value={newPresc.dosage}
-                    onChange={(e) => setNewPresc({ ...newPresc, dosage: e.target.value })}
-                  />
+
+                <div style={{ gridColumn: 'span 6' }}>
+                  <label className="pd-label-premium">DOSAGE PROTOCOL</label>
+                  <div style={{ position: 'relative' }}>
+                    <Clock size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: '#cbd5e1' }} />
+                    <input
+                      type="text"
+                      className="pd-input-premium"
+                      placeholder="e.g. 1-0-1 (Morning, Noon, Night)"
+                      style={{ paddingLeft: '56px' }}
+                      value={newPresc.dosage}
+                      onChange={(e) => setNewPresc({ ...newPresc, dosage: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <div className="pd-field">
-                  <label style={{ fontWeight: 700, marginBottom: '8px', display: 'block' }}>Duration</label>
+
+                <div style={{ gridColumn: 'span 6' }}>
+                  <label className="pd-label-premium">COURSE DURATION</label>
                   <input
                     type="text"
-                    className="pd-input"
-                    placeholder="e.g. 7 Days"
+                    className="pd-input-premium"
+                    placeholder="7 Days, Until Finished, etc."
                     value={newPresc.duration}
                     onChange={(e) => setNewPresc({ ...newPresc, duration: e.target.value })}
                   />
                 </div>
+
+                <div style={{ gridColumn: 'span 12' }}>
+                  <label className="pd-label-premium">CLINICAL ADMINISTRATION INSTRUCTIONS</label>
+                  <textarea
+                    className="pd-input-premium"
+                    placeholder="Provide detailed intake guidance (e.g., 'Take with lukewarm water, exactly 30 mins after meals')..."
+                    style={{ minHeight: "130px", padding: '24px', resize: 'none', lineHeight: 1.6 }}
+                    value={newPresc.instructions}
+                    onChange={(e) => setNewPresc({ ...newPresc, instructions: e.target.value })}
+                  />
+                </div>
               </div>
 
-              <div className="pd-field">
-                <label style={{ fontWeight: 700, marginBottom: '8px', display: 'block' }}>Usage Instructions</label>
-                <textarea
-                  className="pd-textarea"
-                  placeholder="e.g. Take after meals with lukewarm water..."
-                  style={{ minHeight: "100px" }}
-                  value={newPresc.instructions}
-                  onChange={(e) => setNewPresc({ ...newPresc, instructions: e.target.value })}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '32px' }}>
-                <button className="pd-action-btn-secondary" onClick={() => setShowNewForm(false)}>Discard Draft</button>
+              <div style={{ display: 'flex', gap: '20px', justifyContent: 'flex-end', marginTop: '30px' }}>
+                <button 
+                   onClick={() => setShowNewForm(false)} 
+                   style={{ padding: '16px 36px', borderRadius: '18px', background: 'white', border: '2px solid #f1f5f9', color: '#64748b', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
+                   onMouseEnter={(e) => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#fee2e2'; }}
+                   onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; e.currentTarget.style.borderColor = '#f1f5f9'; }}
+                >
+                  Discard Draft
+                </button>
                 <button
-                  className="pd-action-btn-primary"
-                  style={{ minWidth: '180px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
                   onClick={handleAddPrescription}
                   disabled={isSubmitting}
+                  style={{ 
+                    minWidth: '260px', padding: '18px 40px', borderRadius: '20px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', fontWeight: 900, fontSize: '1.05rem', cursor: 'pointer', boxShadow: '0 20px 40px -10px rgba(16, 185, 129, 0.4)', transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)'; e.currentTarget.style.boxShadow = '0 25px 50px -12px rgba(16, 185, 129, 0.5)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = '0 20px 40px -10px rgba(16, 185, 129, 0.4)'; }}
                 >
-                  {isSubmitting ? <Loader2 className="animate-spin" size={18} /> : <span>Digital Sign & Issue</span>}
+                  {isSubmitting ? (
+                    <><Loader2 className="animate-spin" size={22} /> AUTHORIZING...</>
+                  ) : (
+                    <><FileText size={22} /> DIGITAL SIGN & ISSUE</>
+                  )}
                 </button>
               </div>
             </div>
@@ -355,54 +414,78 @@ function Prescriptions() {
 
       {/* View Prescription Modal */}
       {viewPrescModal && selectedPresc && (
-        <div className="pd-modal-overlay">
-          <div className="pd-modal" style={{ maxWidth: '500px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '24px' }}>
+        <div className="pd-modal-overlay-premium">
+          <div className="pd-premium-modal" style={{ maxWidth: '550px', padding: '50px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '32px' }}>
               <div>
-                <h3 style={{ margin: 0, fontWeight: 800 }}>Rx Prescription Record</h3>
-                <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Authorized by Dr. {selectedPresc.doctor_name}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                   <div style={{ width: '32px', height: '4px', borderRadius: '10px', background: '#3b82f6' }}></div>
+                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '1px' }}>Clinical Record</span>
+                </div>
+                <h3 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-1.2px' }}>Digital Prescription</h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: '#64748b', fontWeight: 600 }}>Authorized by Dr. {selectedPresc.doctor_name}</p>
               </div>
-              <button onClick={() => setViewPrescModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
+              <button 
+                onClick={() => setViewPrescModal(false)} 
+                style={{ background: '#f8fafc', border: '1.5px solid #f1f5f9', padding: '10px', borderRadius: '14px', cursor: 'pointer', color: '#94a3b8', transition: 'all 0.3s' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#1e293b'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.transform = 'scale(1)'; }}
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <div style={{ border: '2px solid #f1f5f9', borderRadius: '16px', padding: '24px', position: 'relative', overflow: 'hidden' }}>
-               <div style={{ position: 'absolute', right: '-20px', top: '-20px', opacity: 0.05 }}>
-                 <Pill size={120} />
+            <div style={{ border: '2px solid #f1f5f9', borderRadius: '28px', padding: '32px', position: 'relative', overflow: 'hidden', background: 'linear-gradient(to bottom, #ffffff, #fcfdfe)' }}>
+               <div style={{ position: 'absolute', right: '-30px', bottom: '-20px', opacity: 0.04, transform: 'rotate(-15deg)' }}>
+                 <Pill size={160} color="#10b981" />
                </div>
                
-               <div style={{ marginBottom: '20px' }}>
-                  <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '1px' }}>Patient</label>
-                  <p style={{ margin: '4px 0 0 0', fontWeight: 700, fontSize: '1.1rem' }}>{selectedPresc.patient_name}</p>
+               <div style={{ marginBottom: '28px' }}>
+                  <label className="pd-label-premium" style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Patient Name</label>
+                  <p style={{ margin: '0', fontWeight: 800, fontSize: '1.25rem', color: '#1e293b' }}>{selectedPresc.patient_name}</p>
                </div>
 
-               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
                   <div>
-                    <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Medicine</label>
-                    <p style={{ margin: '4px 0 0 0', fontWeight: 700 }}>{selectedPresc.medicine} {selectedPresc.strength}</p>
+                    <label className="pd-label-premium" style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Medication</label>
+                    <p style={{ margin: '0', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}><Pill size={14} color="#3b82f6" /> {selectedPresc.medicine}</p>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '6px', marginTop: '6px', display: 'inline-block' }}>{selectedPresc.strength}</span>
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Dosage</label>
-                    <p style={{ margin: '4px 0 0 0', fontWeight: 700 }}>{selectedPresc.dosage}</p>
+                    <label className="pd-label-premium" style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Dosage</label>
+                    <p style={{ margin: '0', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14} color="#f59e0b" /> {selectedPresc.dosage}</p>
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Duration</label>
-                    <p style={{ margin: '4px 0 0 0', fontWeight: 700 }}>{selectedPresc.duration}</p>
+                    <label className="pd-label-premium" style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Course Duration</label>
+                    <p style={{ margin: '0', fontWeight: 700, color: '#1e293b' }}>{selectedPresc.duration}</p>
                   </div>
                   <div>
-                    <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Date</label>
-                    <p style={{ margin: '4px 0 0 0', fontWeight: 700 }}>{selectedPresc.date}</p>
+                    <label className="pd-label-premium" style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Issue Date</label>
+                    <p style={{ margin: '0', fontWeight: 700, color: '#1e293b' }}>{selectedPresc.date}</p>
                   </div>
                </div>
 
-               <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
-                  <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Instructions</label>
-                  <p style={{ margin: '8px 0 0 0', fontSize: '0.9rem', color: '#475569', lineHeight: 1.5 }}>{selectedPresc.instructions || "No specific instructions provided. Follow standard dosage."}</p>
+               <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '20px', border: '1.5px dashed #e2e8f0' }}>
+                  <label className="pd-label-premium" style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Administrative Guidance</label>
+                  <p style={{ margin: '8px 0 0 0', fontSize: '0.95rem', color: '#475569', lineHeight: 1.6, fontWeight: 500 }}>{selectedPresc.instructions || "No specific administration instructions provided. Follow standard clinical protocols."}</p>
                </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-              <button className="pd-action-btn-secondary" style={{ flex: 1 }} onClick={() => setViewPrescModal(false)}>Close</button>
-              <button className="pd-action-btn-primary" style={{ flex: 1 }} onClick={() => handleDownload(selectedPresc?.id)}><Download size={18} /> Get PDF</button>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '40px' }}>
+              <button 
+                className="pd-action-btn-secondary" 
+                style={{ flex: 1, padding: '16px', borderRadius: '18px', fontWeight: 800 }} 
+                onClick={() => setViewPrescModal(false)}
+              >
+                Close Record
+              </button>
+              <button 
+                className="pd-action-btn-primary" 
+                style={{ flex: 1.2, padding: '16px', borderRadius: '18px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', fontWeight: 900, boxShadow: '0 15px 30px rgba(16, 185, 129, 0.25)' }} 
+                onClick={() => handleDownload(selectedPresc?.id)}
+              >
+                <Download size={20} /> Download PDF
+              </button>
             </div>
           </div>
         </div>

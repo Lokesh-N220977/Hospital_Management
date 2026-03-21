@@ -1,6 +1,7 @@
 import { useState } from "react"
 import AdminSidebar from "./AdminSidebar"
 import AdminNavbar from "./AdminNavbar"
+import { useTheme } from "../../../hooks/useTheme"
 
 type Props = {
   children: React.ReactNode
@@ -8,9 +9,10 @@ type Props = {
 
 function AdminLayout({ children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { theme } = useTheme()
 
   return (
-    <div className="pl-wrapper admin-wrapper">
+    <div className={`pl-wrapper admin-wrapper ${theme === 'dark' ? 'dark' : ''}`}>
       <AdminSidebar
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

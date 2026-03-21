@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { FaPlusSquare, FaBars, FaTimes } from 'react-icons/fa';
 
 const PublicNavbar: React.FC = () => {
@@ -15,6 +15,9 @@ const PublicNavbar: React.FC = () => {
                     <span>MedicPulse</span>
                 </Link>
 
+                {/* Mobile Overlay */}
+                {open && <div className="ps-overlay ps-overlay-open" onClick={() => setOpen(false)} />}
+
                 {/* Hamburger — mobile only */}
                 <button
                     className={`hamburger${open ? ' is-open' : ''}`}
@@ -27,8 +30,8 @@ const PublicNavbar: React.FC = () => {
                 {/* Nav links + auth — grouped right */}
                 <div className={`nav-right${open ? ' nav-open' : ''}`}>
                     <div className="nav-menu">
-                        <Link to="/" className="nav-link" onClick={() => setOpen(false)}>Home</Link>
-                        <Link to="/doctors" className="nav-link" onClick={() => setOpen(false)}>Doctors</Link>
+                        <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} onClick={() => setOpen(false)} end>Home</NavLink>
+                        <NavLink to="/doctors" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} onClick={() => setOpen(false)}>Doctors</NavLink>
                         <a href="/#about" className="nav-link" onClick={() => setOpen(false)}>About</a>
                     </div>
                     <div className="nav-auth">

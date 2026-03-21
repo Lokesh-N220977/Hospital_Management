@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Calendar, Stethoscope, Search, UserCheck, AlertCircle, CheckCircle2 } from "lucide-react"
+import { Search, UserCheck, AlertCircle, CheckCircle2, Loader2, Clock } from "lucide-react"
 import api from "../../services/api"
 import { appointmentService } from "../../services/appointment.service"
 import { useNavigate } from "react-router-dom"
@@ -31,17 +31,17 @@ function AddAppointment() {
 
     // 1. Search Patients in background as user types
     useEffect(() => {
-        if (!searchTerm) { setFoundPatients([]); return; }
+        if (!searchTerm || (selectedPatientId && searchTerm.includes("("))) { return; }
         const t = setTimeout(async () => {
             setSearching(true);
             try {
-                const { data } = await api.get("/admin/patients", { params: { phone: searchTerm } });
-                setFoundPatients(data);
+                const data = await api.get("/admin/patients", { params: { search: searchTerm } }).then(res => res.data);
+                setFoundPatients(Array.isArray(data) ? data : []);
             } catch (err) { console.error("Search failed"); }
             finally { setSearching(false); }
         }, 500);
         return () => clearTimeout(t);
-    }, [searchTerm]);
+    }, [searchTerm, selectedPatientId]);
 
     // 2. Fetch Doctors
     useEffect(() => {
@@ -61,6 +61,7 @@ function AddAppointment() {
             try {
                 const data = await appointmentService.getAvailableSlots(selectedDoctorId, selectedDate);
                 setAvailableSlots(data.slots || []);
+                setSelectedSlot(""); // Reset slot when date/doctor changes
             } catch (err) { console.error("Slots fetch failed"); }
         };
         fetchSlots();
@@ -68,7 +69,7 @@ function AddAppointment() {
 
     const handleConfirm = async () => {
         if (!selectedPatientId || !selectedDoctorId || !selectedDate || !selectedSlot) {
-            setError("All fields are required");
+            setError("All fields are required. Please select a patient, doctor, date, and time slot.");
             return;
         }
         setLoading(true);
@@ -92,135 +93,202 @@ function AddAppointment() {
 
     return (
         <AdminLayout>
-            <div className="ad-page">
+            <div className="ad-page" style={{ animation: 'fadeIn 0.4s ease-out' }}>
                 <div className="ad-header">
                     <div className="ad-header-content">
-                        <h1>Book Appointment</h1>
-                        <p>Search for a patient and schedule their visit.</p>
+                        <h1 className="ad-page-title">Book New Appointment</h1>
+                        <p className="ad-page-sub">Schedule a medical consultation for existing hospital patients.</p>
                     </div>
                 </div>
 
-                <div className="ad-card" style={{ maxWidth: '900px', margin: '0 auto' }}>
+                <div className="ad-card" style={{ maxWidth: '1000px', margin: '0 auto', padding: '30px' }}>
                     
                     {error && (
-                        <div style={{ padding: '12px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', marginBottom: '16px' }}>
+                        <div style={{ padding: '15px', background: '#fee2e2', color: '#b91c1c', borderRadius: '10px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', fontWeight: 600 }}>
                             <AlertCircle size={20} /> {error}
                         </div>
                     )}
 
                     {success && (
-                        <div style={{ padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px' }}>
-                            <CheckCircle2 size={20} /> Appointment booked! Redirecting...
+                        <div style={{ padding: '15px', background: '#dcfce7', color: '#166534', borderRadius: '10px', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', fontWeight: 600 }}>
+                            <CheckCircle2 size={20} /> Appointment successfully booked! Redirecting to list...
                         </div>
                     )}
 
-                    <div className="ad-form-grid">
-                        <div className="ad-field" style={{ gridColumn: '1 / -1' }}>
-                            <label>Lookup Patient (Search by Phone Number)</label>
+                    <div className="ad-form-section">
+                        <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: '#1e293b' }}>1. Patient Information</h3>
+                        <div className="ad-field">
+                            <label>Lookup Patient (Name, ID or Contact)</label>
                             <div style={{ position: 'relative' }}>
                                 <Search size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
                                 <input 
                                     type="text" 
                                     className="ad-input" 
-                                    placeholder="Search by phone e.g. +91..." 
-                                    style={{ paddingLeft: '40px' }} 
+                                    placeholder="Start typing patient name..." 
+                                    style={{ paddingLeft: '45px', fontSize: '1rem' }} 
                                     value={searchTerm}
-                                    onChange={e => setSearchTerm(e.target.value)}
+                                    onChange={e => {
+                                        setSearchTerm(e.target.value);
+                                        if (selectedPatientId) setSelectedPatientId("");
+                                    }}
                                 />
-                                {searching && <span style={{ position: 'absolute', right: '16px', top: '16px', fontSize: '12px', color: '#999' }}>Searching...</span>}
-                                {foundPatients.length > 0 && selectedPatientId === "" && (
-                                    <div style={{ position: 'absolute', width: '100%', background: 'white', border: '1px solid #e2e8f0', borderTop: 'none', zIndex: 10, borderRadius: '0 0 8px 8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                {searching && (
+                                    <div style={{ position: 'absolute', right: '16px', top: '16px' }}>
+                                        <Loader2 size={18} className="animate-spin" color="#3b82f6" />
+                                    </div>
+                                )}
+                                
+                                {foundPatients.length > 0 && !selectedPatientId && searchTerm.length > 1 && (
+                                    <div style={{ position: 'absolute', width: '100%', background: 'white', border: '1px solid #e2e8f0', zIndex: 100, borderRadius: '12px', marginTop: '5px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
                                         {foundPatients.map(p => (
                                             <div 
                                                 key={p._id} 
-                                                onClick={() => { setSelectedPatientId(p._id); setSearchTerm(p.name + " (" + p.phone + ")"); }}
-                                                style={{ padding: '12px 16px', cursor: 'pointer', hover: { background: '#f8fafc' } }}
-                                                className="ad-search-item"
+                                                onClick={() => { 
+                                                    setSelectedPatientId(p._id); 
+                                                    setSearchTerm(`${p.name} (${p.phone || p._id.slice(-6).toUpperCase()})`); 
+                                                    setFoundPatients([]);
+                                                }}
+                                                style={{ padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9', transition: 'background 0.2s' }}
+                                                className="ad-search-item-hover"
                                             >
-                                                <strong>{p.name}</strong> • {p.phone}
+                                                <div style={{ fontWeight: 700, color: '#1e293b' }}>{p.name}</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>{p.phone || "No contact"} • Patient ID: {p._id.slice(-6).toUpperCase()}</div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
                             </div>
                             {selectedPatientId && (
-                                <div style={{ marginTop: '8px', fontSize: '13px', color: '#16a34a' }}>
-                                    Patient Linked: {searchTerm} 
-                                    <button onClick={() => { setSelectedPatientId(""); setSearchTerm(""); }} style={{ background: 'none', border: 'none', color: '#ef4444', marginLeft: '10px', cursor: 'pointer', textDecoration: 'underline' }}>Change</button>
+                                <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: 600, fontSize: '0.9rem' }}>
+                                    <CheckCircle2 size={16} /> Patient Selected Successfully
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <h3 style={{ borderBottom: '1px solid #eef2f6', paddingBottom: '10px', marginTop: '30px', marginBottom: '20px' }}>Select Doctor & Timing</h3>
-                    <div className="ad-form-grid">
-                        <div className="ad-field">
-                            <label>Select Doctor</label>
-                            <select 
-                                className="ad-input" 
-                                value={selectedDoctorId} 
-                                onChange={e => setSelectedDoctorId(e.target.value)}
-                            >
-                                <option value="">Select Doctor</option>
-                                {doctors.map(d => (
-                                    <option key={d._id} value={d._id}>{d.name} ({d.specialization})</option>
-                                ))}
-                            </select>
+                    <div className="ad-form-section" style={{ marginTop: '35px' }}>
+                        <h3 style={{ fontSize: '1.1rem', marginBottom: '15px', color: '#1e293b' }}>2. Schedule Appointment</h3>
+                        <div className="ad-form-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div className="ad-field">
+                                <label>Target Specialist</label>
+                                <select 
+                                    className="ad-input" 
+                                    value={selectedDoctorId} 
+                                    onChange={e => setSelectedDoctorId(e.target.value)}
+                                    style={{ fontSize: '1rem' }}
+                                >
+                                    <option value="">Select Doctor</option>
+                                    {doctors.map(d => (
+                                        <option key={d._id} value={d._id}>{d.name} — {d.specialization}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="ad-field">
+                                <label>Consultation Date</label>
+                                <input 
+                                    type="date" 
+                                    className="ad-input" 
+                                    min={new Date().toISOString().split("T")[0]} 
+                                    value={selectedDate} 
+                                    onChange={e => setSelectedDate(e.target.value)} 
+                                    onClick={(e) => (e.target as any).showPicker && (e.target as any).showPicker()}
+                                    style={{ fontSize: '1rem' }}
+                                />
+                            </div>
                         </div>
-                        <div className="ad-field">
-                            <label>Appointment Date</label>
-                            <input 
-                                type="date" 
-                                className="ad-input" 
-                                min={new Date().toISOString().split("T")[0]} 
-                                value={selectedDate} 
-                                onChange={e => setSelectedDate(e.target.value)} 
-                            />
-                        </div>
-                        <div className="ad-field">
-                            <label>Available Slots</label>
-                            <select 
-                                className="ad-input" 
-                                value={selectedSlot} 
-                                onChange={e => setSelectedSlot(e.target.value)}
-                                disabled={!selectedDate || !selectedDoctorId}
-                            >
-                                <option value="">Select Slot</option>
-                                {availableSlots.map(s => (
-                                    <option key={s.time} value={s.time} disabled={s.booked}>
-                                        {s.time} {s.booked ? "(Full)" : ""}
-                                    </option>
+
+                        <div className="ad-field" style={{ marginTop: '25px' }}>
+                            <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Choose Available Time Slot</span>
+                                {selectedDoctorId && selectedDate && availableSlots.length === 0 && (
+                                    <span style={{ color: '#ef4444', fontSize: '0.8rem' }}>No slots found for this date.</span>
+                                )}
+                            </label>
+                            
+                            <div style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', 
+                                gap: '12px', 
+                                marginTop: '10px' 
+                            }}>
+                                {availableSlots.map((s) => (
+                                    <button
+                                        key={s.time}
+                                        onClick={() => setSelectedSlot(s.time)}
+                                        disabled={s.booked}
+                                        style={{
+                                            padding: '12px 10px',
+                                            borderRadius: '10px',
+                                            border: '2px solid',
+                                            borderColor: s.booked ? '#e2e8f0' : (selectedSlot === s.time ? '#3b82f6' : '#22c55e30'),
+                                            background: s.booked ? '#f1f5f9' : (selectedSlot === s.time ? '#3b82f6' : '#fff'),
+                                            color: s.booked ? '#94a3b8' : (selectedSlot === s.time ? '#fff' : '#16a34a'),
+                                            cursor: s.booked ? 'not-allowed' : 'pointer',
+                                            fontSize: '0.9rem',
+                                            fontWeight: 700,
+                                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            textAlign: 'center',
+                                            boxShadow: selectedSlot === s.time ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none'
+                                        }}
+                                        type="button"
+                                    >
+                                        {s.time}
+                                        {s.booked && <div style={{ fontSize: '0.65rem', marginTop: '2px', opacity: 0.7 }}>Occupied</div>}
+                                    </button>
                                 ))}
-                            </select>
+                            </div>
+                            {!selectedDoctorId || !selectedDate ? (
+                                <div style={{ padding: '30px', textAlign: 'center', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1', color: '#64748b' }}>
+                                    <Clock size={32} style={{ opacity: 0.3, margin: '0 auto 10px' }} />
+                                    <p>Select a doctor and date to view available time slots.</p>
+                                </div>
+                            ) : null}
                         </div>
                     </div>
 
-                    <div className="ad-field" style={{ marginTop: '20px' }}>
-                        <label>Reason for Visit / Symptoms</label>
+                    <div className="ad-field" style={{ marginTop: '30px' }}>
+                        <label>Reason for Consultation / Special Instructions</label>
                         <textarea 
                             className="ad-input" 
-                            rows={4} 
-                            placeholder="Symptoms or note..." 
-                            style={{ resize: 'vertical' }}
+                            rows={3} 
+                            placeholder="Briefly state symptoms or follow-up reason..." 
+                            style={{ resize: 'none', fontSize: '1rem', padding: '15px' }}
                             value={reason}
                             onChange={e => setReason(e.target.value)}
                         ></textarea>
                     </div>
 
-                    <div className="pd-settings-footer" style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-                        <button type="button" onClick={() => navigate("/admin/appointments")} className="ad-btn-primary" style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                    <div style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
+                        <button 
+                            type="button" 
+                            onClick={() => navigate("/admin/appointments")} 
+                            className="ad-btn-primary" 
+                            style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '12px 25px', borderRadius: '10px', fontWeight: 600 }}
+                        >
+                            Back to List
+                        </button>
                         <button 
                             className="ad-btn-duo" 
                             disabled={loading || success} 
                             onClick={handleConfirm}
-                            style={{ padding: '10px 20px', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                            style={{ padding: '12px 30px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}
                         >
-                            <UserCheck size={18} />
-                            <span>{loading ? "Scheduling..." : "Confirm Appointment"}</span>
+                            {loading ? <Loader2 size={18} className="animate-spin" /> : <UserCheck size={18} />}
+                            <span>{loading ? "Processing..." : "Confirm & Schedule Visit"}</span>
                         </button>
                     </div>
                 </div>
             </div>
+            
+            <style>{`
+                .ad-search-item-hover:hover {
+                    background: #f8fafc;
+                }
+                .ad-form-section {
+                    background: #fff;
+                    border-radius: 12px;
+                }
+            `}</style>
         </AdminLayout>
     )
 }

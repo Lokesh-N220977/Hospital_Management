@@ -19,6 +19,7 @@ const Register: React.FC = () => {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [gender, setGender] = useState('');
+    const [age, setAge] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
@@ -35,7 +36,15 @@ const Register: React.FC = () => {
         setSubmitting(true);
 
         try {
-            await authService.register({ name, phone, email: email || undefined, password, gender, role: "patient" });
+            await authService.register({ 
+                name, 
+                phone, 
+                email: email || undefined, 
+                password, 
+                gender, 
+                age: parseInt(age) || undefined, 
+                role: "patient" 
+            });
             navigate('/login', { state: { message: "Account created! You can now login with your phone number or email." } });
         } catch (err: any) {
             let errorMessage = "Registration failed. Please try again.";
@@ -135,7 +144,7 @@ const Register: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Gender + Phone */}
+                        {/* Gender + Age */}
                         <div className="sf-row">
                             <div className="sf-field">
                                 <label>Gender</label>
@@ -154,17 +163,34 @@ const Register: React.FC = () => {
                                 </div>
                             </div>
                             <div className="sf-field">
-                                <label>Phone Number</label>
+                                <label>Age *</label>
                                 <div className="sf-input-wrap">
-                                    <FaPhone className="sf-icon" />
+                                    <FaCalendarAlt className="sf-icon" />
                                     <input
-                                        type="tel"
-                                        placeholder="+91 234 567 890"
+                                        type="number"
+                                        placeholder="e.g. 25"
                                         required
-                                        value={phone}
-                                        onChange={e => setPhone(e.target.value)}
+                                        value={age}
+                                        onChange={e => setAge(e.target.value)}
+                                        min="0"
+                                        max="120"
                                     />
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Phone Number */}
+                        <div className="sf-field">
+                            <label>Phone Number</label>
+                            <div className="sf-input-wrap">
+                                <FaPhone className="sf-icon" />
+                                <input
+                                    type="tel"
+                                    placeholder="+91 234 567 890"
+                                    required
+                                    value={phone}
+                                    onChange={e => setPhone(e.target.value)}
+                                />
                             </div>
                         </div>
 

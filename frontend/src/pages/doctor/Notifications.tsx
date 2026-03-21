@@ -1,119 +1,149 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import DoctorLayout from "../../components/layout/doctor/DoctorLayout"
-import {
-    Bell, CheckCircle2, CalendarCheck,
-    FileText, AlertCircle, Pill, Trash2,
-    Clock, Activity
-} from "lucide-react"
-
-type NotifType = "appointment" | "report" | "prescription" | "clinical" | "alert"
+import { Bell, CheckCircle2 } from "lucide-react"
+import api from "../../services/api"
 
 interface Notification {
-    id: string
-    type: NotifType
-    title: string
-    message: string
-    time: string
-    read: boolean
+  id: string
+  title: string
+  message: string
+  type: string
+  is_read: boolean
+  created_at: string
 }
 
-const typeIcons: Record<NotifType, React.ReactNode> = {
-    appointment: <CalendarCheck size={18} />,
-    report: <FileText size={18} />,
-    prescription: <Pill size={18} />,
-    clinical: <Activity size={18} />,
-    alert: <AlertCircle size={18} />,
-}
+export default function DoctorNotifications() {
+  const [notifs, setNotifs] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
 
-const typeColors: Record<NotifType, string> = {
-    appointment: "#3b82f6",
-    report: "#10b981",
-    prescription: "#8b5cf6",
-    clinical: "#0dcb6e",
-    alert: "#ef4444",
-}
+  const fetchNotifs = async () => {
+    try {
+      setLoading(true)
+      const res = await api.get("/notifications")
+      if (res.data.success) {
+        setNotifs(res.data.data)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-const initialNotifs: Notification[] = [
-    { id: "DN1", type: "appointment", read: false, title: "New Appointment Request", message: "A new patient, Sarah Miller, has requested an appointment for tomorrow at 11:30 AM.", time: "1 hour ago" },
-    { id: "DN2", type: "clinical", read: false, title: "Urgent Lab Result", message: "Patient John Doe's blood report shows critically high potassium levels. Immediate review required.", time: "3 hours ago" },
-    { id: "DN3", type: "report", read: true, title: "Monthly Performance Report", message: "Your practice performance report for February 2026 is now available for download.", time: "Yesterday" },
-    { id: "DN4", type: "alert", read: true, title: "Hospital Meeting", message: "Emergency board meeting scheduled for today at 4:30 PM in Conference Room B.", time: "2 days ago" },
-]
+  useEffect(() => {
+    fetchNotifs()
+  }, [])
 
-function DoctorNotifications() {
-    const [notifs, setNotifs] = useState(initialNotifs)
-    const [filter, setFilter] = useState<"all" | "unread">("all")
+  const markAll = async () => {
+    try {
+      await api.patch("/notifications/read-all")
+      setNotifs(notifs.map(n => ({ ...n, is_read: true })))
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
-    const unreadCount = notifs.filter(n => !n.read).length
-    const markAll = () => setNotifs(notifs.map(n => ({ ...n, read: true })))
-    const markRead = (id: string) => setNotifs(notifs.map(n => n.id === id ? { ...n, read: true } : n))
-    const deleteNotif = (id: string) => setNotifs(notifs.filter(n => n.id !== id))
-    const displayed = filter === "unread" ? notifs.filter(n => !n.read) : notifs
+  const markRead = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      await api.patch(`/notifications/${id}/read`)
+      setNotifs(notifs.map(n => n.id === id ? { ...n, is_read: true } : n))
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
-    return (
-        <DoctorLayout>
-            <div className="pd-page">
-                <div className="pd-header">
-                    <div className="pd-header-content">
-                        <h1 className="pd-page-title">Notifications</h1>
-                        <p className="pd-page-sub">Keep track of patient alerts, appointments, and hospital updates.</p>
-                    </div>
-                    <div className="pd-header-actions">
-                        {unreadCount > 0 && (
-                            <button className="pd-action-btn-secondary pd-btn-sm" onClick={markAll}>
-                                <CheckCircle2 size={16} />
-                                <span>Mark all as read</span>
-                            </button>
-                        )}
-                    </div>
-                </div>
+  const unreadCount = notifs.filter(n => !n.is_read).length
 
-                <div className="pd-notif-layout">
-                    <div className="pd-card">
-                        <div className="pd-notif-tabs">
-                            <button className={`pd-notif-tab ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>
-                                All Notifications ({notifs.length})
-                            </button>
-                            <button className={`pd-notif-tab ${filter === "unread" ? "active" : ""}`} onClick={() => setFilter("unread")}>
-                                Unread ({unreadCount})
-                            </button>
-                        </div>
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    }).format(date);
+  };
 
-                        <div className="pd-notif-list">
-                            {displayed.length === 0 ? (
-                                <div className="pd-empty-state">
-                                    <Bell size={48} className="text-slate-200" />
-                                    <p>No notifications to display</p>
-                                </div>
-                            ) : (
-                                displayed.map(notif => (
-                                    <div
-                                        key={notif.id}
-                                        className={`pd-notif-item ${!notif.read ? "unread" : ""}`}
-                                        onClick={() => markRead(notif.id)}
-                                    >
-                                        <div className="pd-notif-icon" style={{ background: `${typeColors[notif.type]}15`, color: typeColors[notif.type] }}>
-                                            {typeIcons[notif.type]}
-                                        </div>
-                                        <div className="pd-notif-content">
-                                            <div className="pd-notif-info">
-                                                <h4 className="pd-notif-title">{notif.title}</h4>
-                                                <span className="pd-notif-time"><Clock size={12} /> {notif.time}</span>
-                                            </div>
-                                            <p className="pd-notif-msg">{notif.message}</p>
-                                        </div>
-                                        <button className="pd-notif-delete" onClick={(e) => { e.stopPropagation(); deleteNotif(notif.id); }}>
-                                            <Trash2 size={16} />
-                                        </button>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-                </div>
+  return (
+    <DoctorLayout>
+      <div className="pd-page">
+        {/* Header */}
+        <div className="pd-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div className="pd-header-content">
+            <h1 className="pd-page-title" style={{ fontSize: '24px', fontWeight: 'bold' }}>Notifications</h1>
+            <p className="pd-page-sub" style={{ color: '#6b7280' }}>Keep track of patient alerts, appointments, and updates.</p>
+          </div>
+          <div className="pd-header-actions">
+            {unreadCount > 0 && (
+              <button 
+                onClick={markAll} 
+                className="pd-action-btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+              >
+                <CheckCircle2 size={16} /> Mark all as read
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Notifications List */}
+        <div className="pd-notif-layout" style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>Loading notifications...</div>
+          ) : notifs.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px', color: '#6b7280', background: '#f8fafc', borderRadius: '8px' }}>
+              <Bell size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
+              <p>No notifications yet</p>
             </div>
-        </DoctorLayout>
-    )
+          ) : (
+            notifs.map(notif => (
+              <div 
+                key={notif.id} 
+                style={{ 
+                  padding: '16px', 
+                  borderRadius: '8px', 
+                  border: '1px solid',
+                  borderColor: notif.is_read ? '#e2e8f0' : '#bbf7d0',
+                  backgroundColor: notif.is_read ? '#f8fafc' : '#f0fdf4',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ 
+                    background: notif.is_read ? '#e2e8f0' : '#dcfce7', 
+                    color: notif.is_read ? '#64748b' : '#16a34a',
+                    padding: '10px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Bell size={20} />
+                  </div>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: notif.is_read ? '500' : '600', color: '#0f172a' }}>
+                      {notif.title}
+                    </h4>
+                    <p style={{ margin: '0 0 8px', fontSize: '14px', color: '#475569', lineHeight: '1.5' }}>
+                      {notif.message}
+                    </p>
+                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>{formatDate(notif.created_at)}</span>
+                  </div>
+                </div>
+                {!notif.is_read && (
+                  <button 
+                    onClick={(e) => markRead(notif.id, e)}
+                    style={{ background: 'none', border: 'none', color: '#16a34a', cursor: 'pointer', fontSize: '13px', fontWeight: '500' }}
+                  >
+                    Mark as read
+                  </button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </DoctorLayout>
+  )
 }
-
-export default DoctorNotifications

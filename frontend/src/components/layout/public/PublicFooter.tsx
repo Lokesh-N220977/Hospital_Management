@@ -1,15 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlusSquare, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
+import api from '../../../services/api';
 
 const PublicFooter: React.FC = () => {
+    const [hospitalInfo, setHospitalInfo] = useState({
+        hospital_name: "MedicPulse General",
+        email: "support@medicpulse.com",
+        mobile_number: "+91 99999 99999",
+        address: "Medical District Healthcare Center"
+    });
+
+    useEffect(() => {
+        const fetchInfo = async () => {
+            try {
+                const res = await api.get('/public/hospital-settings');
+                if (res.data) setHospitalInfo(res.data);
+            } catch (err) {
+                console.error("Failed to load hospital info", err);
+            }
+        };
+        fetchInfo();
+    }, []);
+
     return (
         <footer className="footer">
             <div className="container footer-grid">
                 <div className="footer-brand-col">
                     <div className="footer-logo">
                         <FaPlusSquare className="brand-icon" />
-                        <span>MedicPulse</span>
+                        <span>{hospitalInfo.hospital_name || "MedicPulse"}</span>
                     </div>
                     <p className="brand-desc">
                         A modern, intuitive, and secure platform bridging the gap between patients and healthcare providers. Making quality healthcare accessible to everyone.
@@ -35,14 +55,14 @@ const PublicFooter: React.FC = () => {
                 <div className="footer-contact-col">
                     <h3>Contact Info</h3>
                     <ul className="contact-list">
-                        <li><FaMapMarkerAlt /> Medical District Healthcare Center</li>
-                        <li><FaPhoneAlt /> +91 XXXXX XXXXX</li>
-                        <li><FaEnvelope /> support@medicpulse.com</li>
+                        <li><FaMapMarkerAlt /> {hospitalInfo.address}</li>
+                        <li><FaPhoneAlt /> {hospitalInfo.mobile_number}</li>
+                        <li><FaEnvelope /> {hospitalInfo.email}</li>
                     </ul>
                 </div>
             </div>
             <div className="footer-bottom">
-                <p>&copy; 2026 MedicPulse. All rights reserved.</p>
+                <p>&copy; {new Date().getFullYear()} {hospitalInfo.hospital_name}. All rights reserved.</p>
             </div>
         </footer>
     );

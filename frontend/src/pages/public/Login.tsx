@@ -105,7 +105,7 @@ const Login: React.FC = () => {
             login(res);
             const user = res.user;
             if (user?.must_change_password && user.role === 'doctor') {
-                navigate('/doctor/dashboard');
+                navigate('/doctor/change-password');
             } else {
                 navigate(roleRedirects[user.role] || '/');
             }

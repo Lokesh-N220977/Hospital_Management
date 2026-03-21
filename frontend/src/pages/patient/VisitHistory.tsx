@@ -140,12 +140,12 @@ function VisitHistory() {
                         </div>
                         <p className="vh-diagnosis">{visit.diagnosis}</p>
                         
-                        <div style={{ margin: '8px 0', padding: '6px 12px', background: '#f8fafc', borderRadius: '6px', display: 'inline-block', border: '1px solid #e2e8f0' }}>
-                           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase' }}>Patient:</span>
-                           <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', marginLeft: '6px' }}>{visit.patient_name || 'Primary Account'}</span>
+                        <div className="vh-patient-detail">
+                           <span className="vh-patient-label">Patient:</span>
+                           <span className="vh-patient-value">{visit.patient_name || 'Primary Account'}</span>
                         </div>
 
-                        <div className="vh-meta-row" style={{ marginTop: '4px' }}>
+                        <div className="vh-meta-row">
                           <span><Calendar size={13} /> {visit.date || "Recent"}</span>
                           <span><Clock size={13} /> {visit.duration || "20 min"}</span>
                           <span>

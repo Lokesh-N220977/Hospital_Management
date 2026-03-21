@@ -64,25 +64,22 @@ async def update_profile(update_data: dict, current_user=Depends(get_current_use
 
 @router.delete("/my-account")
 async def delete_my_account(current_user=Depends(get_current_user)):
-    """Soft delete account: anonymize data, cancel future appointments, keep medical history."""
+    """Soft delete/suspend account: keep data for analytics but mark inactive and cancel future bookings."""
     from app.database import users_collection, patients_collection, appointments_collection
     from datetime import datetime
     from bson import ObjectId
     
     user_id = str(current_user["_id"])
-    timestamp = int(datetime.utcnow().timestamp())
-    deleted_marker = f"deleted_{user_id}_{timestamp}"
+    now = datetime.utcnow()
     
-    # 1. Anonymize user and set inactive
+    # 1. Set user inactive
     await users_collection.update_one(
         {"_id": ObjectId(user_id)},
         {"$set": {
-            "name": "Deleted User",
-            "phone": deleted_marker,
-            "email": f"{deleted_marker}@deleted.local",
-            "password": None,
             "is_active": False,
-            "deleted_at": datetime.utcnow()
+            "status": "deleted",
+            "deactivated_at": now,
+            "updated_at": now
         }}
     )
     
@@ -91,28 +88,31 @@ async def delete_my_account(current_user=Depends(get_current_user)):
     patient_ids = [str(p["_id"]) for p in user_patients]
     
     if patient_ids:
-        # 3. Anonymize patient identities and lock them
+        # 3. Mark patient record inactive
         await patients_collection.update_many(
             {"user_id": user_id},
             {"$set": {
-                "name": "Deleted Patient",
-                "phone": deleted_marker,
-                "email": None,
                 "is_active": False,
-                "deleted_at": datetime.utcnow()
+                "status": "suspended",
+                "deactivated_at": now
             }}
         )
         
         # 4. Cancel all upcoming appointments for these patients
-        now_str = datetime.utcnow().strftime("%Y-%m-%d")
+        now_str = now.strftime("%Y-%m-%d")
         await appointments_collection.update_many(
             {
                 "patient_id": {"$in": patient_ids},
                 "status": "booked", 
                 "date": {"$gte": now_str}
             },
-            {"$set": {"status": "cancelled", "notes": "Account deactivated."}}
+            {"$set": {
+                "status": "cancelled", 
+                "cancel_reason": "User account deactivated.",
+                "cancelled_by": "system",
+                "updated_at": now
+            }}
         )
         
-    logger.info(f"Account softly deleted & anonymized: {user_id}")
-    return {"message": "Account deleted successfully"}
+    logger.info(f"Account suspended/inactivated: {user_id}")
+    return {"message": "Account suspended successfully. We will keep your medical records safe for your next visit."}

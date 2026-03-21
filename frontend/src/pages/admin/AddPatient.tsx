@@ -11,6 +11,7 @@ function AddPatient() {
     const [email, setEmail] = useState("");
     const [gender, setGender] = useState("male");
     
+    const [age, setAge] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -21,7 +22,7 @@ function AddPatient() {
         setError("");
         
         try {
-            await api.post("/admin/add-patient", { name, phone, email, gender });
+            await api.post("/admin/add-patient", { name, phone, email, gender, age: parseInt(age) || null });
             setSuccess(true);
             setTimeout(() => navigate("/admin/patients"), 2000);
         } catch (err: any) {
@@ -95,6 +96,23 @@ function AddPatient() {
                                     <option value="female">Female</option>
                                     <option value="other">Other</option>
                                 </select>
+                            </div>
+                            <div className="ad-field">
+                                <label>Age *</label>
+                                <div style={{ position: 'relative' }}>
+                                    <Calendar size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                    <input 
+                                        type="number" 
+                                        className="ad-input" 
+                                        required
+                                        value={age} 
+                                        onChange={e => setAge(e.target.value)} 
+                                        placeholder="e.g. 25" 
+                                        style={{ paddingLeft: '40px' }} 
+                                        min="0"
+                                        max="120"
+                                    />
+                                </div>
                             </div>
                             <div className="ad-field" style={{ gridColumn: '1 / -1' }}>
                                 <label>Email (Optional)</label>

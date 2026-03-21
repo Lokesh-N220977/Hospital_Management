@@ -62,7 +62,14 @@ async def get_my_patients(user_id: str):
                 patients.insert(0, patient_data)
                 logger.info(f"Auto-generated missing primary 'self' record for user {user_id}")
             
-    return patients
+    # Deduplicate: one record per phone, prioritizing 'self' (primary)
+    unique_patients = {}
+    for p in patients:
+        phone = p.get("phone")
+        if phone not in unique_patients or p.get("created_by") == "self":
+            unique_patients[phone] = p
+            
+    return list(unique_patients.values())
 
 async def get_patient_by_id(patient_id: str):
     try:
@@ -90,14 +97,18 @@ async def delete_patient(patient_id: str):
     # Soft delete the patient
     await patients_collection.update_one(
         {"_id": ObjectId(patient_id)},
-        {"$set": {"is_active": False, "deleted_at": datetime.utcnow()}}
+        {"$set": {"is_active": False, "status": "deleted", "deleted_at": datetime.utcnow()}}
     )
     
     # Cancel future appointments associated with this patient
     now_str = datetime.utcnow().strftime("%Y-%m-%d")
     result = await appointments_collection.update_many(
-        {"patient_id": patient_id, "status": "booked", "date": {"$gte": now_str}},
-        {"$set": {"status": "cancelled", "notes": "Patient member removed."}}
+        {
+            "patient_id": {"$in": [ObjectId(patient_id), patient_id]}, 
+            "status": "booked", 
+            "$or": [{"date": {"$gte": now_str}}, {"appointment_date": {"$gte": now_str}}]
+        },
+        {"$set": {"status": "cancelled", "cancel_reason": "Patient member removed.", "cancelled_by": "system", "is_active": False}}
     )
     
     logger.info(f"Patient record soft-deleted: {patient_id}. Cancelled {result.modified_count} future appointments.")

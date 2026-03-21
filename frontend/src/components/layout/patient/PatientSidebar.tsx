@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
+import api from "../../../services/api"
 import {
   LayoutDashboard,
   CalendarPlus,
@@ -17,7 +19,7 @@ const navLinks = [
   { to: "/patient/book-appointment", label: "Book Appointment", icon: CalendarPlus },
   { to: "/patient/appointments", label: "My Appointments", icon: CalendarCheck },
   { to: "/patient/visit-history", label: "Visit History", icon: History },
-  { to: "/patient/notifications", label: "Notifications", icon: Bell, badge: 3 },
+  { to: "/patient/notifications", label: "Notifications", icon: Bell, isNotif: true },
   { to: "/patient/profile", label: "Profile", icon: UserCircle },
   { to: "/patient/settings", label: "Settings", icon: Settings },
 ]
@@ -31,6 +33,25 @@ const PatientSidebar = ({ mobileOpen = false, onClose }: PatientSidebarProps) =>
   const navigate = useNavigate()
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const initials = (user.name || "U").split(" ").map((n: string) => n[0]).join("").toUpperCase();
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const fetchUnread = async () => {
+    try {
+      const res = await api.get("/notifications")
+      if (res.data.success) {
+        const count = res.data.data.filter((n: any) => !n.is_read).length
+        setUnreadCount(count)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 60000) // update every minute
+    return () => clearInterval(interval)
+  }, [])
 
   const handleLogout = () => {
     navigate("/login")
@@ -71,7 +92,7 @@ const PatientSidebar = ({ mobileOpen = false, onClose }: PatientSidebarProps) =>
         <nav className="ps-nav">
           <p className="ps-nav-label">MAIN MENU</p>
           <ul className="ps-menu">
-            {navLinks.map(({ to, label, icon: Icon, badge }) => (
+            {navLinks.map(({ to, label, icon: Icon, isNotif }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -84,8 +105,8 @@ const PatientSidebar = ({ mobileOpen = false, onClose }: PatientSidebarProps) =>
                     <Icon size={19} />
                   </span>
                   <span className="ps-link-label">{label}</span>
-                  {badge && (
-                    <span className="ps-badge">{badge}</span>
+                  {isNotif && unreadCount > 0 && (
+                    <span className="ps-badge">{unreadCount}</span>
                   )}
                 </NavLink>
               </li>

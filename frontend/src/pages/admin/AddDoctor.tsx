@@ -2,7 +2,7 @@ import AdminLayout from "../../components/layout/admin/AdminLayout"
 import { UserPlus, Image, Mail, Phone, MapPin, Building, Award, Loader2, Copy, Check, DollarSign } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { addDoctor } from "../../services/adminService"
+import { addDoctor, uploadDoctorImage } from "../../services/adminService"
 
 function AddDoctor() {
     const navigate = useNavigate()
@@ -23,9 +23,23 @@ function AddDoctor() {
     const [tempPassword, setTempPassword] = useState("")
     const [showModal, setShowModal] = useState(false)
     const [copied, setCopied] = useState(false)
+    const [selectedFile, setSelectedFile] = useState<File | null>(null)
+    const [imagePreview, setImagePreview] = useState<string | null>(null)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setSelectedFile(file)
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string)
+            }
+            reader.readAsDataURL(file)
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +52,14 @@ function AddDoctor() {
                 experience: parseInt(formData.experience) || 0,
                 consultation_fee: parseInt(formData.consultation_fee) || 500
             })
-            // res should contain temp_password
+            
+            // If image is selected, upload it
+            if (selectedFile && res.doctor_id) {
+                const imgData = new FormData()
+                imgData.append('file', selectedFile)
+                await uploadDoctorImage(res.doctor_id, imgData)
+            }
+
             setTempPassword(res.temp_password) 
             setShowModal(true)
         } catch (err: any) {
@@ -76,15 +97,46 @@ function AddDoctor() {
                         </div>
                     )}
 
-                    <div className="pd-form-grid" style={{ marginBottom: '30px' }}>
-                        <div className="pd-field" style={{ gridColumn: '1 / -1' }}>
-                            <div className="ad-upload-area">
-                                <Image size={40} />
-                                <span className="ad-upload-text">Upload Doctor Photo</span>
-                                <span className="pd-page-sub">Recommended size: 400x400px</span>
+                        <div className="pd-field" style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
+                            <label style={{ marginBottom: '10px', fontSize: '0.9rem', color: '#64748b' }}>Doctor Profile Photo (Passport Size)</label>
+                            <div 
+                                className="ad-upload-area" 
+                                onClick={() => document.getElementById('doctor-photo-input')?.click()}
+                                style={{ 
+                                    cursor: 'pointer', 
+                                    position: 'relative',
+                                    border: '2px dashed #cbd5e1',
+                                    width: '150px',
+                                    height: '180px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    borderRadius: '8px',
+                                    backgroundColor: '#f8fafc',
+                                    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {imagePreview ? (
+                                    <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                    <>
+                                        <Image size={32} color="#94a3b8" />
+                                        <span className="ad-upload-text" style={{ marginTop: '10px', color: '#64748b', fontSize: '0.75rem', textAlign: 'center', padding: '0 10px' }}>Upload Photo</span>
+                                    </>
+                                )}
+                                <input 
+                                    type="file" 
+                                    id="doctor-photo-input" 
+                                    hidden 
+                                    accept="image/*" 
+                                    onChange={handleFileChange} 
+                                />
                             </div>
+                            <span className="pd-page-sub" style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '8px' }}>Recommended: 400x500px square or 3:4 ratio</span>
                         </div>
-                    </div>
 
                     <h3 className="pd-card-subtitle" style={{ borderBottom: '1px solid #eef2f6', paddingBottom: '10px', marginBottom: '20px' }}>Personal Details</h3>
                     <div className="ad-form-grid">

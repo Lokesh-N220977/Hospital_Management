@@ -6,6 +6,8 @@ export interface User {
   phone?: string;
   email?: string;
   role: string;
+  age?: number;
+  gender?: string;
   must_change_password?: boolean;
 }
 
@@ -58,6 +60,7 @@ export const register = async (payload: {
   password?: string;
   role?: string;
   gender?: string;
+  age?: number;
 }) => {
   const { data } = await api.post('/auth/register', payload);
   return data;

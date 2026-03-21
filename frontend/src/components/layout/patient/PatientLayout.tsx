@@ -1,6 +1,7 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import PatientSidebar from "./PatientSidebar"
 import PatientNavbar from "./PatientNavbar"
+import { useTheme } from "../../../hooks/useTheme"
 
 type Props = {
   children: React.ReactNode
@@ -8,9 +9,25 @@ type Props = {
 
 function PatientLayout({ children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [prefKey, setPrefKey] = useState(0)
+  const { theme } = useTheme()
+
+  useEffect(() => {
+    const handlePrefChange = () => setPrefKey(prev => prev + 1)
+    window.addEventListener('patient-prefs-changed', handlePrefChange)
+    window.addEventListener('theme-change', handlePrefChange)
+    return () => {
+      window.removeEventListener('patient-prefs-changed', handlePrefChange)
+      window.removeEventListener('theme-change', handlePrefChange)
+    }
+  }, [])
+
+  const fontSize = localStorage.getItem('patient-font-size') || 'Normal'
+  const fontClass = `font-size-${fontSize.toLowerCase().replace(' ', '-')}`
+  const themeClass = theme === 'dark' ? 'dark' : ''
 
   return (
-    <div className="pl-wrapper">
+    <div key={prefKey} className={`pl-wrapper ${fontClass} ${themeClass}`.trim()}>
       <PatientSidebar
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -27,3 +44,4 @@ function PatientLayout({ children }: Props) {
 }
 
 export default PatientLayout
+

@@ -132,8 +132,8 @@ function BookAppointment() {
         setReason("")
         setStep(1)
       }, 3000)
-    } catch (err) {
-      setError("Booking failed. Please try again.")
+    } catch (err: any) {
+      setError(err.response?.data?.detail || err.response?.data?.message || "Booking failed. Please try again.")
     } finally {
       setBookingLoading(false)
     }
@@ -198,47 +198,26 @@ function BookAppointment() {
             {step === 1 && (
               <div className="ba-step-container">
                 <h3 className="ba-section-title">Who is this appointment for?</h3>
-                <div className="ba-patients-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px', marginTop: '20px' }}>
+                <div className="ba-patients-grid">
                   {patients.map(p => (
                     <div 
                       key={p._id} 
                       className={`ba-patient-card ${selectedPatient === p._id ? 'selected' : ''}`}
                       onClick={() => { setSelectedPatient(p._id); setStep(2); }}
-                      style={{ 
-                        padding: '20px', 
-                        borderRadius: '12px', 
-                        border: '2px solid',
-                        borderColor: selectedPatient === p._id ? '#2563eb' : '#e2e8f0',
-                        backgroundColor: selectedPatient === p._id ? '#eff6ff' : 'white',
-                        cursor: 'pointer',
-                        textAlign: 'center',
-                        transition: 'all 0.2s'
-                      }}
                     >
-                      <div className="ba-patient-avatar" style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#cbd5e1', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '18px', fontWeight: 'bold' }}>
+                      <div className="ba-patient-avatar">
                         {p.name[0].toUpperCase()}
                       </div>
-                      <h4 style={{ margin: 0, color: '#1e293b' }}>{p.name}</h4>
-                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748b' }}>{p.created_by === 'self' ? 'Primary Account' : 'Family Member'}</p>
+                      <h4>{p.name}</h4>
+                      <p className="ba-p-sub">{p.created_by === 'self' ? 'Primary Account' : 'Family Member'}</p>
                     </div>
                   ))}
                   <div 
-                    className="ba-patient-card add-patient" 
-                    onClick={() => navigate('/patient/profile')} // Or a modal
-                    style={{ 
-                      padding: '20px', 
-                      borderRadius: '12px', 
-                      border: '2px dashed #cbd5e1',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
+                    className="ba-patient-card ba-add-patient" 
+                    onClick={() => navigate('/patient/profile')}
                   >
-                    <PlusSquare size={24} color="#64748b" />
-                    <p style={{ margin: '8px 0 0', fontSize: '14px', color: '#64748b' }}>Add Member</p>
+                    <PlusSquare size={24} className="ba-add-icon" />
+                    <p className="ba-add-text">Add Member</p>
                   </div>
                 </div>
               </div>
@@ -270,8 +249,8 @@ function BookAppointment() {
             )}
 
             {/* Doctor Cards */}
-            <div className="ba-doctors-list">
-              {loading && step === 1 ? (
+            <div className="ba-doctors-list" style={{ display: step >= 2 ? 'block' : 'none' }}>
+              {loading && step === 2 ? (
                 <div style={{ padding: '40px', textAlign: 'center' }}>Loading doctors...</div>
               ) : filtered.map((doc, idx) => (
                 <div
@@ -281,7 +260,6 @@ function BookAppointment() {
                     if (doc.available) {
                       setSelectedDoctor(doc._id)
                       setSelectedSlot(null)
-                      setStep(2)
                     }
                   }}
                 >
@@ -302,11 +280,11 @@ function BookAppointment() {
                       <span><Clock size={12} /> {doc.experience} exp</span>
                       <span><MapPin size={12} /> Hospital Clinic</span>
                     </div>
-                    <p className="ba-doc-fee">Consultation Fee: <strong>{doc.consultation_fee}</strong></p>
+                    <p className="ba-doc-fee">Consultation Fee: <strong>₹{doc.consultation_fee}</strong></p>
                   </div>
                 </div>
               ))}
-              {!loading && filtered.length === 0 && (
+              {!loading && filtered.length === 0 && step === 2 && (
                 <div className="ba-empty">
                   <Stethoscope size={40} />
                   <p>No doctors found</p>
@@ -340,6 +318,7 @@ function BookAppointment() {
                     value={selectedDate}
                     min={new Date().toISOString().split("T")[0]}
                     onChange={e => setSelectedDate(e.target.value)}
+                    onClick={(e) => (e.target as any).showPicker && (e.target as any).showPicker()}
                   />
                 </div>
 
@@ -355,11 +334,6 @@ function BookAppointment() {
                           disabled={slot.booked}
                           className={`ba-slot${selectedSlot === slot.time ? " ba-slot-selected" : ""}${slot.booked ? " ba-slot-booked" : " ba-slot-available"}`}
                           onClick={() => { setSelectedSlot(slot.time); setStep(3) }}
-                          style={{
-                            backgroundColor: slot.booked ? '#f1f5f9' : selectedSlot === slot.time ? '#22c55e' : '#f0fdf4',
-                            borderColor: slot.booked ? '#e2e8f0' : selectedSlot === slot.time ? '#16a34a' : '#bbf7d0',
-                            color: slot.booked ? '#94a3b8' : selectedSlot === slot.time ? 'white' : '#15803d'
-                          }}
                         >
                           {slot.time}
                           {slot.booked && <span style={{ fontSize: '10px', display: 'block', opacity: 0.6 }}>Full</span>}
@@ -395,7 +369,7 @@ function BookAppointment() {
 
                 <div className="ba-panel-fee">
                   <span>Consultation Fee</span>
-                  <strong>{chosenDoc.consultation_fee}</strong>
+                  <strong>₹{chosenDoc.consultation_fee}</strong>
                 </div>
               </div>
             ) : (

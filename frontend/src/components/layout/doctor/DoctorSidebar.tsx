@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom"
 import { 
   LayoutDashboard, ClipboardList, Clock, Users, History, 
-  FileText, Bell, User, Settings, LogOut, 
+  FileText, User, Settings, LogOut, 
   CalendarX, X, PlusSquare 
 } from "lucide-react"
 
@@ -22,7 +22,6 @@ const DoctorSidebar = ({ mobileOpen = false, onClose }: DoctorSidebarProps) => {
     { title: "Patients",            path: "/doctor/patients",           icon: <Users size={20} /> },
     { title: "Visit History",       path: "/doctor/visit-history",      icon: <History size={20} /> },
     { title: "Prescriptions",       path: "/doctor/prescriptions",      icon: <FileText size={20} /> },
-    { title: "Notifications",       path: "/doctor/notifications",      icon: <Bell size={20} />, badge: 3 },
     { title: "Profile",             path: "/doctor/profile",            icon: <User size={20} /> },
     { title: "Settings",            path: "/doctor/settings",           icon: <Settings size={20} /> },
   ]
@@ -34,7 +33,7 @@ const DoctorSidebar = ({ mobileOpen = false, onClose }: DoctorSidebarProps) => {
         <div className="ps-overlay ps-overlay-open" onClick={onClose} />
       )}
 
-      <aside className={`patient-sidebar${mobileOpen ? " ps-open" : ""}`}>
+      <aside className={`patient-sidebar dr-sidebar-theme${mobileOpen ? " ps-open" : ""}`}>
         <div className="ps-logo">
           <div className="ps-logo-icon" style={{ background: 'linear-gradient(135deg, #0dcb6e, #0ba358)' }}>
             <PlusSquare size={24} color="#fff" fill="#fff" />
@@ -53,7 +52,7 @@ const DoctorSidebar = ({ mobileOpen = false, onClose }: DoctorSidebarProps) => {
           </div>
           <div className="ps-user-info">
             <p className="ps-user-name">{user?.name || "Doctor"}</p>
-            <p className="ps-user-role">{user?.specialization || "Practitioner"}</p>
+            <p className="ps-user-role">Practitioner</p>
           </div>
         </div>
 
@@ -69,7 +68,6 @@ const DoctorSidebar = ({ mobileOpen = false, onClose }: DoctorSidebarProps) => {
               >
                 <span className="ps-link-icon">{link.icon}</span>
                 <span className="ps-link-label">{link.title}</span>
-                {link.badge && <span className="ps-badge">{link.badge}</span>}
               </NavLink>
             ))}
           </div>

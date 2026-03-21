@@ -13,7 +13,7 @@ function VisitHistory() {
       try {
         const prof = await getPortalProfile()
         if (prof && prof.doctor_id) {
-          const list = await getDoctorAppointments(prof.doctor_id)
+          const list = await getDoctorAppointments()
           // Filter for completed or cancelled
           const filtered = Array.isArray(list) 
             ? list.filter((a: any) => a.status === 'completed' || a.status === 'cancelled') 

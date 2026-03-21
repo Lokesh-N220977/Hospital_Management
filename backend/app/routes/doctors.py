@@ -11,10 +11,33 @@ from typing import Optional
 
 router = APIRouter(prefix="/api/v1/doctors", tags=["Doctors"])
 
+@router.get("/stats")
+async def get_public_stats():
+    from app.services import analytics_service
+    stats = await analytics_service.get_system_analytics()
+    # Return only public-safe stats
+    return {
+        "total_doctors": stats["total_doctors"],
+        "total_patients": stats["total_patients"],
+        "total_appointments": stats["total_appointments"]
+    }
+
 @router.get("/")
-async def get_all_doctors(specialization: Optional[str] = None):
-    logger.info("Fetching all available doctors")
-    return await doctor_service.get_doctors(specialization)
+async def get_all_doctors(
+    specialization: Optional[str] = None, 
+    location: Optional[str] = None,
+    min_experience: Optional[int] = None
+):
+    logger.info(f"Fetching doctors with filters - spec: {specialization}, loc: {location}, min_exp: {min_experience}")
+    return await doctor_service.get_doctors(specialization, location, min_experience)
+
+@router.get("/specializations")
+async def get_specializations():
+    return await doctor_service.get_distinct_specializations()
+
+@router.get("/locations")
+async def get_locations():
+    return await doctor_service.get_distinct_locations()
 
 @router.get("/{doctor_id}/slots")
 async def get_slots(doctor_id: str, date: str):

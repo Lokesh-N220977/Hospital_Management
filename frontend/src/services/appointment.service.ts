@@ -21,21 +21,20 @@ export const appointmentService = {
   async getDoctors(specialization?: string) {
     const params = specialization && specialization !== 'All' ? { specialization } : {};
     const { data } = await api.get('/doctors/', { params });
-    return data as Doctor[];
+    return data.success ? data.data : data as Doctor[];
   },
 
   async getAvailableSlots(doctorId: string, date: string) {
     const { data } = await api.get('/slots', {
       params: { doctor_id: doctorId, date }
     });
-    return data as { slots: {time: string, booked: boolean}[]; message?: string };
+    // This wasn't changed but just in case
+    return data.success ? data.data : data as { slots: {time: string, booked: boolean}[]; message?: string };
   },
 
   async updateAppointmentStatus(appointmentId: string, status: string) {
-    const { data } = await api.patch(`/appointments/${appointmentId}`, null, {
-      params: { status }
-    });
-    return data;
+    const { data } = await api.patch(`/appointments/${appointmentId}?status=${status}`);
+    return data.success ? data.data : data;
   },
 
   async bookAppointment(bookingData: { 
@@ -46,26 +45,27 @@ export const appointmentService = {
     reason: string 
   }) {
     const { data } = await api.post('/appointments/book', bookingData);
-    return data;
+    return data.success ? data.data : data;
   },
 
   async getMyAppointments() {
     const { data } = await api.get('/appointments/my-appointments');
-    return data;
+    return data.success ? data.data : data;
   },
 
   async getMyPatients() {
     const { data } = await api.get('/patients/my');
-    return data as PatientRecord[];
+    return data.success ? data.data : data as PatientRecord[];
   },
 
   async cancelAppointment(appointmentId: string) {
-    const { data } = await api.put(`/appointments/${appointmentId}/cancel`);
-    return data;
+    const { data } = await api.patch(`/appointments/${appointmentId}/cancel`);
+    return data.success ? data.data : data;
   },
 
   async getDashboardData() {
     const { data } = await api.get('/appointments/dashboard');
-    return data;
+    return data.success ? data.data : data;
   }
 };
+
