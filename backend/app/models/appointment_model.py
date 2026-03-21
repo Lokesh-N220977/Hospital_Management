@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 class AppointmentCreate(BaseModel):
     doctor_id: str
-    patient_id: str  # Mandatory: Which family member/identity is this for?
+    patient_id: str
     date: str
     time: str
-    reason: str
+    reason: Optional[str] = None

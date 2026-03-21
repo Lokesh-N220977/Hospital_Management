@@ -14,17 +14,20 @@ async def get_available_slots(doctor_id: str, date: str):
     """
     Step 4: Slot Generation Engine (CRITICAL)
     """
-    # Check leave (Step 3: Leave System Implementation)
-    leave = await db["doctor_leaves"].find_one({
+    # 1 & 2. Get schedule and check leave in parallel for performance
+    import asyncio
+    from app.database import doctor_leaves_collection
+    
+    leave_task = doctor_leaves_collection.find_one({
         "doctor_id": doctor_id,
-        "date": date
+        "date": date,
+        "status": "approved"
     })
-    if leave:
-        return []
-
-    # 1. Get schedule
-    sched = await schedules_collection.find_one({"doctor_id": doctor_id})
-    if not sched:
+    sched_task = schedules_collection.find_one({"doctor_id": doctor_id})
+    
+    leave, sched = await asyncio.gather(leave_task, sched_task)
+    
+    if leave or not sched:
         return []
 
     # 2. Check working day
@@ -33,7 +36,7 @@ async def get_available_slots(doctor_id: str, date: str):
     except Exception:
         return []
 
-    if day not in sched["working_days"]:
+    if day not in sched.get("working_days", []):
         return []
 
     # 3. Generate slots
@@ -48,25 +51,54 @@ async def get_available_slots(doctor_id: str, date: str):
         all_slots.append(to_time(current))
         current += duration
 
-    # 4. Remove booked slots
+    # 4. Remove booked slots - Perform filtering at DB level for performance & accuracy
     booked = []
+    from bson import ObjectId
+    import datetime as dt_mod
+    
+    # Optimize query to use the most efficient index (doctor_id + appointment_date or slot_start)
+    day_start = dt_mod.datetime.strptime(date, "%Y-%m-%d")
+    day_end = day_start + dt_mod.timedelta(days=1)
+    
     cursor = appointments_collection.find({
-        "doctor_id": doctor_id,
-        "date": date,
-        "status": {"$ne": "cancelled"}
-    })
+        "doctor_id": {"$in": [ObjectId(doctor_id), doctor_id]},
+        "status": {"$in": ["booked", "completed", "no_show"]},
+        "$or": [
+            {"appointment_date": date},
+            {"slot_start": {"$gte": day_start, "$lt": day_end}}
+        ]
+    }, {"slot_start": 1, "time": 1}) # Projection for performance
+    
     async for appt in cursor:
-        booked.append(appt["time"])
+        if "slot_start" in appt and isinstance(appt["slot_start"], dt_mod.datetime):
+            booked.append(appt["slot_start"].strftime("%H:%M"))
+        elif "time" in appt:
+            booked.append(appt["time"])
 
     # Returns list of {time, booked} objects as expected by the frontend
-    return [{"time": s, "booked": (s in booked)} for s in all_slots]
+    result = []
+    
+    # Check if the requested date is today
+    now = datetime.datetime.now()
+    is_today = (date == now.strftime("%Y-%m-%d"))
+    current_time_str = now.strftime("%H:%M")
+    
+    for s in all_slots:
+        is_booked = (s in booked)
+        if is_today and s < current_time_str:
+            is_booked = True # mark past times today as booked
+        
+        result.append({"time": s, "booked": is_booked})
+        
+    return result
 
 async def book_slot(doctor_id: str, date: str, time: str):
     """Checks if a slot is available before booking."""
     # 1. Check leave
     leave = await db["doctor_leaves"].find_one({
         "doctor_id": doctor_id,
-        "date": date
+        "date": date,
+        "status": "approved"
     })
     if leave:
         return False
@@ -86,3 +118,16 @@ async def book_slot(doctor_id: str, date: str, time: str):
 async def release_slot(doctor_id: str, date: str, time: str):
     """Optional: Release a locked slot (currently no-op as appointments are source of truth)."""
     return True
+
+async def get_schedule(doctor_id: str):
+    """Fetch the schedule of a doctor."""
+    return await schedules_collection.find_one({"doctor_id": doctor_id})
+
+async def is_doctor_on_leave(doctor_id: str, date: str):
+    """Check if the doctor is on leave on a given date."""
+    leave = await db["doctor_leaves"].find_one({
+        "doctor_id": doctor_id,
+        "date": date,
+        "status": "approved"
+    })
+    return bool(leave)

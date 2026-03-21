@@ -1,8 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from app.core.role_checker import get_doctor_user
 from app.models.schedule import DoctorScheduleUpdate, LeaveCreate
+from app.models.doctor_model import DoctorUpdate
 from app.services import leave_service, doctor_service, scheduling_service
 from app.core.logger import logger
+from app.database import doctors_collection, users_collection
+from bson import ObjectId
+import os
+import uuid
 from typing import List
 
 router = APIRouter(prefix="/api/v1/doctor", tags=["Doctor Portal"])
@@ -21,31 +26,67 @@ async def get_doctor_profile(current_user=Depends(get_doctor_user)):
         "phone": current_user.get("phone"),
         "specialization": doctor.get("specialization"),
         "experience": doctor.get("experience"),
-        "consultation_fee": doctor.get("consultation_fee"),
-        "bio": doctor.get("bio", "No bio provided yet."),
-        "education": doctor.get("education", []),
-        "certifications": doctor.get("certifications", []),
+        "qualification": doctor.get("qualification"),
+        "consultation_fee": doctor.get("consultation_fee", 500),
+        "about": doctor.get("about", doctor.get("bio", "")),
         "location": doctor.get("location", "Not specified"),
-        "languages": doctor.get("languages", ["English"]),
-        "profile_img": doctor.get("profile_img")
+        "profile_image_url": doctor.get("profile_image_url", doctor.get("profile_img")),
+        "profile_image_source": doctor.get("profile_image_source"),
+        "average_rating": doctor.get("average_rating", 0.0),
+        "total_reviews": doctor.get("total_reviews", 0)
     }
 
-@router.get("/leave")
-async def get_leaves(current_user=Depends(get_doctor_user)):
-    """Get all leave requests for the doctor."""
+@router.patch("/profile")
+async def update_doctor_profile(data: DoctorUpdate, current_user=Depends(get_doctor_user)):
     doctor = await doctor_service.get_doctor_by_user_id(str(current_user["_id"]))
     if not doctor:
-        return []
-    return await leave_service.get_doctor_leaves(doctor["_id"])
-
-@router.post("/leave")
-async def add_leave(leave: LeaveCreate, current_user=Depends(get_doctor_user)):
-    """Request a new leave."""
-    doctor = await doctor_service.get_doctor_by_user_id(str(current_user["_id"]))
-    if not doctor or doctor["_id"] != leave.doctor_id:
-        raise HTTPException(status_code=403, detail="Unauthorized")
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+    
+    update_data = data.dict(exclude_none=True)
+    
+    # If name or phone is updated, update the user record too
+    user_updates = {}
+    if "name" in update_data:
+        user_updates["name"] = update_data["name"]
+    if "phone" in update_data:
+        user_updates["phone"] = update_data["phone"]
         
-    leave_id = await leave_service.request_leave(leave.doctor_id, leave.date, leave.reason or "No reason provided")
-    if not leave_id:
-        raise HTTPException(status_code=400, detail="Leave already exists for this date.")
-    return {"message": "Leave requested", "leave_id": leave_id}
+    if user_updates:
+        # Crucial fix: current_user["_id"] is string, DB needs ObjectId
+        await users_collection.update_one(
+            {"_id": ObjectId(current_user["_id"])},
+            {"$set": user_updates}
+        )
+    
+    await doctor_service.update_doctor_profile(doctor["_id"], update_data)
+    return {"message": "Profile updated successfully"}
+
+@router.patch("/profile/image")
+async def upload_profile_image(file: UploadFile = File(...), current_user=Depends(get_doctor_user)):
+    doctor = await doctor_service.get_doctor_by_user_id(str(current_user["_id"]))
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+    
+    UPLOAD_DIR = "uploads/doctor_profiles"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+    file_ext = file.filename.split(".")[-1]
+    file_name = f"{uuid.uuid4()}.{file_ext}"
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    image_url = f"/uploads/doctor_profiles/{file_name}"
+
+    await doctors_collection.update_one(
+        {"_id": ObjectId(doctor["_id"])},
+        {
+            "$set": {
+                "profile_image_url": image_url,
+                "profile_image_source": "doctor"
+            }
+        }
+    )
+
+    return {"image_url": image_url}

@@ -2,17 +2,43 @@
 import { request } from './apiClient';
 
 // Public/Patient facing
-export const getAllDoctors = (params?: { specialization?: string }) => {
-    const query = new URLSearchParams(params as any).toString();
+export const getAllDoctors = (params?: { 
+    specialization?: string, 
+    location?: string,
+    min_experience?: number 
+}) => {
+    const paramsCopy = { ...params };
+    if (paramsCopy.specialization === 'All Specialties') delete paramsCopy.specialization;
+    if (paramsCopy.location === 'Any Location') delete paramsCopy.location;
+    
+    const query = new URLSearchParams(paramsCopy as any).toString();
     return request(`/doctors${query ? `?${query}` : ""}`);
 };
+
+export const getSpecializations = () => request(`/doctors/specializations`);
+export const getLocations = () => request(`/doctors/locations`);
 
 export const getDoctorSlots = (doctorId: string, date: string) => 
     request(`/doctors/${doctorId}/slots?date=${date}`);
 
+export const getPublicStats = () =>
+    request(`/doctors/stats`);
+
 // Doctor Portal specific (/doctor prefix)
 export const getPortalProfile = () => 
     request(`/doctor/profile`);
+
+export const updatePortalProfile = (data: any) =>
+    request(`/doctor/profile`, {
+        method: 'PATCH',
+        body: JSON.stringify(data)
+    });
+
+export const updatePortalProfileImage = (formData: FormData) =>
+    request(`/doctor/profile/image`, {
+        method: 'PATCH',
+        body: formData
+    });
 
 export const getPortalSchedule = (doctorId: string) => 
     request(`/doctor/schedule/${doctorId}`);
@@ -35,16 +61,16 @@ export const addLeave = (leaveData: any) =>
         body: JSON.stringify(leaveData)
     });
 
-export const getDoctorAppointments = (doctorId: string) =>
-    request(`/appointments/doctor/${doctorId}`);
+export const getDoctorAppointments = () =>
+    request(`/appointments/doctor/me`).then((res: any) => res.success ? res.data : res);
 
 export const updateAppointmentStatus = (appointmentId: string, status: string) =>
     request(`/appointments/${appointmentId}?status=${status}`, {
         method: 'PATCH'
-    });
+    }).then((res: any) => res.success ? res.data : res);
 
 export const getDoctorPatients = (doctorId: string) =>
-    request(`/appointments/doctor/${doctorId}/patients`);
+    request(`/appointments/doctor/${doctorId}/patients`).then((res: any) => res.success ? res.data : res);
 
 export const issuePrescription = (data: any) =>
     request(`/prescriptions/`, {

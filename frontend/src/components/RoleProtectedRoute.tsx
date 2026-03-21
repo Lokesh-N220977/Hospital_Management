@@ -20,11 +20,9 @@ export const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ allowedR
 
   // Force password change guard
   if (user.must_change_password) {
-    const isDoctorDashboard = user.role === 'doctor' && location.pathname === '/doctor/dashboard';
-    const isDedicatedPage = location.pathname === `/${user.role}/change-password`;
-    
-    if (!isDoctorDashboard && !isDedicatedPage) {
-      return <Navigate to={user.role === 'doctor' ? '/doctor/dashboard' : `/${user.role}/change-password`} replace />;
+    const isChangePasswordPage = location.pathname === `/${user.role}/change-password`;
+    if (!isChangePasswordPage) {
+      return <Navigate to={`/${user.role}/change-password`} replace />;
     }
   }
 

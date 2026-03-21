@@ -173,74 +173,99 @@ function Consultation() {
             )}
 
             {activeTab === "presc" && (
-              <div className="pd-card">
-                <div className="pd-card-header">
-                  <h3 className="pd-card-subtitle">Add New Prescription</h3>
-                </div>
-                <div className="pd-form-grid" style={{ marginBottom: 20 }}>
-                  <div className="pd-field">
-                    <label>Medicine Name</label>
-                    <input
-                      type="text"
-                      className="pd-input"
-                      placeholder="e.g. Paracetamol 500mg"
-                      value={medInput.name}
-                      onChange={(e) => setMedInput({ ...medInput, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="pd-field">
-                    <label>Dosage</label>
-                    <input
-                      type="text"
-                      className="pd-input"
-                      placeholder="e.g. 1-0-1"
-                      value={medInput.dosage}
-                      onChange={(e) => setMedInput({ ...medInput, dosage: e.target.value })}
-                    />
-                  </div>
-                  <div className="pd-field">
-                    <label>Duration</label>
-                    <input
-                      type="text"
-                      className="pd-input"
-                      placeholder="e.g. 5 Days"
-                      value={medInput.duration}
-                      onChange={(e) => setMedInput({ ...medInput, duration: e.target.value })}
-                    />
-                  </div>
-                  <div className="pd-field" style={{ justifyContent: 'flex-end', display: 'flex' }}>
-                    <button className="pd-action-btn-primary" style={{ height: '48px', width: '100%' }} onClick={addMedicine}>
-                      <Plus size={18} /> Add Medicine
-                    </button>
-                  </div>
+              <div className="pd-card" style={{ padding: '0', overflow: 'hidden' }}>
+                <div style={{ padding: '24px', borderBottom: '1.5px solid #f1f5f9', background: 'linear-gradient(to right, #f8fafc, #fff)' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                     <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#3b82f6', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Pill size={18} />
+                     </div>
+                     <div>
+                       <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#1e293b' }}>Issue Prescription</h3>
+                       <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>Pharmacological orders for current follow-up.</p>
+                     </div>
+                   </div>
                 </div>
 
-                <div className="pd-presc-table-wrap">
-                  <table className="pd-tiny-table">
-                    <thead>
-                      <tr>
-                        <th>Medicine</th>
-                        <th>Dosage</th>
-                        <th>Duration</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {medicines.map((m, i) => (
-                        <tr key={i}>
-                          <td>{m.name}</td>
-                          <td>{m.dosage}</td>
-                          <td>{m.duration}</td>
-                          <td><button className="pd-text-danger" onClick={() => removeMedicine(i)}><Trash2 size={16} /></button></td>
-                        </tr>
-                      ))}
-                      {medicines.length === 0 && (
+                <div style={{ padding: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '24px', background: '#f8fafc', padding: '20px', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+                    <div className="pd-field">
+                      <label style={{ fontWeight: 700, fontSize: '0.85rem', color: '#475569', marginBottom: '8px', display: 'block' }}>Medicine Name</label>
+                      <input
+                        type="text"
+                        className="pd-input"
+                        placeholder="e.g. Paracetamol 500mg"
+                        style={{ width: '100%', borderRadius: '10px', padding: '12px', border: '1.5px solid #e2e8f0' }}
+                        value={medInput.name}
+                        onChange={(e) => setMedInput({ ...medInput, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="pd-field">
+                      <label style={{ fontWeight: 700, fontSize: '0.85rem', color: '#475569', marginBottom: '8px', display: 'block' }}>Dosage Schema</label>
+                      <input
+                        type="text"
+                        className="pd-input"
+                        placeholder="e.g. 1-0-1"
+                        style={{ width: '100%', borderRadius: '10px', padding: '12px', border: '1.5px solid #e2e8f0' }}
+                        value={medInput.dosage}
+                        onChange={(e) => setMedInput({ ...medInput, dosage: e.target.value })}
+                      />
+                    </div>
+                    <div className="pd-field">
+                      <label style={{ fontWeight: 700, fontSize: '0.85rem', color: '#475569', marginBottom: '8px', display: 'block' }}>Duration</label>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                          type="text"
+                          className="pd-input"
+                          placeholder="e.g. 5 Days"
+                          style={{ flex: 1, borderRadius: '10px', padding: '12px', border: '1.5px solid #e2e8f0' }}
+                          value={medInput.duration}
+                          onChange={(e) => setMedInput({ ...medInput, duration: e.target.value })}
+                        />
+                        <button 
+                           className="pd-action-btn-primary" 
+                           style={{ padding: '0 20px', borderRadius: '10px', background: '#3b82f6', border: 'none', color: 'white', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 6px rgba(59, 130, 246, 0.2)' }} 
+                           onClick={addMedicine}
+                        >
+                          <Plus size={20} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pd-presc-table-wrap" style={{ border: '1.5px solid #f1f5f9', borderRadius: '16px', overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead style={{ background: '#f8fafc', borderBottom: '1.5px solid #f1f5f9' }}>
                         <tr>
-                          <td colSpan={4} style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>No medicines added yet.</td>
+                          <th style={{ textAlign: 'left', padding: '14px 20px', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Medicine Information</th>
+                          <th style={{ textAlign: 'left', padding: '14px 20px', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Timing/Dosage</th>
+                          <th style={{ textAlign: 'left', padding: '14px 20px', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Duration</th>
+                          <th style={{ textAlign: 'center', padding: '14px 20px', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Remove</th>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {medicines.map((m, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid #f8fafc', transition: 'all 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#fcfdfe'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
+                            <td style={{ padding: '16px 20px', fontWeight: 700, color: '#1e293b' }}>{m.name}</td>
+                            <td style={{ padding: '16px 20px', color: '#475569' }}><span style={{ background: '#f1f5f9', padding: '4px 10px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 600 }}>{m.dosage}</span></td>
+                            <td style={{ padding: '16px 20px', color: '#475569', fontSize: '0.9rem' }}>{m.duration}</td>
+                            <td style={{ padding: '16px 20px', textAlign: 'center' }}>
+                              <button 
+                                 style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', padding: '8px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }} 
+                                 onClick={() => removeMedicine(i)}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {medicines.length === 0 && (
+                          <tr>
+                            <td colSpan={4} style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontStyle: 'italic' }}>No pharmacological agents added to this clinical record yet.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

@@ -70,6 +70,14 @@ async def verify_otp(verify_data):
         # Link existing patients or create new one
         await _link_patient_to_user(user_id, phone, user_data["name"])
     
+    # If user was suspended, DO NOT allow login. User must re-register to reactivate.
+    if not user.get("is_active", True):
+        logger.warning(f"Login attempted on deleted account: {phone}")
+        raise HTTPException(
+            status_code=403, 
+            detail="Account deleted. Please register again to reactivate."
+        )
+    
     # 3. Clean up OTP
     await otp_collection.delete_many({"phone": phone})
     
@@ -99,6 +107,10 @@ async def login_email(login_data):
         logger.warning(f"Email login failed: {email} not found")
         raise HTTPException(status_code=401, detail="Invalid email or password")
         
+    if not user.get("is_active", True):
+        logger.warning(f"Email login attempted on deleted account: {email}")
+        raise HTTPException(status_code=403, detail="Account deleted. Please register again to reactivate.")
+        
     if user.get("role", "").lower() != role.lower():
         logger.warning(f"Email login failed: Role mismatch for {email}")
         raise HTTPException(status_code=403, detail="Role mismatch. Access denied.")
@@ -120,21 +132,26 @@ async def login_email(login_data):
             "phone": user.get("phone"),
             "email": user.get("email"),
             "role": user["role"],
-            "name": user.get("name")
+            "name": user.get("name"),
+            "must_change_password": user.get("must_change_password", False)
         }
     }
 
 # --- HELPERS ---
 
-async def _link_patient_to_user(user_id, phone, name):
+async def _link_patient_to_user(user_id, phone, name, age=None):
     # Check if Admin already created patient(s) with this phone (walk-ins)
     existing_patients = await patients_collection.find({"phone": phone}).to_list(100)
     
     if existing_patients:
         # Link ALL patients with this phone to this user account
+        update_set = {"user_id": user_id}
+        if age:
+            update_set["age"] = age
+            
         await patients_collection.update_many(
             {"phone": phone},
-            {"$set": {"user_id": user_id}}
+            {"$set": update_set}
         )
         logger.info(f"Linked {len(existing_patients)} existing patients to User {user_id}")
     else:
@@ -146,6 +163,9 @@ async def _link_patient_to_user(user_id, phone, name):
             "created_by": "self",
             "created_at": datetime.utcnow()
         }
+        if age:
+            patient_data["age"] = age
+            
         await patients_collection.insert_one(patient_data)
         logger.info(f"Created new primary patient record for User {user_id}")
 
@@ -156,12 +176,55 @@ async def register(user_data_obj):
     if user_data_obj.phone:
         existing_phone = await users_collection.find_one({"phone": user_data_obj.phone})
         if existing_phone:
+            # If suspended (deleted), reactivate and START FRESH
+            if not existing_phone.get("is_active", True):
+                u_id_str = str(existing_phone["_id"])
+                # 1. Update user to active
+                await users_collection.update_one(
+                    {"_id": existing_phone["_id"]},
+                    {"$set": {
+                        "is_active": True, 
+                        "status": "active", 
+                        "password": hash_password(user_data_obj.password) if user_data_obj.password else existing_phone.get("password"),
+                        "reactivated_at": datetime.utcnow()
+                    }}
+                )
+                
+                # 2. Archive old patient records so they don't appear in "My Profile" or "MyAppointments"
+                # We move user_id to legacy_user_id to keep the link for admin/analytics but hide from user
+                await patients_collection.update_many(
+                    {"user_id": u_id_str},
+                    {"$set": {"legacy_user_id": u_id_str, "user_id": None, "status": "archived_history"}}
+                )
+                
+                # 3. Create a NEW primary patient record for this "new" account session
+                await _link_patient_to_user(u_id_str, user_data_obj.phone, user_data_obj.name, getattr(user_data_obj, 'age', None))
+                
+                logger.info(f"User {user_data_obj.phone} reactivated with a FRESH profile.")
+                return True
             raise HTTPException(status_code=400, detail="Phone already registered")
             
     # Check email
     if user_data_obj.email:
         existing_email = await users_collection.find_one({"email": user_data_obj.email})
         if existing_email:
+            # If suspended, reactivate
+            if not existing_email.get("is_active", True):
+                await users_collection.update_one(
+                    {"_id": existing_email["_id"]},
+                    {"$set": {
+                        "is_active": True, 
+                        "status": "active",
+                        "password": hash_password(user_data_obj.password) if user_data_obj.password else existing_email.get("password"),
+                        "reactivated_at": datetime.utcnow()
+                    }}
+                )
+                await patients_collection.update_many(
+                    {"user_id": str(existing_email["_id"])},
+                    {"$set": {"is_active": True, "status": "active"}}
+                )
+                logger.info(f"User {user_data_obj.email} reactivated via email re-registration.")
+                return True
             raise HTTPException(status_code=400, detail="Email already registered")
 
     user_data = {
@@ -170,6 +233,7 @@ async def register(user_data_obj):
         "email": user_data_obj.email,
         "password": hash_password(user_data_obj.password) if user_data_obj.password else None,
         "role": user_data_obj.role or "patient",
+        "age": getattr(user_data_obj, 'age', None),
         "is_active": True,
         "created_at": datetime.utcnow()
     }
@@ -178,7 +242,7 @@ async def register(user_data_obj):
     user_id = str(user_res.inserted_id)
     
     if user_data["role"] == "patient":
-        await _link_patient_to_user(user_id, user_data_obj.phone, user_data_obj.name)
+        await _link_patient_to_user(user_id, user_data_obj.phone, user_data_obj.name, user_data.get("age"))
 
     logger.info(f"Manual registration: {user_data_obj.phone or user_data_obj.email}")
     return True
@@ -189,25 +253,58 @@ async def login(login_data_obj):
     db_user = await users_collection.find_one({"phone": login_data_obj.phone})
     if not db_user:
         raise HTTPException(status_code=401, detail="Invalid phone or password")
+        
+    if not db_user.get("is_active", True):
+        raise HTTPException(status_code=403, detail="Account deleted. Please register again.")
+        
     if not verify_password(login_data_obj.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
         
     token = create_access_token({"sub": db_user["phone"], "id": str(db_user["_id"]), "role": db_user["role"]})
-    return {"token": token, "user": {"id": str(db_user["_id"]), "name": db_user.get("name"), "role": db_user["role"]}}
+    return {
+        "token": token, 
+        "user": {
+            "id": str(db_user["_id"]), 
+            "name": db_user.get("name"), 
+            "role": db_user["role"],
+            "must_change_password": db_user.get("must_change_password", False)
+        }
+    }
 
 async def change_password(user_id: str, old_password: str, new_password: str):
     db_user = await users_collection.find_one({"_id": ObjectId(user_id)})
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
-    if not verify_password(old_password, db_user["password"]):
-        raise HTTPException(status_code=400, detail="Incorrect old password")
+    
+    # If user has a password, verify it first
+    if db_user.get("password"):
+        if not verify_password(old_password, db_user["password"]):
+            raise HTTPException(status_code=400, detail="Incorrect old password")
+    
     new_hashed = hash_password(new_password)
-    await users_collection.update_one({"_id": ObjectId(user_id)}, {"$set": {"password": new_hashed}})
-    return True
+    await users_collection.update_one(
+        {"_id": ObjectId(user_id)}, 
+        {"$set": {"password": new_hashed, "must_change_password": False}}
+    )
+    return {"message": "Password updated successfully"}
 
 async def update_user_profile(user_id: str, update_data: dict):
-    # Only allow safe fields
-    safe_data = {k: v for k, v in update_data.items() if k in ["name", "email", "gender"]}
+    # Only allow safe fields for user account
+    safe_data = {k: v for k, v in update_data.items() if k in ["name", "email", "gender", "age"]}
     if not safe_data: return False
+    
+    # 1. Update user account
     await users_collection.update_one({"_id": ObjectId(user_id)}, {"$set": safe_data})
+    
+    # 2. Sync with primary patient record
+    patient_sync = {k: v for k, v in safe_data.items() if k in ["name", "gender", "age"]}
+    if patient_sync:
+        await patients_collection.update_many(
+            {"user_id": user_id, "created_by": "self"},
+            {"$set": patient_sync}
+        )
+        # Also update any other records with same phone to keep consistency across walk-ins? 
+        # For now, just primary self is enough.
+        
+    logger.info(f"User profile synced for ID: {user_id}")
     return True

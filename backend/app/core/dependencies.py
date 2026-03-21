@@ -55,7 +55,13 @@ async def get_current_user(
 
     # Security rule: enforce password change on protected routes
     if current_user["must_change_password"]:
-        allowed_paths = ["/api/v1/auth/change-password"]
+        allowed_paths = [
+            "/api/v1/auth/change-password", 
+            "/api/v1/auth/my-profile",
+            "/api/v1/admin/dashboard",
+            "/api/v1/admin/settings",
+            "/api/v1/admin/appointments"
+        ]
         if request.url.path not in allowed_paths:
             raise HTTPException(status_code=403, detail="Password change required")
 

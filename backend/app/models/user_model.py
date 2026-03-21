@@ -8,6 +8,7 @@ class UserRegister(BaseModel):
     password: Optional[str] = None
     role: str = "patient"
     gender: Optional[str] = None
+    age: int
 
 class UserLogin(BaseModel):
     phone: Optional[str] = None
@@ -36,6 +37,7 @@ class UserProfile(BaseModel):
     phone: str
     email: Optional[EmailStr] = None
     gender: Optional[str] = None
+    age: int
 
 class PatientCreate(BaseModel):
     name: str
@@ -43,3 +45,4 @@ class PatientCreate(BaseModel):
     email: Optional[EmailStr] = None
     gender: Optional[str] = None
     relation: Optional[str] = None
+    age: int

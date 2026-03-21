@@ -6,6 +6,8 @@ import {
   Search, User
 } from "lucide-react"
 import { appointmentService } from "../../services/appointment.service"
+import { reviewService } from "../../services/reviewService"
+import ReviewModal from "../../components/ReviewModal"
 
 const statusIcons: Record<string, React.ReactNode> = {
   confirmed: <CheckCircle2 size={14} />,
@@ -28,19 +30,21 @@ function MyAppointments() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [reviewModal, setReviewModal] = useState<{ isOpen: boolean; appointmentId: string; existingReview?: any }>({ isOpen: false, appointmentId: "" })
+
+  const fetchAppointments = async () => {
+    setLoading(true)
+    try {
+      const data = await appointmentService.getMyAppointments()
+      setAppointments(data)
+    } catch (err) {
+      setError("Failed to load appointments.")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchAppointments = async () => {
-      setLoading(true)
-      try {
-        const data = await appointmentService.getMyAppointments()
-        setAppointments(data)
-      } catch (err) {
-        setError("Failed to load appointments.")
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchAppointments()
   }, [])
 
@@ -59,9 +63,27 @@ function MyAppointments() {
         // Refresh list
         const data = await appointmentService.getMyAppointments();
         setAppointments(data);
-      } catch (err) {
-        alert("Failed to cancel appointment.");
+      } catch (err: any) {
+        alert(err.response?.data?.detail || err.response?.data?.message || "Failed to cancel appointment.");
       }
+    }
+  }
+
+  const handleReviewSuccess = () => {
+    // Refresh list to update 'reviewed' status
+    fetchAppointments();
+  }
+
+  const handleOpenReview = async (apptId: string, reviewed: boolean) => {
+    if (reviewed) {
+      try {
+        const review = await reviewService.getAppointmentReview(apptId);
+        setReviewModal({ isOpen: true, appointmentId: apptId, existingReview: review });
+      } catch (err) {
+        alert("Could not load review data.");
+      }
+    } else {
+      setReviewModal({ isOpen: true, appointmentId: apptId });
     }
   }
 
@@ -176,29 +198,71 @@ function MyAppointments() {
                       <p className="ma-expand-label">Doctor ID</p>
                       <p className="ma-expand-val">{appt.doctor_id}</p>
                     </div>
-                    {appt.status === "cancelled" && appt.cancellation_reason && (
-                      <div style={{ gridColumn: 'span 2' }}>
-                        <p className="ma-expand-label" style={{ color: '#ef4444' }}>Cancellation Reason</p>
-                        <p className="ma-expand-val" style={{ color: '#b91c1c', fontWeight: 600 }}>{appt.cancellation_reason}</p>
+                    {(appt.status === "cancelled" || appt.status === "cancel") && (appt.cancel_reason || appt.cancellation_reason) && (
+                      <div className="ma-cancellation-block">
+                        <p className="ma-cancellation-label">Cancellation Reason</p>
+                        <p className="ma-cancellation-text">{appt.cancel_reason || appt.cancellation_reason}</p>
                       </div>
                     )}
                   </div>
                   {(appt.status === "booked" || appt.status === "confirmed") && (
                     <div className="ma-expand-actions" style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
                        <button 
-                         className="ma-action-btn ma-cancel" 
+                         className="ma-cancel-btn" 
                          onClick={() => handleCancel(appt._id)}
-                         style={{ backgroundColor: '#fee2e2', color: '#b91c1c', border: '1px solid #fca5a5', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
                        >
                          Cancel Appointment
                        </button>
+                    </div>
+                  )}
+                  {appt.status === "completed" && (
+                    <div className="ma-expand-actions" style={{ marginTop: '15px' }}>
+                      <button 
+                        className={`ma-review-btn ${appt.reviewed ? "ma-reviewed" : "ma-unreviewed"}`} 
+                        onClick={() => handleOpenReview(appt._id, appt.reviewed)}
+                      >
+                        {appt.reviewed ? "👁️ View Review" : "⭐ Add Review"}
+                      </button>
                     </div>
                   )}
                 </div>
               </div>
             </div>
           ))}
+        <div className="ma-legend">
+          <span className="ma-legend-title">Status Legend</span>
+          <div className="ma-legend-grid">
+            <div className="ma-legend-item">
+              <div className="ma-legend-dot" style={{ background: '#10b981' }} />
+              Confirmed
+            </div>
+            <div className="ma-legend-item">
+              <div className="ma-legend-dot" style={{ background: '#f59e0b' }} />
+              Pending
+            </div>
+            <div className="ma-legend-item">
+              <div className="ma-legend-dot" style={{ background: '#3b82f6' }} />
+              Booked
+            </div>
+            <div className="ma-legend-item">
+              <div className="ma-legend-dot" style={{ background: '#8b5cf6' }} />
+              Completed
+            </div>
+            <div className="ma-legend-item">
+              <div className="ma-legend-dot" style={{ background: '#ef4444' }} />
+              Cancelled
+            </div>
+          </div>
         </div>
+      </div>
+        <ReviewModal
+          key={`${reviewModal.appointmentId}-${reviewModal.existingReview ? 'view' : 'add'}`}
+          isOpen={reviewModal.isOpen}
+          onClose={() => setReviewModal({ isOpen: false, appointmentId: "", existingReview: undefined })}
+          appointmentId={reviewModal.appointmentId}
+          existingReview={reviewModal.existingReview}
+          onSuccess={handleReviewSuccess}
+        />
       </div>
     </PatientLayout>
   )

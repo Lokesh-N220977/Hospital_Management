@@ -110,12 +110,12 @@ function Leaves() {
                             <div style={{ textAlign: 'center', padding: '10px 20px', color: '#64748b' }}>
                                 <Calendar size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
                                 <p style={{ fontWeight: 600 }}>No planned absences recorded yet.</p>
-                                <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>Use the button above to block dates where you are unavailable.</p>
+                                <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>Use the button above to request dates where you are unavailable.</p>
                             </div>
                         ) : (
                             <div className="pd-break-list">
                                 {leaves.map(leave => (
-                                    <div key={leave._id} className="pd-break-item" style={{ padding: '16px', borderRadius: '14px', marginBottom: '16px' }}>
+                                    <div key={leave._id} className="pd-break-item" style={{ padding: '16px', borderRadius: '14px', marginBottom: '16px', border: '1px solid #f1f5f9' }}>
                                         <div className="pd-break-date" style={{ background: '#fef2f2', color: '#ef4444', width: '60px', height: '60px', borderRadius: '12px' }}>
                                             <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>
                                                 {new Date(leave.date || leave.leave_date).getDate() || "?"}
@@ -124,12 +124,12 @@ function Leaves() {
                                                 {leave.date || leave.leave_date ? new Date(leave.date || leave.leave_date).toLocaleDateString(undefined, { month: 'short' }).toUpperCase() : "N/A"}
                                             </span>
                                         </div>
-                                        <div className="pd-break-info" style={{ flex: 1 }}>
+                                        <div className="pd-break-info" style={{ flex: 1, paddingLeft: '16px' }}>
                                             <h4 style={{ margin: '0 0 6px 0', fontSize: '1.05rem', fontWeight: 800 }}>{leave.reason}</h4>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                    <Calendar size={14} /> Planned Offline (Override Active)
-                                                </span>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '8px' }}>
+                                                {leave.status === 'pending' && <span style={{ color: '#eab308', background: '#fef9c3', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>Waiting for approval</span>}
+                                                {leave.status === 'approved' && <span style={{ color: '#22c55e', background: '#dcfce7', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>Leave confirmed</span>}
+                                                {leave.status === 'rejected' && <span style={{ color: '#ef4444', background: '#fee2e2', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>Leave rejected</span>}
                                             </div>
                                         </div>
                                     </div>
@@ -141,8 +141,8 @@ function Leaves() {
                     <div className="pd-side-stack">
                         <div className="pd-card pd-card--premium">
                             <AlertCircle className="pd-premium-star" size={32} />
-                            <h3 style={{ margin: '16px 0 8px 0', fontWeight: 800 }}>Active Protocols</h3>
-                            <p style={{ fontSize: '0.9rem', opacity: 0.9, lineHeight: 1.6 }}>Marking an absence will automatically block all consulting slots for that date. Any pre-booked appointments will be flagged for review.</p>
+                            <h3 style={{ margin: '16px 0 8px 0', fontWeight: 800 }}>Approval Protocols</h3>
+                            <p style={{ fontSize: '0.9rem', opacity: 0.9, lineHeight: 1.6 }}>Marking an absence will submit a request to the admin. Once approved, it will automatically block all consulting slots for that date and cancel overlapping appointments.</p>
                         </div>
                     </div>
                 </div>
@@ -158,7 +158,14 @@ function Leaves() {
 
                         <div className="pd-field" style={{ marginBottom: '20px' }}>
                             <label style={{ fontWeight: 800, color: '#1e293b', display: 'block', marginBottom: '8px' }}>Absence Date</label>
-                            <input type="date" className="pd-input" value={leaveDate} onChange={(e) => setLeaveDate(e.target.value)} style={{ padding: '14px' }} />
+                            <input 
+                                type="date" 
+                                className="pd-input" 
+                                value={leaveDate} 
+                                onChange={(e) => setLeaveDate(e.target.value)} 
+                                onClick={(e) => (e.target as any).showPicker && (e.target as any).showPicker()}
+                                style={{ padding: '14px' }} 
+                            />
                         </div>
                         <div className="pd-field" style={{ marginBottom: '32px' }}>
                             <label style={{ fontWeight: 800, color: '#1e293b', display: 'block', marginBottom: '8px' }}>Reason for Absence</label>

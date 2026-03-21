@@ -1,4 +1,3 @@
-// export default function FindDoctors() { return <div>FindDoctors</div>; }
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import PublicNavbar from '../../components/layout/public/PublicNavbar';
@@ -7,33 +6,76 @@ import {
     FaSearch, FaBriefcase, FaStar, FaMapMarkerAlt, 
     FaClock, FaArrowRight, FaHandPointer, FaUserCheck
 } from 'react-icons/fa';
+import { getAllDoctors, getSpecializations, getLocations } from '../../services/doctorService';
+
+const SERVER_URL = "http://localhost:8000";
 
 interface Doctor {
+    _id: string;
     name: string;
     specialization: string;
-    image: string;
-    experience: string;
-    rating: string;
-    hospital: string;
-    available: string;
+    profile_image_url?: string;
+    experience: number;
+    location?: string;
+    hospital?: string;
+    average_rating?: number;
+    total_reviews?: number;
 }
 
 const MOBILE_BP = 768;
 
 const FindDoctors: React.FC = () => {
+    const [doctors, setDoctors] = useState<Doctor[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [specialization, setSpecialization] = useState('All Specialties');
+    const [location, setLocation] = useState('Any Location');
+    const [minExperience, setMinExperience] = useState<number>(0);
+    const [availableSpecializations, setAvailableSpecializations] = useState<string[]>([]);
+    const [availableLocations, setAvailableLocations] = useState<string[]>([]);
     const [flipped, setFlipped] = useState<number | null>(null);
+    const [visibleCount, setVisibleCount] = useState(8);
     const gridRef = useRef<HTMLDivElement>(null);
 
-    const doctors: Doctor[] = [
-        { name: "Dr. Rahul Sharma",  specialization: "Cardiologist",     image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "12+ Years", rating: "4.9 ★", hospital: "Apollo Heart Center",   available: "Mon 10:00 AM" },
-        { name: "Dr. Priya Patel",   specialization: "Dermatologist",    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "8+ Years",  rating: "4.8 ★", hospital: "City Skin Clinic",      available: "Tue 2:00 PM"  },
-        { name: "Dr. Ananya Singh",  specialization: "Dentist",          image: "https://images.unsplash.com/photo-1559839734-2b71f1536780?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "6+ Years",  rating: "4.7 ★", hospital: "Bright Smile Dental",   available: "Wed 11:00 AM" },
-        { name: "Dr. Rohan Gupta",   specialization: "Orthopedic",       image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "10+ Years", rating: "4.9 ★", hospital: "Bone & Joint Clinic",   available: "Thu 3:00 PM"  },
-        { name: "Dr. John Davis",    specialization: "General Physician", image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "15+ Years", rating: "5.0 ★", hospital: "City General Hospital", available: "Mon 9:00 AM"  },
-        { name: "Dr. Emily White",   specialization: "Pediatrician",     image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "9+ Years",  rating: "4.8 ★", hospital: "Kids Care Center",      available: "Fri 1:00 PM"  },
-        { name: "Dr. Vikram Rao",    specialization: "Neurologist",      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "14+ Years", rating: "5.0 ★", hospital: "Apollo Neuro Center",   available: "Fri 4:00 PM"  },
-        { name: "Dr. Chloe Smith",   specialization: "Psychiatrist",     image: "https://images.unsplash.com/photo-1559839734-2b71f1536780?auto=format&fit=crop&w=500&h=600&q=80&crop=faces", experience: "7+ Years",  rating: "4.6 ★", hospital: "MindCare Clinic",       available: "Sat 10:00 AM" },
-    ];
+    const fetchFilters = async () => {
+        try {
+            const [specs, locs] = await Promise.all([
+                getSpecializations(),
+                getLocations()
+            ]);
+            if (specs) setAvailableSpecializations(specs);
+            if (locs) setAvailableLocations(locs);
+        } catch (error) {
+            console.error("Error fetching filters:", error);
+        }
+    };
+
+    const fetchDoctors = async (paramsOverride?: any) => {
+        setLoading(true);
+        try {
+            const params = {
+                specialization: paramsOverride?.specialization ?? specialization,
+                location: paramsOverride?.location ?? location,
+                min_experience: paramsOverride?.minExperience ?? minExperience,
+                ...paramsOverride
+            };
+            const data = await getAllDoctors(params);
+            if (data) setDoctors(data);
+        } catch (error) {
+            console.error("Error fetching doctors:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFilters();
+        fetchDoctors();
+    }, []);
+
+    const handleSearch = () => {
+        fetchDoctors();
+    };
 
     const testimonials = [
         { text: "Booking with Dr. Sharma was very smooth and professional. The seamless platform matched me with the right specialist right away.", author: "Arjun K.", role: "Cardiology Patient", initials: "AK", color: "#007bff" },
@@ -98,21 +140,60 @@ const FindDoctors: React.FC = () => {
                     <div className="search-card">
                         <div className="filter-group">
                             <label>Search Doctor</label>
-                            <input type="text" placeholder="Name or Specialization..." />
+                            <input 
+                                type="text" 
+                                placeholder="Name or Specialization..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
                         <div className="filter-group">
                             <label>Specialization</label>
-                            <select><option>All Specialties</option><option>Cardiology</option><option>Dermatology</option><option>Dentistry</option><option>Orthopedic</option><option>Neurology</option></select>
+                            <select 
+                                value={specialization}
+                                onChange={(e) => {
+                                    setSpecialization(e.target.value);
+                                    fetchDoctors({ specialization: e.target.value });
+                                }}
+                            >
+                                <option>All Specialties</option>
+                                {availableSpecializations.map(s => (
+                                    <option key={s} value={s}>{s}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="filter-group">
                             <label>Location</label>
-                            <select><option>Any Location</option><option>Mumbai</option><option>Delhi</option><option>Bangalore</option></select>
+                            <select 
+                                value={location}
+                                onChange={(e) => {
+                                    setLocation(e.target.value);
+                                    fetchDoctors({ location: e.target.value });
+                                }}
+                            >
+                                <option>Any Location</option>
+                                {availableLocations.map(l => (
+                                    <option key={l} value={l}>{l}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="filter-group">
                             <label>Experience</label>
-                            <select><option>Any Experience</option><option>5+ Years</option><option>10+ Years</option><option>15+ Years</option></select>
+                            <select 
+                                value={minExperience}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    setMinExperience(val);
+                                    fetchDoctors({ minExperience: val });
+                                }}
+                            >
+                                <option value="0">Any Experience</option>
+                                <option value="5">5+ Years</option>
+                                <option value="10">10+ Years</option>
+                                <option value="15">15+ Years</option>
+                            </select>
                         </div>
-                        <button className="btn-search"><FaSearch /></button>
+                        <button className="btn-search" onClick={handleSearch}><FaSearch /></button>
                     </div>
                 </div>
             </section>
@@ -121,76 +202,122 @@ const FindDoctors: React.FC = () => {
             <section className="doctors-list-section">
                 <div className="container">
                     <div className="flip-doctors-grid" ref={gridRef}>
-                        {doctors.map((doc, idx) => (
-                            <div
-                                key={idx}
-                                className={`flip-card${flipped === idx ? ' tapped' : ''}`}
-                                onClick={() => handleCardClick(idx)}
-                                role="button"
-                                aria-label={`View details for ${doc.name}`}
-                            >
-                                <div className="flip-card-inner">
-                                    {/* Front */}
-                                    <div className="flip-front">
-                                        <div className="flip-img">
-                                            <img src={doc.image} alt={doc.name} />
-                                            <div className="flip-spec-badge">{doc.specialization}</div>
-                                            
-                                            {/* Floating Stats */}
-                                            <div className="sc-floating-meta">
-                                                <div className="sc-chip experience">
-                                                    <FaBriefcase /> {doc.experience.split(' ')[0]}
-                                                </div>
-                                                <div className="sc-chip rating">
-                                                    <FaStar /> {doc.rating.split(' ')[0]}
-                                                </div>
-                                            </div>
-
-                                            <div className="sc-img-overlay">
-                                                <div className="sc-name-row">
-                                                    <h3 className="sc-name">{doc.name}</h3>
-                                                    <FaUserCheck className="sc-verified" />
-                                                </div>
-                                                <p className="sc-spec">{doc.specialization}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flip-front-body">
-                                            <p className="flip-hint">
-                                                <FaHandPointer className="flip-hint-icon" />
-                                                <span className="hint-desktop">Hover</span>
-                                                <span className="hint-mobile">Tap</span>
-                                                {' '}to view details
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Back */}
-                                    <div className="flip-back">
-                                        <div className="flip-back-content">
-                                            <h3 className="flip-back-name">{doc.name}</h3>
-                                            <p className="flip-back-spec">{doc.specialization}</p>
-                                            <ul className="flip-details">
-                                                <li><FaBriefcase /> {doc.experience} Experience</li>
-                                                <li><FaStar />     {doc.rating} Rating</li>
-                                                <li><FaMapMarkerAlt /> {doc.hospital}</li>
-                                                <li><FaClock />    Next: {doc.available}</li>
-                                            </ul>
-                                            <Link
-                                                to="/login"
-                                                className="flip-book-btn"
-                                                onClick={e => e.stopPropagation()}
-                                            >
-                                                Book Now <FaArrowRight />
-                                            </Link>
-                                        </div>
-                                    </div>
+                        {loading ? (
+                            <div className="loading-state">Loading doctors...</div>
+                        ) : doctors.length > 0 ? (() => {
+                            const filtered = doctors.filter(doc => 
+                                doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                doc.specialization.toLowerCase().includes(searchTerm.toLowerCase())
+                            );
+                            
+                            if (filtered.length === 0) return (
+                                <div className="no-results" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '100px 0', color: '#64748b' }}>
+                                    <p>No doctors found matching your criteria.</p>
+                                    <button onClick={() => { setSearchTerm(''); setSpecialization('All Specialties'); setLocation('Any Location'); setMinExperience(0); fetchDoctors(); }} style={{ marginTop: '15px', background: 'none', border: '1px solid #007bff', color: '#007bff', padding: '8px 20px', borderRadius: '50px', cursor: 'pointer' }}>Clear All Filters</button>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            );
 
-                    <div className="load-more">
-                        <button className="btn-load-more">Load More Doctors</button>
+                            return (
+                                <>
+                                    {filtered.slice(0, visibleCount).map((doc, idx) => (
+                                        <div
+                                            key={doc._id || idx}
+                                            className={`flip-card${flipped === idx ? ' tapped' : ''}`}
+                                            onClick={() => handleCardClick(idx)}
+                                            role="button"
+                                            aria-label={`View details for ${doc.name}`}
+                                        >
+                                            <div className="flip-card-inner">
+                                                {/* Front */}
+                                                <div className="flip-front">
+                                                    <div className="flip-img">
+                                                        <img 
+                                                            src={doc.profile_image_url 
+                                                                ? (doc.profile_image_url.startsWith('http') ? doc.profile_image_url : `${SERVER_URL}${doc.profile_image_url}`)
+                                                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(doc.name)}&background=random&size=500`
+                                                            } 
+                                                            alt={doc.name} 
+                                                        />
+                                                        <div className="flip-spec-badge">{doc.specialization}</div>
+                                                        
+                                                        {/* Floating Stats */}
+                                                        <div className="sc-floating-meta">
+                                                            <div className="sc-chip experience">
+                                                                <FaBriefcase /> {String(doc.experience).split(' ')[0]} Years
+                                                            </div>
+                                                            <div className="sc-chip rating">
+                                                                <FaStar /> {doc.average_rating || "0.0"} ({doc.total_reviews || 0})
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="sc-img-overlay">
+                                                            <div className="sc-name-row">
+                                                                <h3 className="sc-name">{doc.name}</h3>
+                                                                <FaUserCheck className="sc-verified" />
+                                                            </div>
+                                                            <p className="sc-spec">{doc.specialization}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flip-front-body">
+                                                        <p className="flip-hint">
+                                                            <FaHandPointer className="flip-hint-icon" />
+                                                            <span className="hint-desktop">Hover</span>
+                                                            <span className="hint-mobile">Tap</span>
+                                                            {' '}to view details
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Back */}
+                                                <div className="flip-back">
+                                                    <div className="flip-back-content">
+                                                        <h3 className="flip-back-name">{doc.name}</h3>
+                                                        <p className="flip-back-spec">{doc.specialization}</p>
+                                                        <ul className="flip-details">
+                                                            <li><FaBriefcase /> {String(doc.experience).split(' ')[0]} Years Experience</li>
+                                                            <li><FaStar /> {doc.average_rating || "0.0"} ({doc.total_reviews || 0} reviews)</li>
+                                                            <li><FaMapMarkerAlt /> {doc.hospital || doc.location || "Available Nearby"}</li>
+                                                            <li><FaClock />    Next: Available Now</li>
+                                                        </ul>
+                                                        <Link
+                                                            to="/login"
+                                                            className="flip-book-btn"
+                                                            onClick={e => e.stopPropagation()}
+                                                        >
+                                                            Book Now <FaArrowRight />
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {filtered.length > visibleCount && (
+                                        <div className="load-more" style={{ gridColumn: '1 / -1', textAlign: 'center', marginTop: '40px' }}>
+                                            <button 
+                                                className="btn-load-more" 
+                                                onClick={() => setVisibleCount(prev => prev + 8)}
+                                                style={{
+                                                    backgroundColor: '#007bff',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    padding: '12px 30px',
+                                                    borderRadius: '8px',
+                                                    fontWeight: '700',
+                                                    cursor: 'pointer',
+                                                    boxShadow: '0 4px 12px rgba(0,123,255,0.2)'
+                                                }}
+                                            >
+                                                Load More Doctors
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })() : (
+                            <div className="no-results" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '100px 0', color: '#64748b' }}>
+                                <p>No doctors found matching your criteria.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>

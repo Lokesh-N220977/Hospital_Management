@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import PatientLayout from "../../components/layout/patient/PatientLayout"
 import {
   CalendarCheck,
-  History,
   Bell,
   Heart,
   ChevronRight,
@@ -64,24 +63,24 @@ function Dashboard() {
        value: stats.total,
        sub: "Lifetime appointments",
        color: "#3b82f6",
-       bg: "#eff6ff",
-    },
-    {
-       icon: Clock,
-       label: "Upcoming",
-       value: stats.upcoming,
-       sub: upcoming.length > 0 ? `Next: ${upcoming[0].date}` : "No upcoming visits",
-       color: "#10b981",
-       bg: "#ecfdf5",
-    },
-    {
-       icon: AlertCircle,
-       label: "Cancelled",
-       value: stats.cancelled,
-       sub: "Review history",
-       color: "#ef4444",
-       bg: "#fef2f2",
-    }
+        bg: "var(--p-primary-soft)",
+     },
+     {
+        icon: Clock,
+        label: "Upcoming",
+        value: stats.upcoming,
+        sub: upcoming.length > 0 ? `Next: ${upcoming[0].date}` : "No upcoming visits",
+        color: "#10b981",
+        bg: "rgba(16, 185, 129, 0.1)",
+     },
+     {
+        icon: AlertCircle,
+        label: "Cancelled",
+        value: stats.cancelled,
+        sub: "Review history",
+        color: "#ef4444",
+        bg: "rgba(239, 68, 68, 0.1)",
+     }
   ]
 
   const getInitials = (name: string) => {
@@ -118,35 +117,36 @@ function Dashboard() {
           <div className="pd-alerts-section" style={{ marginBottom: '24px' }}>
             {data.alerts.map((alert: any) => (
               <div key={alert._id} className="pd-alert-banner" style={{ 
-                background: '#fff1f2', 
+                background: 'var(--p-bg-main)', 
                 borderLeft: '5px solid #e11d48', 
                 padding: '16px', 
                 borderRadius: '8px', 
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                boxShadow: 'var(--p-shadow-sm)',
                 marginBottom: '12px',
                 display: 'flex',
                 alignItems: 'start',
-                gap: '12px'
+                gap: '12px',
+                border: '1px solid var(--p-border)'
               }}>
                 <AlertCircle size={24} color="#e11d48" style={{ marginTop: '2px', flexShrink: 0 }} />
                 <div>
-                  <h4 style={{ color: '#9f1239', margin: '0 0 4px 0', fontSize: '1rem', fontWeight: 700 }}>
+                  <h4 style={{ color: '#e11d48', margin: '0 0 4px 0', fontSize: '1rem', fontWeight: 700 }}>
                     Appointment Cancelled by Provider
                   </h4>
-                  <p style={{ color: '#4b5563', margin: 0, fontSize: '0.9rem' }}>
+                  <p style={{ color: 'var(--p-text-muted)', margin: 0, fontSize: '0.9rem' }}>
                     Your visit with <strong>{alert.doctor_name}</strong> on <strong>{alert.date}</strong> at <strong>{alert.time}</strong> has been cancelled.
                   </p>
                   <div style={{ 
                     marginTop: '8px', 
                     padding: '8px 12px', 
-                    background: 'rgba(225, 29, 72, 0.05)', 
+                    background: 'rgba(225, 29, 72, 0.1)', 
                     borderRadius: '6px',
                     fontSize: '0.85rem',
-                    color: '#be123c',
+                    color: '#e11d48',
                     fontStyle: 'italic',
-                    border: '1px solid rgba(225, 29, 72, 0.1)'
+                    border: '1px solid rgba(225, 29, 72, 0.2)'
                   }}>
-                    <strong>Reason:</strong> {alert.cancellation_reason || "Scheduled administrative leave."}
+                    <strong>Reason:</strong> {alert.cancel_reason || alert.cancellation_reason || "Scheduled administrative leave."}
                   </div>
                 </div>
               </div>
@@ -188,7 +188,7 @@ function Dashboard() {
             <div className="pd-appointments-list">
               {upcoming.length > 0 ? upcoming.map((appt: any) => (
                 <div className="pd-appt-item" key={appt._id}>
-                  <div className="pd-appt-avatar" style={{ background: '#eef2ff', color: '#4f46e5' }}>{getInitials(appt.doctor_name)}</div>
+                  <div className="pd-appt-avatar" style={{ background: 'var(--p-primary-soft)', color: 'var(--p-primary)' }}>{getInitials(appt.doctor_name)}</div>
                   <div className="pd-appt-info">
                     <p className="pd-appt-doctor">{appt.doctor_name}</p>
                     <p className="pd-appt-specialty">{appt.specialization}</p>
@@ -233,9 +233,9 @@ function Dashboard() {
                     <p className="pd-activity-text">
                        Appointment with {item.doctor_name} was {item.status}
                     </p>
-                    {item.status === 'cancelled' && item.cancellation_reason && (
+                    {(item.status === 'cancelled' || item.status === 'cancel') && (item.cancel_reason || item.cancellation_reason) && (
                       <p style={{ fontSize: '0.8rem', color: '#be123c', marginTop: '2px', fontWeight: 500 }}>
-                        Note: {item.cancellation_reason}
+                        Note: {item.cancel_reason || item.cancellation_reason}
                       </p>
                     )}
                     <p className="pd-activity-time">{item.date} at {item.time}</p>
@@ -263,14 +263,14 @@ function Dashboard() {
                   alignItems: 'center', 
                   gap: '12px', 
                   padding: '12px 0',
-                  borderBottom: i === patients.length - 1 ? 'none' : '1px solid #f1f5f9'
+                  borderBottom: i === patients.length - 1 ? 'none' : '1px solid var(--p-border)'
                 }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: p.created_by === 'self' ? '#dcfce7' : '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: p.created_by === 'self' ? '#166534' : '#64748b' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: p.created_by === 'self' ? 'var(--p-primary-soft)' : 'var(--p-bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: p.created_by === 'self' ? 'var(--p-primary)' : 'var(--p-text-light)' }}>
                     {getInitials(p.name)}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: '#1e293b' }}>{p.name}</p>
-                    <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>{p.created_by === 'self' ? 'Primary' : 'Family Member'}</p>
+                    <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: 'var(--p-text-main)' }}>{p.name}</p>
+                    <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--p-text-light)' }}>{p.created_by === 'self' ? 'Primary' : 'Family Member'}</p>
                   </div>
                 </div>
               )) : (

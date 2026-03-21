@@ -2,6 +2,9 @@ from datetime import datetime
 from app.database import doctor_leaves_collection, appointments_collection
 from bson import ObjectId
 from app.core.logger import logger
+from app.services import appointment_service, patient_service
+from app.services.notification_service import NotificationService
+from app.models.notification_model import NotificationType
 
 async def request_leave(doctor_id: str, date: str, reason: str):
     # Check if leave already exists for this date
@@ -13,31 +16,30 @@ async def request_leave(doctor_id: str, date: str, reason: str):
     if existing:
         return None # Indicate already exists
 
+    now = datetime.now()
     leave_data = {
         "doctor_id": doctor_id,
         "date": date,
         "reason": reason,
         "status": "pending",
-        "requested_at": datetime.utcnow()
+        "created_at": now,
+        "updated_at": now
     }
     result = await doctor_leaves_collection.insert_one(leave_data)
     
-    # Cancel all appointments for that doctor on that day
-    cancel_res = await appointments_collection.update_many(
-        {
-            "doctor_id": doctor_id,
-            "date": date,
-            "status": {"$in": ["booked", "confirmed", "pending"]}
-        },
-        {
-            "$set": {
-                "status": "cancelled",
-                "cancellation_reason": f"Doctor on leave: {reason}"
-            }
-        }
-    )
+    # Notify Admin
+    from app.database import users_collection
+    admin_user = await users_collection.find_one({"role": "admin"})
+    if admin_user:
+        await NotificationService.create_notification(
+            str(admin_user["_id"]),
+            "admin",
+            "Leave Request",
+            f"Doctor {doctor_id} has requested leave for {date}.",
+            "doctor_leave_request"
+        )
     
-    logger.info(f"Leave approved for doctor {doctor_id} on {date}. {cancel_res.modified_count} appointments cancelled.")
+    logger.info(f"Leave requested (pending) for doctor {doctor_id} on {date}.")
     return str(result.inserted_id)
 
 async def approve_leave(leave_id: str):
@@ -48,30 +50,65 @@ async def approve_leave(leave_id: str):
         
     await doctor_leaves_collection.update_one(
         {"_id": ObjectId(leave_id)},
-        {"$set": {"status": "approved"}}
+        {"$set": {"status": "approved", "updated_at": datetime.now()}}
     )
     
-    # Cancel all appointments for that doctor on that day
-    cancel_res = await appointments_collection.update_many(
+    # Atomic update for all appointments on that doctor/date
+    doc_id_val = leave["doctor_id"]
+    try:
+        doc_ids = [ObjectId(doc_id_val), str(doc_id_val)]
+    except:
+        doc_ids = [doc_id_val]
+        
+    date_val = leave["date"]
+    
+    # Find affected appointments to notify users
+    affected_appointments = await appointments_collection.find({
+        "doctor_id": {"$in": doc_ids},
+        "$or": [{"appointment_date": date_val}, {"date": date_val}],
+        "status": "booked"
+    }).to_list(length=1000)
+
+    # Atomic update for all appointments on that doctor/date
+    result = await appointments_collection.update_many(
         {
-            "doctor_id": leave["doctor_id"],
-            "date": leave["date"],
-            "status": {"$in": ["booked", "confirmed", "pending"]}
+            "doctor_id": {"$in": doc_ids},
+            "$or": [{"appointment_date": date_val}, {"date": date_val}],
+            "status": "booked"
         },
         {
             "$set": {
                 "status": "cancelled",
-                "cancellation_reason": f"Doctor on leave: {leave.get('reason', 'Scheduled leave')}"
+                "cancel_reason": "Doctor on approved leave",
+                "cancelled_by": "admin",
+                "is_active": False,
+                "updated_at": datetime.now()
             }
         }
     )
-    logger.info(f"Leave approved for doctor {leave['doctor_id']} on {leave['date']}. {cancel_res.modified_count} appointments cancelled.")
+    
+    # Notify affected patients
+    for appt in affected_appointments:
+        patient_id_str = str(appt.get("patient_id"))
+        patient = await patient_service.get_patient_by_id(patient_id_str)
+        if patient:
+            user_id_to_notify = str(patient.get("user_id")) if patient.get("user_id") else patient_id_str
+            doc_name = appt.get("doctor_name", "your doctor")
+            await NotificationService.create_notification(
+                user_id_to_notify,
+                "patient",
+                "Doctor Unavailable",
+                f"Your appointment with Dr. {doc_name} on {date_val} has been cancelled due to doctor leave.",
+                "doctor_leave"
+            )
+            
+    logger.info(f"Leave approved for doctor {doc_id_val} on {date_val}. {result.modified_count} appointments cancelled.")
     return True
 
 async def reject_leave(leave_id: str):
     result = await doctor_leaves_collection.update_one(
         {"_id": ObjectId(leave_id)},
-        {"$set": {"status": "rejected"}}
+        {"$set": {"status": "rejected", "updated_at": datetime.now()}}
     )
     if result.matched_count == 0:
         logger.warning(f"Leave rejection failed: ID {leave_id} not found")
@@ -80,7 +117,7 @@ async def reject_leave(leave_id: str):
     return True
 
 async def is_on_leave(doctor_id: str, date: str):
-    """Check if a doctor is on approved leave for a given date."""
+    """Check if a doctor is on EXPLICITLY approved leave for a given date."""
     leave = await doctor_leaves_collection.find_one({
         "doctor_id": doctor_id,
         "date": date,
@@ -91,10 +128,13 @@ async def is_on_leave(doctor_id: str, date: str):
 async def get_doctor_leaves(doctor_id: str):
     """Fetch all leave requests for a doctor."""
     leaves = []
-    async for leave in doctor_leaves_collection.find({"doctor_id": doctor_id}):
+    async for leave in doctor_leaves_collection.find({"doctor_id": doctor_id}).sort("created_at", -1):
         leave["_id"] = str(leave["_id"])
-        # Ensure we return 'date' field even if old records have 'leave_date'
         if "leave_date" in leave and "date" not in leave:
             leave["date"] = leave["leave_date"]
+        # Standardize for frontend that might be looking for status
+        if "status" not in leave:
+            leave["status"] = "approved"  # old default
         leaves.append(leave)
     return leaves
+

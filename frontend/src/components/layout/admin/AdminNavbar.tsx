@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react"
-import { Bell, Menu, ChevronDown, UserCircle, Settings, LogOut } from "lucide-react"
+import { Menu, ChevronDown, UserCircle, Settings, LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import NotificationDropdown from "../../ui/NotificationDropdown"
 
 const AdminNavbar = ({ onMenuClick }: { onMenuClick: () => void }) => {
   const navigate = useNavigate()
@@ -28,14 +29,14 @@ const AdminNavbar = ({ onMenuClick }: { onMenuClick: () => void }) => {
         <button className="pn-hamburger" onClick={onMenuClick}>
           <Menu size={22} />
         </button>
-        <h1 className="pn-page-title">Admin Dashboard</h1>
+        <div className="pn-title-wrap">
+          <h1 className="pn-page-title">Admin Dashboard</h1>
+          <p className="pn-breadcrumb">MedicPulse &rsaquo; System Overview</p>
+        </div>
       </div>
 
       <div className="pn-right">
-        <button className="pn-icon-btn">
-          <Bell size={20} />
-          <span className="pn-bell-dot">5</span>
-        </button>
+        <NotificationDropdown />
 
         <div className="pn-profile" onClick={() => setShowDropdown(!showDropdown)} ref={dropdownRef}>
           <div className="pn-avatar" style={{ background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>AD</div>

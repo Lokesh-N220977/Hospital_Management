@@ -41,7 +41,7 @@ async def update_family_member(patient_id: str, update_data: dict, current_user=
     if patient.get("user_id") != str(current_user["_id"]):
         raise HTTPException(status_code=403, detail="Access denied")
     # Cannot edit primary self record's phone (identity key)
-    safe = {k: v for k, v in update_data.items() if k in ["name", "gender", "relation", "phone"]}
+    safe = {k: v for k, v in update_data.items() if k in ["name", "gender", "relation", "phone", "age"]}
     await patient_service.update_patient(patient_id, safe)
     return {"message": "Member updated successfully"}
 
