@@ -17,9 +17,9 @@ async def get_public_stats():
     stats = await analytics_service.get_system_analytics()
     # Return only public-safe stats
     return {
-        "total_doctors": stats["total_doctors"],
-        "total_patients": stats["total_patients"],
-        "total_appointments": stats["total_appointments"]
+        "total_doctors": stats.get("total_doctors", 0),
+        "total_patients": stats.get("total_patients", 0),
+        "total_appointments": stats.get("total_appointments", 0)
     }
 
 @router.get("/")

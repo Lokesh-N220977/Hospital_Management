@@ -10,9 +10,9 @@ import {
   UserCircle,
   LogOut,
   X,
-  HeartPulse,
   Settings
 } from "lucide-react"
+import logo from "../../../assets/logo.png"
 
 const navLinks = [
   { to: "/patient/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -66,10 +66,8 @@ const PatientSidebar = ({ mobileOpen = false, onClose }: PatientSidebarProps) =>
 
       <aside className={`patient-sidebar${mobileOpen ? " ps-open" : ""}`}>
         {/* Logo */}
-        <div className="ps-logo">
-          <div className="ps-logo-icon">
-            <HeartPulse size={22} />
-          </div>
+        <div className="ps-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src={logo} alt="Logo" style={{ height: '32px', width: 'auto' }} />
           <span className="ps-logo-text">MedicPulse</span>
           <button className="ps-close-btn" onClick={onClose}>
             <X size={20} />

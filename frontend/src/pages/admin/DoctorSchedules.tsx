@@ -14,7 +14,7 @@ function DoctorSchedules() {
     // Modal States
     const [showEditModal, setShowEditModal] = useState(false)
     const [currentSchedule, setCurrentSchedule] = useState<any>(null)
-    const [timeState, setTimeState] = useState({ start: "09:00", end: "17:00" })
+    const [timeState, setTimeState] = useState({ start: "09:00", end: "17:00", lunchStart: "", lunchEnd: "" })
     const [saving, setSaving] = useState(false)
 
     const fetchSchedules = useCallback(async (search: string) => {
@@ -51,11 +51,24 @@ function DoctorSchedules() {
     })
 
     const handleEditClick = (schedule: any) => {
-        const [start, end] = (schedule.working_hours || "09:00 - 17:00").split(" - ")
-        setTimeState({ start, end })
+        let start = schedule.start_time;
+        let end = schedule.end_time;
+        if (!start || !end) {
+            const splitHours = (schedule.working_hours || "09:00 - 17:00").split(" - ");
+            start = splitHours[0];
+            end = splitHours[1];
+        }
+
+        setTimeState({ 
+            start: start || "09:00", 
+            end: end || "17:00",
+            lunchStart: schedule.lunch_start_time || "",
+            lunchEnd: schedule.lunch_end_time || ""
+        })
         setCurrentSchedule({ 
             ...schedule, 
-            working_days: schedule.working_days || ["Mon", "Tue", "Wed", "Thu", "Fri"] 
+            working_days: schedule.working_days || ["Mon", "Tue", "Wed", "Thu", "Fri"],
+            slot_duration: schedule.slot_duration || 30
         })
         setShowEditModal(true)
     }
@@ -72,7 +85,29 @@ function DoctorSchedules() {
         setSaving(true)
         try {
             const updatedHours = `${timeState.start} - ${timeState.end}`
-            const payload = { ...currentSchedule, working_hours: updatedHours }
+            
+            // Auto-calculate capacity via rigorous subtraction of lunch minutes
+            const toMin = (t: string) => {
+                if (!t) return 0;
+                const [h, m] = t.split(":").map(Number);
+                return h * 60 + m;
+            }
+            const totalMin = toMin(timeState.end) - toMin(timeState.start);
+            const lunchMin = (timeState.lunchStart && timeState.lunchEnd && toMin(timeState.lunchEnd) > toMin(timeState.lunchStart)) 
+                ? toMin(timeState.lunchEnd) - toMin(timeState.lunchStart) : 0;
+            const finalMins = totalMin - lunchMin;
+            const calcSlots = finalMins > 0 ? Math.floor(finalMins / (currentSchedule.slot_duration || 30)) : 0;
+
+            const payload = { 
+                ...currentSchedule, 
+                working_hours: updatedHours,
+                start_time: timeState.start,
+                end_time: timeState.end,
+                lunch_start_time: timeState.lunchStart || null,
+                lunch_end_time: timeState.lunchEnd || null,
+                slots_per_day: calcSlots
+            }
+            
             await updateDoctorSchedule(currentSchedule._id, payload)
             setSchedules(prev => prev.map(s => s._id === currentSchedule._id ? payload : s))
             setSuccess(`Schedule for Dr. ${currentSchedule.doctor_name} updated successfully.`)
@@ -127,7 +162,7 @@ function DoctorSchedules() {
 
                 <div className="ad-card" style={{ position: 'relative', overflow: 'hidden' }}>
                     {loading && (
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(2px)', zIndex: 10, display: 'flex', justifyContent: 'center', pt: '100px' }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(2px)', zIndex: 10, display: 'flex', justifyContent: 'center', paddingTop: '100px' }}>
                             <Loader2 className="animate-spin" size={32} color="#3b82f6" style={{ marginTop: '100px' }} />
                         </div>
                     )}
@@ -199,7 +234,7 @@ function DoctorSchedules() {
                                                 </div>
                                             </td>
                                             <td>
-                                                <div style={{ px: '8px', py: '4px', background: '#3b82f610', color: '#3b82f6', borderRadius: '4px', display: 'inline-block', fontSize: '0.75rem', fontWeight: 700 }}>
+                                                <div style={{ padding: '4px 8px', background: '#3b82f610', color: '#3b82f6', borderRadius: '4px', display: 'inline-block', fontSize: '0.75rem', fontWeight: 700 }}>
                                                     {schedule.specialization}
                                                 </div>
                                             </td>
@@ -253,8 +288,8 @@ function DoctorSchedules() {
 
                 {/* Edit Schedule Modal */}
                 {showEditModal && currentSchedule && (
-                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
-                        <div className="ad-card" style={{ width: '550px', padding: '0', overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.4)', border: 'none' }}>
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
+                        <div className="ad-card" style={{ width: '100%', maxWidth: '600px', padding: '0', overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.4)', border: 'none', margin: 'auto' }}>
                             <div style={{ background: 'linear-gradient(135deg, #0dcb6e, #3b82f6)', padding: '24px 30px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div>
                                     <h3 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Shift Configuration</h3>
@@ -263,7 +298,7 @@ function DoctorSchedules() {
                                 <button onClick={() => setShowEditModal(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', color: '#fff', padding: '8px', cursor: 'pointer', display: 'flex' }}><X size={22} /></button>
                             </div>
                             
-                            <div style={{ padding: '35px' }}>
+                            <div style={{ padding: '35px', maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
                                 <div style={{ marginBottom: '30px' }}>
                                     <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', marginBottom: '15px', letterSpacing: '0.05em' }}>Working Days Selection</label>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
@@ -286,7 +321,7 @@ function DoctorSchedules() {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '35px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', marginBottom: '25px' }}>
                                     <div className="ad-field">
                                         <label>Shift Start Time</label>
                                         <div style={{ position: 'relative' }}>
@@ -309,6 +344,42 @@ function DoctorSchedules() {
                                             onChange={(e) => setTimeState({...timeState, end: e.target.value})}
                                         />
                                     </div>
+                                    <div className="ad-field">
+                                        <label>Lunch Start Time</label>
+                                        <input 
+                                            type="time" 
+                                            className="ad-input" 
+                                            style={{ width: '100%', height: '48px', fontSize: '1rem' }}
+                                            value={timeState.lunchStart} 
+                                            onChange={(e) => setTimeState({...timeState, lunchStart: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="ad-field">
+                                        <label>Lunch End Time</label>
+                                        <input 
+                                            type="time" 
+                                            className="ad-input" 
+                                            style={{ width: '100%', height: '48px', fontSize: '1rem' }}
+                                            value={timeState.lunchEnd} 
+                                            onChange={(e) => setTimeState({...timeState, lunchEnd: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="ad-field" style={{ marginBottom: '25px' }}>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>Slot Duration (Minutes)</label>
+                                    <select
+                                        className="ad-input"
+                                        style={{ height: '48px', fontSize: '1rem', fontWeight: 700 }}
+                                        value={currentSchedule.slot_duration || 30}
+                                        onChange={(e) => setCurrentSchedule({...currentSchedule, slot_duration: parseInt(e.target.value)})}
+                                    >
+                                        <option value={15}>15 Minutes</option>
+                                        <option value={30}>30 Minutes</option>
+                                        <option value={45}>45 Minutes</option>
+                                        <option value={60}>60 Minutes</option>
+                                    </select>
+                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '6px', display: 'block' }}>How long each patient appointment will last.</span>
                                 </div>
 
                                 <div className="ad-field" style={{ marginBottom: '35px' }}>
@@ -316,11 +387,22 @@ function DoctorSchedules() {
                                     <input 
                                         type="number" 
                                         className="ad-input" 
-                                        style={{ height: '48px', fontSize: '1.1rem', fontWeight: 700 }}
-                                        value={currentSchedule.slots_per_day} 
-                                        onChange={(e) => setCurrentSchedule({...currentSchedule, slots_per_day: parseInt(e.target.value) || 0})}
+                                        style={{ height: '48px', fontSize: '1.1rem', fontWeight: 700, background: '#f8fafc', color: '#94a3b8', cursor: 'not-allowed' }}
+                                        value={(() => {
+                                            const toMin = (t: string) => {
+                                                if (!t) return 0;
+                                                const [h, m] = t.split(":").map(Number);
+                                                return h * 60 + m;
+                                            }
+                                            const totalMin = toMin(timeState.end) - toMin(timeState.start);
+                                            const lunchMin = (timeState.lunchStart && timeState.lunchEnd && toMin(timeState.lunchEnd) > toMin(timeState.lunchStart)) 
+                                                ? toMin(timeState.lunchEnd) - toMin(timeState.lunchStart) : 0;
+                                            const finalMins = totalMin - lunchMin;
+                                            return finalMins > 0 ? Math.floor(finalMins / (currentSchedule.slot_duration || 30)) : 0;
+                                        })()} 
+                                        readOnly
                                     />
-                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '6px' }}>Recommended capacity: 16-24 slots per 8-hour shift.</span>
+                                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '6px', display: 'block' }}>Auto-calculated: (Shift − Lunch) ÷ Slot Duration</span>
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '15px' }}>

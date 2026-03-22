@@ -1,17 +1,32 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { FaPlusSquare, FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars, FaTimes } from 'react-icons/fa';
+
+import logo from '../../../assets/logo.png';
 
 const PublicNavbar: React.FC = () => {
     const [open, setOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    React.useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 50) {
+                setScrolled(true);
+            } else {
+                setScrolled(false);
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     return (
-        <nav className="navbar">
+        <nav className={`navbar pub-navbar ${scrolled ? 'scrolled' : 'not-scrolled'}`}>
             <div className="container navbar-content">
 
                 {/* Brand / Logo */}
                 <Link to="/" className="navbar-brand" onClick={() => setOpen(false)}>
-                    <FaPlusSquare className="brand-icon" />
+                    <img src={logo} alt="MedicPulse Logo" />
                     <span>MedicPulse</span>
                 </Link>
 

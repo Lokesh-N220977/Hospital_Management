@@ -26,8 +26,18 @@
 }
 
 @keyframes fadeInLeft {
-    from { opacity: 0; transform: translateX(-30px); }
+    from { opacity: 0; transform: translateX(-40px); }
     to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes floatY {
@@ -60,88 +70,337 @@
     animation: fadeInUp 0.7s ease both;
 }
 
+@media (max-width: 768px) {
+    .hero-particles {
+        display: none !important; /* Hide clutter on mobile */
+    }
+}
 
-.hero-section {
-    background: linear-gradient(-45deg, #0055cc, #1a7fe8, #005bb5, #0080ff, #003d99);
-    background-size: 400% 400%;
-    animation: heroShift 10s ease infinite;
-    padding: clamp(60px, 15vh, 130px) var(--space-unit);
-    text-align: center;
-    color: #ffffff;
-    position: relative;
+
+/* ── Hero v4 (Modern Split Layout) ── */
+.hero-v4 {
+    background: linear-gradient(135deg, #0055cc 0%, #1e40af 100%);
+    padding: 70px 0 100px; /* Reduced top space from 120px to 70px */
+    text-align: left;
+    min-height: auto;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 60vh;
 }
 
-/* Subtle floating orbs for depth */
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: -60px; left: -60px;
-    width: 350px; height: 350px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 50%;
-    animation: heroShift 14s ease infinite reverse;
-}
-.hero-section::after {
-    content: '';
-    position: absolute;
-    bottom: -80px; right: -80px;
-    width: 450px; height: 450px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 50%;
-    animation: heroShift 12s ease infinite;
+.hero-v4 .container {
+    animation: fadeInUp 0.8s ease-out both;
 }
 
-.hero-content {
-    position: relative;
-    z-index: 2;
+.hero-text-side {
+    animation: fadeInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.2s;
 }
 
-.hero-badge {
+.hero-image-side {
+    animation: fadeInRight 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.4s;
+}
+
+/* ─── Public Landing Navbar (fixed, transparent → white on scroll) ─── */
+/* ─── Public Landing Navbar (Always Solid White) ─── */
+.pub-navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    transition: padding 0.3s ease;
+    padding: 10px 0;
+    width: 100%;
+}
+
+/* ── Link colors: always blue/dark for high contrast ── */
+.pub-navbar .navbar-brand,
+.pub-navbar .navbar-brand span {
+    color: #1e40af !important;
+    text-shadow: none !important;
+}
+
+.pub-navbar .navbar-brand .brand-icon {
+    color: #007bff !important;
+}
+
+.navbar-brand img {
+    height: 40px !important;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img {
+    transform: scale(1.1);
+}
+
+.pub-navbar .nav-link {
+    color: #374151 !important;
+    text-shadow: none !important;
+}
+
+.pub-navbar .nav-link:hover,
+.pub-navbar .nav-link.active {
+    color: #1e40af !important;
+}
+
+.pub-navbar .btn-login {
+    color: #1e40af !important;
+    border: 1px solid #1e40af !important;
+    text-shadow: none !important;
+    background: transparent !important;
+}
+
+.pub-navbar .btn-login:hover {
+    background: #f0f7ff !important;
+}
+
+/* ── Register Button ── */
+.pub-navbar .btn-register {
+    background: #007bff !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 8px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.pub-navbar .btn-register:hover {
+    background: #0056b3 !important;
+    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+}
+
+/* ── Hamburger icon ── */
+.pub-navbar .hamburger {
+    color: #1e40af;
+    background: #f1f5f9;
+    border: none;
+}
+
+/* ── Mobile menu ── */
+@media (max-width: 992px) {
+    .pub-navbar .nav-right {
+        background: #ffffff !important;
+    }
+
+    .pub-navbar .nav-link {
+        color: #1e40af !important;
+        font-size: 1.1rem; /* Slightly smaller for mobile */
+        text-shadow: none !important;
+    }
+
+    .pub-navbar .navbar-brand img {
+        height: 32px !important; /* Smaller logo for mobile */
+    }
+
+    .pub-navbar .navbar-brand span {
+        font-size: 1.1rem !important;
+    }
+}
+
+.hero-v4 {
+    display: block; /* Override flex column */
+}
+
+.hero-container-v2 {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    align-items: center;
+    gap: 40px;
+}
+
+.hero-badge-v2 {
     display: inline-block;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
     padding: 8px 20px;
     border-radius: 50px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 25px;
-    letter-spacing: 0.5px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.hero-section .hero-title {
-    font-size: 3.8rem;
+.hero-title-v2 {
+    font-size: clamp(2.5rem, 5vw, 4.2rem);
     font-weight: 900;
-    margin-bottom: 20px;
-    line-height: 1.15;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    letter-spacing: -2px;
 }
 
-.hero-accent {
-    animation: priorityShimmer 3s ease-in-out infinite;
-    font-style: italic;
-    display: inline-block;
+.hero-accent-v2 {
+    color: #93c5fd;
+    text-shadow: 0 0 20px rgba(147, 197, 253, 0.3);
+    transition: 0.3s;
+    cursor: default;
 }
 
-
-.hero-section .hero-subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 45px;
-    opacity: 0.9;
-    max-width: 550px;
-    margin-left: auto;
-    margin-right: auto;
+.hero-accent-v2:hover {
+    color: #ffffff;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
 }
 
-.hero-btns {
+.hero-subtitle-v2 {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    margin-bottom: 40px;
+    max-width: 600px;
+}
+
+.hero-btns-v2 {
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 20px;
+}
+
+.btn-primary-v2 {
+    background: #fff;
+    color: #1e40af;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    display: flex;
     align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+}
+
+.btn-primary-v2:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.btn-secondary-v2 {
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn-secondary-v2:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+}
+
+.hero-image-side {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hero-img-box {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    border: 8px solid rgba(255, 255, 255, 0.1);
+    animation: floatY 6s ease-in-out infinite;
+}
+
+.hero-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-img-accent {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+}
+
+.hero-bottom-curve {
+    position: absolute;
+    bottom: -1px; /* Overlap slightly to prevent gaps */
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    z-index: 5;
+}
+
+.hero-bottom-curve svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 80px;
+}
+
+.hero-bottom-curve .shape-fill {
+    fill: #ffffff;
+}
+
+@media (max-width: 992px) {
+    .hero-v4 {
+        padding: 110px 0 180px; /* Increased bottom padding so image clears the wave */
+        text-align: center;
+    }
+    .hero-container-v2 {
+        grid-template-columns: 1fr;
+        gap: 40px; 
+    }
+    .hero-btns-v2 {
+        flex-direction: column; /* Stack buttons on mobile */
+        width: 100%;
+        max-width: 320px; 
+        box-sizing: border-box;
+        margin: 0 auto; 
+        gap: 15px;
+    }
+    .btn-primary-v2, .btn-secondary-v2 {
+        width: 100%;
+        justify-content: center;
+        padding: 16px 20px; /* Tall, premium buttons */
+        font-size: 1.05rem;
+    }
+    .hero-text-side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 15px;
+    }
+    .hero-title-v2 {
+        font-size: clamp(2.5rem, 8vw, 3.2rem); /* Large, bold title */
+        letter-spacing: -1px;
+        margin-bottom: 20px;
+        line-height: 1.25;
+    }
+    .hero-subtitle-v2 {
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 1.1rem;
+        margin-bottom: 35px;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+    }
+    .hero-image-side {
+        justify-content: center;
+        margin-top: 20px;
+        z-index: 10;
+        padding: 0 20px;
+    }
+    .hero-img-box {
+        max-width: 100%; /* Image spans nicely across the container */
+        border-radius: 24px;
+        border-width: 6px;
+    }
+    .hero-bottom-curve svg {
+        height: 60px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -192,7 +451,7 @@
 
 /* Trust Metrics - STATIC DISPLAY */
 .trust-metrics-section {
-    padding: 60px 0;
+    padding: 40px 0 60px; /* Reduced top padding from 60px to 40px */
     background: #ffffff;
     border-bottom: 1px solid #eef2f6;
 }
@@ -1784,6 +2043,25 @@ html {
     z-index: 1;
     color: #ffffff;
     animation: fadeInLeft 0.7s ease;
+}
+
+.split-left-content .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 40px;
+}
+
+.split-left-content .brand img {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 4px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .split-brand {

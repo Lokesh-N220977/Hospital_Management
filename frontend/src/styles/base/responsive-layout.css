@@ -318,7 +318,11 @@ img {
 
 @media (max-width: 1024px) { 
     .pn-navbar { padding: 0 16px; height: 68px; }
-    .pn-hamburger { display: flex; } 
+    .pn-left { gap: 12px; }
+    .pn-right { gap: 12px; }
+    .pn-hamburger { display: flex; padding: 8px; }
+    .pn-page-title { font-size: 1.15rem; }
+    .pn-breadcrumb { display: none; }
 }
 
 .pn-title-wrap {
@@ -332,6 +336,7 @@ img {
     color: #0f172a;
     line-height: 1.1;
     letter-spacing: -0.02em;
+    margin: 0;
 }
 
 .pn-breadcrumb {
@@ -340,7 +345,7 @@ img {
     color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    margin-top: 2px;
+    margin: 2px 0 0 0;
 }
 
 .pn-right {
@@ -369,6 +374,116 @@ img {
 .pn-avatar:hover { 
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 8px 16px rgba(59, 130, 246, 0.35);
+}
+
+.pn-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px 6px 6px;
+    border-radius: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.pn-profile:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.pn-profile-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.pn-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.pn-role {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.pn-chevron {
+    color: #94a3b8;
+    transition: transform 0.3s ease;
+}
+
+.pn-chevron-open {
+    transform: rotate(180deg);
+}
+
+.pn-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 200px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: dropIn 0.2s ease-out forwards;
+}
+
+.pn-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    border-radius: 8px;
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pn-dropdown-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.pn-dropdown-danger {
+    color: #ef4444;
+}
+
+.pn-dropdown-danger:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.pn-dropdown-hr {
+    margin: 4px 0;
+    border: none;
+    border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 768px) {
+    .pn-profile-info, .pn-chevron {
+        display: none;
+    }
+    .pn-profile {
+        padding: 4px;
+        background: transparent;
+        border: none;
+    }
 }
 
 /* Dark Mode Portal Nav Refinement */

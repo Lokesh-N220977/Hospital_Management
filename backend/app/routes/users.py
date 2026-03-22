@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.models.user_model import (
     UserRegister, UserLogin, ChangePassword,
-    SendOTPRequest, VerifyOTPRequest, EmailLoginRequest
+    SendOTPRequest, VerifyOTPRequest, EmailLoginRequest,
+    SendEmailOTPRequest, VerifyEmailOTPRequest,
+    UnifiedLoginRequest, GoogleLoginRequest
 )
 from app.services import auth_service
 from app.core.dependencies import get_current_user
@@ -22,6 +24,22 @@ async def send_otp(data: SendOTPRequest):
 async def verify_otp(data: VerifyOTPRequest):
     return await auth_service.verify_otp(data)
 
+@router.post("/send-email-otp")
+async def send_email_otp(data: SendEmailOTPRequest):
+    return await auth_service.send_email_otp(data)
+
+@router.post("/verify-email-otp")
+async def verify_email_otp(data: VerifyEmailOTPRequest):
+    return await auth_service.verify_email_otp(data)
+
+@router.post("/send-phone-verify-otp")
+async def send_phone_verify_otp(data: SendOTPRequest):
+    return await auth_service.send_phone_verification_otp(data)
+
+@router.post("/verify-phone-verify-otp")
+async def verify_phone_verify_otp(data: VerifyOTPRequest):
+    return await auth_service.verify_phone_verification_otp(data)
+
 # ─────────────────────────────────────────────────────────────────────
 # EMAIL / Password Login  (Secondary)
 # ─────────────────────────────────────────────────────────────────────
@@ -29,6 +47,14 @@ async def verify_otp(data: VerifyOTPRequest):
 @router.post("/login-email")
 async def login_email(data: EmailLoginRequest):
     return await auth_service.login_email(data)
+
+@router.post("/login-unified")
+async def login_unified(data: UnifiedLoginRequest):
+    return await auth_service.login_unified(data)
+
+@router.post("/google-login")
+async def google_login(data: GoogleLoginRequest):
+    return await auth_service.login_google(data)
 
 # ─────────────────────────────────────────────────────────────────────
 # Legacy phone+password login  (kept for admin & doctor compatibility)

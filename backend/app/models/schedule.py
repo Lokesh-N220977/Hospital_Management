@@ -6,6 +6,8 @@ class DoctorScheduleUpdate(BaseModel):
     working_days: List[str] # ["Mon", "Tue", etc.]
     start_time: str # "09:00"
     end_time: str # "17:00"
+    lunch_start_time: Optional[str] = None # "13:00"
+    lunch_end_time: Optional[str] = None # "14:00"
     slot_duration: int = 30
 
 class LeaveCreate(BaseModel):

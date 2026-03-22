@@ -1,5 +1,5 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Search, Plus, Filter, Edit2, Eye, Trash2, Mail, Phone, Loader2, CheckCircle2, AlertTriangle, X } from "lucide-react"
+import { Search, Plus, Edit2, Eye, Trash2, Mail, Phone, Loader2, CheckCircle2, AlertTriangle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useCallback } from "react"
 import { getAllDoctors, deleteDoctor } from "../../services/adminService"
@@ -244,7 +244,7 @@ function Doctors() {
                             >
                                 Previous
                             </button>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', px: '10px' }}>Page {page}</span>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', paddingLeft: '10px', paddingRight: '10px' }}>Page {page}</span>
                             <button 
                                 onClick={() => setPage(prev => prev + 1)}
                                 disabled={doctors.length < 10}
@@ -258,8 +258,8 @@ function Doctors() {
 
                 {/* Custom Delete Confirmation Modal */}
                 {showDeleteModal && (
-                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
-                        <div className="ad-card" style={{ width: '420px', padding: '40px', textAlign: 'center', boxShadow: '0 25px 70px rgba(0,0,0,0.3)', border: 'none', background: '#fff' }}>
+                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(6px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', overflowY: 'auto', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
+                        <div className="ad-card" style={{ width: '100%', maxWidth: '420px', padding: '40px', textAlign: 'center', boxShadow: '0 25px 70px rgba(0,0,0,0.3)', border: 'none', background: '#fff', margin: 'auto' }}>
                             <div style={{ width: '80px', height: '80px', background: '#fef2f2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 25px', color: '#ef4444' }}>
                                 <AlertTriangle size={40} />
                             </div>

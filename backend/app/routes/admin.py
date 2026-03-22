@@ -306,13 +306,18 @@ async def cancel_appointment_admin(appointment_id: str):
 @router.post("/reset-all-schedules")
 async def reset_all_schedules():
     from app.database import doctor_schedules_collection
-    # Reset all to default Mon-Fri, 09:00-17:00, 16 slots
+    # Reset all to default Mon-Fri, 09:00-17:00, 1hr lunch, 30-min slots = 14 slots/day
     await doctor_schedules_collection.update_many(
         {},
         {"$set": {
             "working_days": ["Mon", "Tue", "Wed", "Thu", "Fri"],
             "working_hours": "09:00 - 17:00",
-            "slots_per_day": 16,
+            "start_time": "09:00",
+            "end_time": "17:00",
+            "lunch_start_time": "13:00",
+            "lunch_end_time": "14:00",
+            "slot_duration": 30,
+            "slots_per_day": 14,
             "status": "Reporting"
         }}
     )
@@ -320,10 +325,13 @@ async def reset_all_schedules():
 
 @router.put("/schedule/{schedule_id}")
 async def update_doctor_schedule(schedule_id: str, update_data: dict):
-    from app.database import doctor_schedules_collection
+    from app.database import doctor_schedules_collection, doctors_collection, users_collection
+    from app.services.notification_service import NotificationService
     from bson import ObjectId
-    # Remove _id if present in update_data to avoid error
     update_data.pop("_id", None)
+    
+    # Fetch the schedule to find the doctor linked
+    existing = await doctor_schedules_collection.find_one({"_id": ObjectId(schedule_id)})
     
     result = await doctor_schedules_collection.update_one(
         {"_id": ObjectId(schedule_id)},
@@ -331,6 +339,22 @@ async def update_doctor_schedule(schedule_id: str, update_data: dict):
     )
     if result.modified_count == 0:
         return {"message": "No changes made to the schedule"}
+    
+    # Notify the doctor that their schedule was updated by an admin
+    if existing and existing.get("doctor_id"):
+        try:
+            doctor = await doctors_collection.find_one({"_id": ObjectId(existing["doctor_id"])})
+            if doctor and doctor.get("user_id"):
+                await NotificationService.create_notification(
+                    user_id=str(doctor["user_id"]),
+                    role="doctor",
+                    title="Schedule Updated by Admin",
+                    message=f"An administrator has updated your working schedule. Please review your new shift timings.",
+                    type="schedule"
+                )
+        except Exception as e:
+            logger.warning(f"Failed to notify doctor: {e}")
+
     return {"message": "Schedule updated successfully"}
 
 @router.get("/schedules")
