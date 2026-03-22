@@ -4,7 +4,7 @@ from typing import Optional, List
 class UserRegister(BaseModel):
     name: str
     phone: str
-    email: Optional[EmailStr] = None
+    email: EmailStr
     password: Optional[str] = None
     role: str = "patient"
     gender: Optional[str] = None
@@ -16,11 +16,27 @@ class UserLogin(BaseModel):
     password: str
     role: str
 
+class UnifiedLoginRequest(BaseModel):
+    identifier: str  # Email or Phone
+    password: str
+    role: str
+
+class GoogleLoginRequest(BaseModel):
+    token: str
+    role: str = "patient"
+
 class SendOTPRequest(BaseModel):
     phone: str
 
 class VerifyOTPRequest(BaseModel):
     phone: str
+    otp: str
+
+class SendEmailOTPRequest(BaseModel):
+    email: EmailStr
+
+class VerifyEmailOTPRequest(BaseModel):
+    email: EmailStr
     otp: str
 
 class EmailLoginRequest(BaseModel):

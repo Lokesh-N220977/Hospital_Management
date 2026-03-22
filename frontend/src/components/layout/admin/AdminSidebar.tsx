@@ -1,8 +1,9 @@
 import { NavLink } from "react-router-dom"
 import {
-  Users, Stethoscope, Bookmark, Settings, LogOut, X, PlusSquare, PieChart,
+  Users, Stethoscope, Bookmark, Settings, LogOut, X, PieChart,
   UserPlus, CalendarDays, BarChart, FileText
 } from "lucide-react"
+import logo from "../../../assets/logo.png"
 
 interface AdminSidebarProps {
   mobileOpen?: boolean
@@ -59,10 +60,8 @@ const AdminSidebar = ({ mobileOpen = false, onClose }: AdminSidebarProps) => {
       <div className={`ps-overlay${mobileOpen ? " ps-overlay-open" : ""}`} onClick={onClose} />
 
       <aside className={`patient-sidebar ad-sidebar-theme${mobileOpen ? " ps-open" : ""}`}>
-        <div className="ps-logo">
-          <div className="ps-logo-icon">
-            <PlusSquare size={24} color="#fff" fill="#fff" />
-          </div>
+        <div className="ps-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src={logo} alt="Logo" style={{ height: '32px', width: 'auto' }} />
           <span className="ps-logo-text">MedicPulse Admin</span>
           <button className="ps-close-btn" onClick={onClose}>
             <X size={20} />

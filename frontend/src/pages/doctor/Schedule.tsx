@@ -17,6 +17,8 @@ function Schedule() {
     const [workingDays, setWorkingDays] = useState<string[]>(["Mon", "Tue", "Wed", "Thu", "Fri"])
     const [startTime, setStartTime] = useState("09:00")
     const [endTime, setEndTime] = useState("17:00")
+    const [lunchStartTime, setLunchStartTime] = useState("13:00")
+    const [lunchEndTime, setLunchEndTime] = useState("14:00")
     const [slotDuration, setSlotDuration] = useState(30)
 
     useEffect(() => {
@@ -32,6 +34,8 @@ function Schedule() {
                         setWorkingDays(validDays)
                         setStartTime(sched.start_time || "09:00")
                         setEndTime(sched.end_time || "17:00")
+                        if (sched.lunch_start_time) setLunchStartTime(sched.lunch_start_time)
+                        if (sched.lunch_end_time) setLunchEndTime(sched.lunch_end_time)
                         setSlotDuration(sched.slot_duration || 30)
                     }
                 }
@@ -76,11 +80,24 @@ function Schedule() {
         // Fix Issue 1: Weak validation check (Slot Alignment)
         const start = timeToMinutes(startTime)
         const end = timeToMinutes(endTime)
+        const lunchStart = lunchStartTime ? timeToMinutes(lunchStartTime) : null
+        const lunchEnd = lunchEndTime ? timeToMinutes(lunchEndTime) : null
         const total = end - start
 
         if (start >= end) {
             setErrorMessage("Start time must be before end time.")
             return
+        }
+
+        if (lunchStart !== null && lunchEnd !== null) {
+            if (lunchStart >= lunchEnd) {
+                setErrorMessage("Lunch start time must be before lunch end time.")
+                return
+            }
+            if (lunchStart < start || lunchEnd > end) {
+                setErrorMessage("Lunch break must be within working hours.")
+                return
+            }
         }
 
         if (total % slotDuration !== 0) {
@@ -96,6 +113,8 @@ function Schedule() {
                 working_days: workingDays,
                 start_time: startTime,
                 end_time: endTime,
+                lunch_start_time: lunchStartTime,
+                lunch_end_time: lunchEndTime,
                 slot_duration: slotDuration
             })
             // Fix Issue 6: UX Feedback (State instead of alert)
@@ -150,7 +169,7 @@ function Schedule() {
                             <span>Your selection below determines the available slots patients see during booking. Dynamic generation filters existing appointments and approved leaves.</span>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+                        <div className="grid-responsive md-3" style={{ gap: '24px', marginBottom: '40px' }}>
                             <div className="pd-field">
                                 <label style={{ fontWeight: 800, color: '#1e293b', marginBottom: '10px', display: 'block' }}>Daily Start Time</label>
                                 <input type="time" className="pd-input" value={startTime} onChange={(e) => setStartTime(e.target.value)} style={{ padding: '14px' }} />
@@ -158,6 +177,14 @@ function Schedule() {
                             <div className="pd-field">
                                 <label style={{ fontWeight: 800, color: '#1e293b', marginBottom: '10px', display: 'block' }}>Daily End Time</label>
                                 <input type="time" className="pd-input" value={endTime} onChange={(e) => setEndTime(e.target.value)} style={{ padding: '14px' }} />
+                            </div>
+                            <div className="pd-field">
+                                <label style={{ fontWeight: 800, color: '#1e293b', marginBottom: '10px', display: 'block' }}>Lunch Start</label>
+                                <input type="time" className="pd-input" value={lunchStartTime} onChange={(e) => setLunchStartTime(e.target.value)} style={{ padding: '14px' }} />
+                            </div>
+                            <div className="pd-field">
+                                <label style={{ fontWeight: 800, color: '#1e293b', marginBottom: '10px', display: 'block' }}>Lunch End</label>
+                                <input type="time" className="pd-input" value={lunchEndTime} onChange={(e) => setLunchEndTime(e.target.value)} style={{ padding: '14px' }} />
                             </div>
                             <div className="pd-field">
                                 <label style={{ fontWeight: 800, color: '#1e293b', marginBottom: '10px', display: 'block' }}>Slot (Minutes)</label>

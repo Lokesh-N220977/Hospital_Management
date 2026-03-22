@@ -9,6 +9,7 @@ import {
     FaArrowRight, FaUsers, FaHospital, FaHeadset, FaBriefcase
 } from 'react-icons/fa';
 import { getPublicStats, getAllDoctors } from '../../services/doctorService';
+import heroDoc from '../../assets/hero-doc.png';
 
 const SERVER_URL = "http://localhost:8000";
 
@@ -80,24 +81,37 @@ const Home: React.FC = () => {
 
     return (
         <div className="landing-page">
-            <PublicNavbar />
 
             {/* ═══ Hero ═══ */}
-            <section className="hero-section">
+            <section className="hero-section hero-v4">
+                <PublicNavbar />
                 <HeroParticles />
-                <div className="container hero-content">
-                    <div className="hero-badge">🏥 India's #1 Healthcare Platform</div>
-                    <h1 className="hero-title">
-                        Your Health, Our{' '}
-                        <span className="hero-accent">Priority</span>
-                    </h1>
-                    <p className="hero-subtitle">
-                        Find trusted doctors, book appointments instantly, and manage your health — all in one place.
-                    </p>
-                    <div className="hero-btns">
-                        <Link to="/doctors" className="btn-get-started">Find a Doctor <FaArrowRight /></Link>
-                        <a href="#about" className="btn-hero-outline">Learn More</a>
+                <div className="container hero-container-v2">
+                    <div className="hero-text-side">
+                        <div className="hero-badge-v2" style={{ animation: 'fadeInDown 0.8s ease-out both', animationDelay: '0.6s' }}>🏥 India's #1 Healthcare Platform</div>
+                        <h1 className="hero-title-v2" style={{ animation: 'fadeInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) both', animationDelay: '0.7s' }}>
+                            Your Health, Our <span className="hero-accent-v2">Priority</span>
+                        </h1>
+                        <p className="hero-subtitle-v2" style={{ animation: 'fadeInLeft 1s cubic-bezier(0.16, 1, 0.3, 1) both', animationDelay: '0.8s' }}>
+                            Find trusted doctors, book appointments instantly, and manage your health — all in one place.
+                        </p>
+                        <div className="hero-btns-v2" style={{ animation: 'fadeInUp 1s ease-out both', animationDelay: '0.9s' }}>
+                            <Link to="/doctors" className="btn-primary-v2">Find a Doctor <FaArrowRight /></Link>
+                            <a href="#about" className="btn-secondary-v2">Learn More</a>
+                        </div>
                     </div>
+                    <div className="hero-image-side">
+                        <div className="hero-img-box">
+                            <img src={heroDoc} alt="Medical Professional" />
+                            <div className="hero-img-accent" />
+                        </div>
+                    </div>
+                </div>
+                {/* Decorative Bottom Wave */}
+                <div className="hero-bottom-curve">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                        <path fill="#ffffff" fillOpacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    </svg>
                 </div>
             </section>
 

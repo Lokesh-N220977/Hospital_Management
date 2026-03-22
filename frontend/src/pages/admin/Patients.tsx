@@ -1,8 +1,8 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Search, Filter, Edit2, Eye, Ban, Download, UserPlus, Loader2, X, CheckCircle2, AlertTriangle, ShieldCheck, Power } from "lucide-react"
+import { Search, Edit2, Eye, Ban, Download, UserPlus, Loader2, X, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useCallback } from "react"
-import { getAllPatients, updatePatient, deletePatient, activatePatient } from "../../services/adminService"
+import { getAllPatients, updatePatient, deletePatient } from "../../services/adminService"
 
 function Patients() {
     const navigate = useNavigate()
@@ -12,7 +12,6 @@ function Patients() {
     const [statusFilter, setStatusFilter] = useState("all")
     const [success, setSuccess] = useState("")
     const [error, setError] = useState("")
-    const [page, setPage] = useState(1)
 
     // Modal States
     const [showViewModal, setShowViewModal] = useState(false)
@@ -91,19 +90,6 @@ function Patients() {
         }
     }
 
-    const handleActivate = async (id: string) => {
-        setLoading(true)
-        try {
-            await activatePatient(id)
-            setSuccess("Patient account reactivated successfully.")
-            fetchPatients()
-            setTimeout(() => setSuccess(""), 4000)
-        } catch (err) {
-            setError("Failed to reactivate patient.")
-        } finally {
-            setLoading(false)
-        }
-    }
 
     return (
         <AdminLayout>
@@ -259,8 +245,8 @@ function Patients() {
 
             {/* View Modal */}
             {showViewModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
-                    <div className="ad-card" style={{ width: '500px', padding: '0', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.3)' }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
+                    <div className="ad-card" style={{ width: '100%', maxWidth: '500px', padding: '0', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.3)', margin: 'auto' }}>
                         <div style={{ background: '#3b82f6', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Patient Summary</h3>
@@ -295,13 +281,13 @@ function Patients() {
 
             {/* Edit Modal */}
             {showEditModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                    <div className="ad-card" style={{ width: '500px', padding: '0', overflow: 'hidden' }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 1000 }}>
+                    <div className="ad-card" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', margin: 'auto' }}>
                         <div style={{ background: '#22c55e', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Modify Patient Info</h3>
-                            <button onClick={() => setShowEditModal(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', color: '#fff', padding: '8px', cursor: 'pointer' }}><X size={20} /></button>
+                            <button onClick={() => setShowEditModal(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', color: '#fff', padding: '8px', cursor: 'pointer', display: 'flex' }}><X size={20} /></button>
                         </div>
-                        <div style={{ padding: '30px' }}>
+                        <div style={{ padding: '30px', maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
                             <div className="ad-field">
                                 <label>Patient Name</label>
                                 <input className="ad-input" value={selectedPatient.name} onChange={(e) => setSelectedPatient({...selectedPatient, name: e.target.value})} />
@@ -352,8 +338,8 @@ function Patients() {
 
             {/* Delete Confirmation */}
             {showDeleteModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                    <div className="ad-card" style={{ width: '400px', textAlign: 'center', padding: '40px' }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', zIndex: 1000 }}>
+                    <div className="ad-card" style={{ width: '100%', maxWidth: '400px', textAlign: 'center', padding: '40px', margin: 'auto' }}>
                         <div style={{ width: '70px', height: '70px', background: '#fef2f2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
                             <AlertTriangle size={35} color="#ef4444" />
                         </div>

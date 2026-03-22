@@ -5,10 +5,12 @@ A production-ready comprehensive platform designed to streamline hospital operat
 ## 🚀 Features
 
 ### **Patients**
+- **Unified Login**: Sign in using either **Email** or **Phone Number** seamlessly.
+- **Google OAuth**: One-click registration and login using your Google account.
+- **SMS Verification**: Real-time OTP verification via a local Android SMS Gateway.
 - **Family Accounts:** Single account to manage all family members' appointments
 - **Streamlined Bookings:** Real-time slot availability, built to prevent double-booking
 - **Dashboard:** At-a-glance view of upcoming & past appointments
-- **Smart Validations:** Cannot book on past dates, automatic blocking when doctors are unavailable
 
 ### **Doctors**
 - **Detailed Profiles:** Specialization, consulting fee, experience
@@ -22,10 +24,10 @@ A production-ready comprehensive platform designed to streamline hospital operat
 
 ## 🛠️ Tech Stack
 
-**Frontend:** React, Tailwind CSS (Vite)
-**Backend:** FastAPI, Python 3.10+
-**Database:** MongoDB, PyMongo
-**Auth:** Custom JWT, Role-Based Access Control (RBAC)
+**Frontend:** React (Vite)
+**Backend:** FastAPI (Python 3.10+)
+**Database:** MongoDB (Motor / Async)
+**Auth:** Google OAuth 2.0, Unified JWT, Role-Based Access Control (RBAC)
 
 ## 🏎️ How to Run
 

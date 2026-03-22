@@ -50,9 +50,19 @@ function MemberModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Phone Verify State for Modal
+  const [isPhoneVerified, setIsPhoneVerified] = useState(mode === "edit");
+  const [showPhoneVerify, setShowPhoneVerify] = useState(false);
+  const [otpPhone, setOtpPhone] = useState("");
+  const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false);
+  const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false);
+  const [otpPhoneError, setOtpPhoneError] = useState("");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone || !age) { setError("Name, phone, and age are required"); return; }
+    if (!isPhoneVerified) { setError("Please verify the phone number first"); return; }
+    
     setLoading(true); setError("");
     try {
       const payload = { name, phone, gender, relation, age: parseInt(age) };
@@ -96,8 +106,74 @@ function MemberModal({
           style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px", boxSizing: "border-box", marginBottom: "14px" }} />
 
         <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "5px" }}>Phone Number *</label>
-        <input type="tel" required placeholder="+91 9876543210" value={phone} onChange={e => setPhone(e.target.value)}
-          style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: "1px solid #e2e8f0", fontSize: "14px", boxSizing: "border-box", marginBottom: "14px" }} />
+        <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
+          <input 
+            type="tel" 
+            required 
+            placeholder="+91 9876543210" 
+            value={phone} 
+            disabled={isPhoneVerified && mode === "edit" && phone === existing?.phone}
+            onChange={e => {
+              setPhone(e.target.value);
+              setIsPhoneVerified(mode === "edit" && e.target.value === existing?.phone);
+              setShowPhoneVerify(false);
+            }}
+            style={{ flex: 1, padding: "10px 12px", borderRadius: "8px", border: isPhoneVerified ? "1px solid #10b981" : "1px solid #e2e8f0", fontSize: "14px", boxSizing: "border-box", background: isPhoneVerified ? "#f0fdf4" : "white" }} 
+          />
+          {phone && !isPhoneVerified && !showPhoneVerify && (
+            <button 
+              type="button"
+              onClick={async () => {
+                setSendingPhoneOtp(true);
+                try {
+                  await api.post("/auth/send-phone-verify-otp", { phone });
+                  setShowPhoneVerify(true);
+                } catch (err: any) {
+                  setError(err.response?.data?.detail || "Failed to send OTP");
+                } finally { setSendingPhoneOtp(false); }
+              }}
+              disabled={sendingPhoneOtp}
+              style={{ background: "#3b82f6", color: "white", border: "none", padding: "0 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+            >
+              {sendingPhoneOtp ? "..." : "Verify"}
+            </button>
+          )}
+          {isPhoneVerified && <CheckCircle2 size={18} color="#10b981" style={{ alignSelf: "center" }} />}
+        </div>
+
+        {/* Verification UI for Modal */}
+        {showPhoneVerify && !isPhoneVerified && (
+          <div style={{ background: "#f8fafc", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", marginBottom: "14px" }}>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input 
+                placeholder="6-digit code" 
+                maxLength={6}
+                value={otpPhone}
+                onChange={e => setOtpPhone(e.target.value)}
+                style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+              />
+              <button 
+                type="button"
+                onClick={async () => {
+                  setVerifyingPhoneOtp(true);
+                  try {
+                    await api.post("/auth/verify-phone-verify-otp", { phone, otp: otpPhone });
+                    setIsPhoneVerified(true);
+                    setShowPhoneVerify(false);
+                    setOtpPhone("");
+                  } catch (err: any) {
+                    setOtpPhoneError("Invalid code");
+                  } finally { setVerifyingPhoneOtp(false); }
+                }}
+                disabled={verifyingPhoneOtp || otpPhone.length < 6}
+                style={{ background: "#10b981", color: "white", border: "none", padding: "0 12px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+              >
+                {verifyingPhoneOtp ? "..." : "Confirm"}
+              </button>
+            </div>
+            {otpPhoneError && <p style={{ color: "#ef4444", fontSize: "11px", margin: "4px 0 0" }}>{otpPhoneError}</p>}
+          </div>
+        )}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "22px" }}>
           <div>
@@ -128,8 +204,8 @@ function MemberModal({
             style={{ flex: 1, padding: "11px", borderRadius: "8px", border: "1px solid #e2e8f0", background: "white", color: "#64748b", fontWeight: 600, cursor: "pointer" }}>
             Cancel
           </button>
-          <button type="submit" disabled={loading}
-            style={{ flex: 2, padding: "11px", borderRadius: "8px", border: "none", background: loading ? "#94a3b8" : "linear-gradient(135deg,#3b82f6,#2563eb)", color: "white", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer" }}>
+          <button type="submit" disabled={loading || !isPhoneVerified}
+            style={{ flex: 2, padding: "11px", borderRadius: "8px", border: "none", background: (loading || !isPhoneVerified) ? "#94a3b8" : "linear-gradient(135deg,#3b82f6,#2563eb)", color: "white", fontWeight: 600, cursor: (loading || !isPhoneVerified) ? "not-allowed" : "pointer" }}>
             {loading ? "Saving..." : mode === "add" ? "Add Member" : "Save Changes"}
           </button>
         </div>
@@ -192,6 +268,15 @@ function Profile() {
   const [deleteMember, setDeleteMember] = useState<FamilyMember | null>(null)
   const [showDeleteAccount, setShowDeleteAccount] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [originalPhone, setOriginalPhone] = useState("")
+
+  // Phone Verify State for main profile
+  const [isPhoneVerified, setIsPhoneVerified] = useState(true)
+  const [showPhoneVerify, setShowPhoneVerify] = useState(false)
+  const [otpPhone, setOtpPhone] = useState("")
+  const [sendingPhoneOtp, setSendingPhoneOtp] = useState(false)
+  const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false)
+  const [otpPhoneError, setOtpPhoneError] = useState("")
 
   useEffect(() => { fetchProfile(); fetchFamily(); }, [])
 
@@ -199,6 +284,8 @@ function Profile() {
     try {
       const data = await getPatientProfile();
       setForm({ name: data.name || "", email: data.email || "", phone: data.phone || "", gender: data.gender || "Male", age: data.age || 0 })
+      setOriginalPhone(data.phone || "")
+      setIsPhoneVerified(true)
     } catch { setError("Failed to load profile.") }
     finally { setLoading(false) }
   }
@@ -319,10 +406,15 @@ function Profile() {
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             {editing ? (
               <>
-                <button onClick={handleSave} disabled={saving} className="pf-save-btn">
+                <button 
+                  onClick={handleSave} 
+                  disabled={saving || (form.phone !== originalPhone && !isPhoneVerified)} 
+                  className="pf-save-btn"
+                  style={{ opacity: (saving || (form.phone !== originalPhone && !isPhoneVerified)) ? 0.6 : 1 }}
+                >
                   <Save size={16} /> {saving ? "Saving..." : "Save Changes"}
                 </button>
-                <button onClick={() => setEditing(false)} className="pf-cancel-btn">
+                <button onClick={() => { setEditing(false); setForm(p => ({...p, phone: originalPhone})); setIsPhoneVerified(true); setShowPhoneVerify(false); }} className="pf-cancel-btn">
                   <X size={16} /> Cancel
                 </button>
               </>
@@ -343,7 +435,7 @@ function Profile() {
             {[
               { label: "Full Name", field: "name", type: "text", icon: <User size={13} />, readOnly: false },
               { label: "Email Address", field: "email", type: "email", icon: <Mail size={13} />, readOnly: true },
-              { label: "Phone Number", field: "phone", type: "tel", icon: <Phone size={13} />, readOnly: true },
+              { label: "Phone Number", field: "phone", type: "tel", icon: <Phone size={13} />, readOnly: false },
               { label: "Age", field: "age", type: "number", icon: <Calendar size={13} />, readOnly: false },
             ].map(({ label, field, type, icon, readOnly }) => (
               <div key={field}>
@@ -353,9 +445,70 @@ function Profile() {
                 <input type={type} min={type === "number" ? 0 : undefined} max={type === "number" ? 120 : undefined}
                   style={{ width: "100%", padding: "10px 12px", borderRadius: "8px", border: editing && !readOnly ? "1px solid #3b82f6" : "1px solid #e2e8f0", background: editing && !readOnly ? "white" : "#f8fafc", boxSizing: "border-box", fontSize: "14px", color: readOnly ? "#94a3b8" : "#1e293b" }}
                   value={(form as any)[field]}
-                  onChange={e => change(field, type === "number" ? parseInt(e.target.value) || 0 : e.target.value)}
+                  onChange={e => {
+                    const val = type === "number" ? parseInt(e.target.value) || 0 : e.target.value;
+                    change(field, val);
+                    if (field === "phone") {
+                      setIsPhoneVerified(val === originalPhone);
+                      setShowPhoneVerify(false);
+                    }
+                  }}
                   readOnly={!editing || readOnly}
                 />
+                
+                {/* Phone Verification Sub-UI */}
+                {editing && field === "phone" && form.phone !== originalPhone && !isPhoneVerified && (
+                  <div style={{ marginTop: "10px", padding: "12px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                    {!showPhoneVerify ? (
+                      <button 
+                        type="button"
+                        onClick={async () => {
+                          setSendingPhoneOtp(true);
+                          try {
+                            await api.post("/auth/send-phone-verify-otp", { phone: form.phone });
+                            setShowPhoneVerify(true);
+                          } catch (err: any) {
+                            setError(err.response?.data?.detail || "Failed to send OTP");
+                          } finally { setSendingPhoneOtp(false); }
+                        }}
+                        disabled={sendingPhoneOtp}
+                        style={{ background: "#3b82f6", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+                      >
+                        {sendingPhoneOtp ? "Sending..." : "Verify New Phone"}
+                      </button>
+                    ) : (
+                      <div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <input 
+                            placeholder="6-digit code" 
+                            maxLength={6}
+                            value={otpPhone}
+                            onChange={e => setOtpPhone(e.target.value)}
+                            style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "13px" }}
+                          />
+                          <button 
+                            type="button"
+                            onClick={async () => {
+                              setVerifyingPhoneOtp(true);
+                              try {
+                                await api.post("/auth/verify-phone-verify-otp", { phone: form.phone, otp: otpPhone });
+                                setIsPhoneVerified(true);
+                                setShowPhoneVerify(false);
+                              } catch (err: any) {
+                                setOtpPhoneError("Invalid code");
+                              } finally { setVerifyingPhoneOtp(false); }
+                            }}
+                            disabled={verifyingPhoneOtp || otpPhone.length < 6}
+                            style={{ background: "#10b981", color: "white", border: "none", padding: "6px 14px", borderRadius: "6px", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
+                          >
+                            {verifyingPhoneOtp ? "..." : "Confirm"}
+                          </button>
+                        </div>
+                        {otpPhoneError && <p style={{ color: "#ef4444", fontSize: "11px", margin: "4px 0 0" }}>{otpPhoneError}</p>}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
             <div>

@@ -29,6 +29,26 @@ export const verifyOTP = async (phone: string, otp: string): Promise<LoginRespon
   return data;
 };
 
+export const sendEmailOTP = async (email: string): Promise<{ message: string }> => {
+  const { data } = await api.post('/auth/send-email-otp', { email });
+  return data;
+};
+
+export const verifyEmailOTP = async (email: string, otp: string): Promise<{ status: string, message: string }> => {
+  const { data } = await api.post('/auth/verify-email-otp', { email, otp });
+  return data;
+};
+
+export const sendPhoneVerifyOTP = async (phone: string): Promise<{ message: string }> => {
+  const { data } = await api.post('/auth/send-phone-verify-otp', { phone });
+  return data;
+};
+
+export const verifyPhoneVerifyOTP = async (phone: string, otp: string): Promise<{ status: string, message: string }> => {
+  const { data } = await api.post('/auth/verify-phone-verify-otp', { phone, otp });
+  return data;
+};
+
 // ─── Email / Password Flow ───────────────────────────────────────────
 
 export const loginWithEmail = async (
@@ -48,6 +68,23 @@ export const loginWithPhone = async (
   role: string
 ): Promise<LoginResponse> => {
   const { data } = await api.post('/auth/login', { phone, password, role });
+  return data;
+};
+
+export const loginUnified = async (
+  identifier: string,
+  password: string,
+  role: string
+): Promise<LoginResponse> => {
+  const { data } = await api.post('/auth/login-unified', { identifier, password, role });
+  return data;
+};
+
+export const googleLogin = async (
+  token: string,
+  role: string
+): Promise<LoginResponse> => {
+  const { data } = await api.post('/auth/google-login', { token, role });
   return data;
 };
 
@@ -90,8 +127,14 @@ export const getStoredUser = (): User | null => {
 const authService = {
   sendOTP,
   verifyOTP,
+  sendEmailOTP,
+  verifyEmailOTP,
+  sendPhoneVerifyOTP,
+  verifyPhoneVerifyOTP,
   loginWithEmail,
   loginWithPhone,
+  loginUnified,
+  googleLogin,
   register,
   storeSession,
   clearSession,

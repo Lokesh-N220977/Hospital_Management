@@ -43,12 +43,27 @@ async def get_available_slots(doctor_id: str, date: str):
     start = to_minutes(sched["start_time"])
     end = to_minutes(sched["end_time"])
     duration = sched["slot_duration"]
+    
+    lunch_start = None
+    lunch_end = None
+    if sched.get("lunch_start_time") and sched.get("lunch_end_time"):
+        lunch_start = to_minutes(sched["lunch_start_time"])
+        lunch_end = to_minutes(sched["lunch_end_time"])
 
     all_slots = []
     current = start
 
     while current + duration <= end:
-        all_slots.append(to_time(current))
+        # Check if this slot overlaps with lunch break
+        # A slot overlaps if it starts during lunch, OR if its end time falls into lunch (excluding exact boundary)
+        is_lunch = False
+        if lunch_start is not None and lunch_end is not None:
+            if (current >= lunch_start and current < lunch_end) or ((current + duration) > lunch_start and (current + duration) <= lunch_end) or (current <= lunch_start and (current + duration) >= lunch_end):
+                is_lunch = True
+        
+        if not is_lunch:
+            all_slots.append(to_time(current))
+            
         current += duration
 
     # 4. Remove booked slots - Perform filtering at DB level for performance & accuracy

@@ -22,10 +22,12 @@ async def get_system_overview():
         
         return {
             "total": total_bookings,
+            "total_appointments": total_bookings,
             "booked": counts.get("booked", 0),
             "completed": counts.get("completed", 0),
             "cancelled": counts.get("cancelled", 0),
             "no_show": counts.get("no_show", 0),
+            "status_distribution": counts,
             "total_doctors": await doctors_collection.count_documents({}),
             "total_patients": await patients_collection.count_documents({})
         }

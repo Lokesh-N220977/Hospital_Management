@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.models.schedule import DoctorScheduleUpdate, LeaveCreate
 from app.database import db
 from app.services import scheduling_service, leave_service
+from app.services.notification_service import NotificationService
 
 router = APIRouter()
 schedules_collection = db["doctor_schedules"]
@@ -15,6 +16,30 @@ async def save_schedule(data: DoctorScheduleUpdate):
         {"$set": data.dict()},
         upsert=True
     )
+    
+    # Notify all admins that this doctor updated their schedule
+    try:
+        users_coll = db["users"]
+        admin_users = await users_coll.find(
+            {"role": "admin", "is_active": {"$ne": False}},
+            {"_id": 1}
+        ).to_list(50)
+        
+        # Fetch doctor name for a clear message
+        sched_doc = await schedules_collection.find_one({"doctor_id": data.doctor_id})
+        doc_name = sched_doc.get("doctor_name", "A doctor") if sched_doc else "A doctor"
+        
+        for admin in admin_users:
+            await NotificationService.create_notification(
+                user_id=str(admin["_id"]),
+                role="admin",
+                title="Doctor Schedule Updated",
+                message=f"{doc_name} has updated their working schedule. Start: {data.start_time}, End: {data.end_time}.",
+                type="schedule"
+            )
+    except Exception:
+        pass  # Non-blocking — schedule is saved regardless
+    
     return {"message": "Schedule saved"}
 
 @router.get("/doctor/schedule/{doctor_id}")

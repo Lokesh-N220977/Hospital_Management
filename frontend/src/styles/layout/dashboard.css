@@ -6,7 +6,6 @@
 
 .main-wrapper {
     flex: 1;
-    margin-left: var(--sidebar-width);
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -20,6 +19,6 @@
 
 @media (max-width: 992px) {
     .main-wrapper {
-        margin-left: 0;
+        min-width: 0;
     }
 }

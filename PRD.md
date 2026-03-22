@@ -32,120 +32,65 @@ The primary objectives of the system are:
 The system supports three main user roles:
 
 ### Patient
-- Register and create an account
-- Login to the system
+- Register and create an account (Email & Phone)
+- Login to the system (Unified Email/Phone or Google OAuth)
 - View available doctors
 - Book appointments based on available time slots
 - View visit history
 
-### Doctor
-- Login to the system
-- View scheduled appointments
-- Manage working schedule
-- Access patient visit history
-- Apply for leave on specific days
+---
 
-### Admin
-- Register doctors in the system
-- Manage doctor profiles
-- Approve or reject doctor leave requests
-- Cancel appointment slots when doctors are unavailable
-- View system analytics dashboards
+## 5. Key New Features
+
+### Unified Authentication
+- Patients can log in using either their **Email** or **Phone Number** in a single input field.
+- The backend automatically detects the identifier type and validates credentials accordingly.
+
+### Google OAuth Integration
+- One-click sign-in for Patients.
+- Automatic account creation (Auto-Registration) if the user is new.
+- Seamless linking between Google accounts and internal Patient records.
+
+### SMS Gateway (Android)
+- Real-time OTP (One Time Password) sent via a local Android phone acting as an SMS Gateway.
+- Secure phone verification during registration.
 
 ---
 
-## 5. Appointment Scheduling Logic
-
-- Each doctor has fixed working hours defined by the hospital.
-- Within those hours, appointments are divided into time slots based on the average consultation duration per patient.
-- Patients can:
-  - Select a doctor
-  - View available slots
-  - Book an appointment.
-
-### Special Cases
-
-- If a doctor applies for leave, the request must be approved by the admin.
-- Once approved:
-  - The admin can cancel all appointment slots for that doctor on that day.
-  - Patients with booked appointments may be notified or rescheduled.
-
----
-
-## 6. Key Features
-
-### Patient Features
-- Patient registration and authentication
-- Doctor browsing
-- Appointment booking
-- Appointment status tracking
-- Visit history viewing
-
-### Doctor Features
-- Secure doctor login
-- Appointment schedule view
-- Patient visit history
-- Leave request submission
-
-### Admin Features
-- Doctor registration and management
-- Leave request approval system
-- Appointment slot cancellation
-- Hospital activity analytics
-
-### Dashboard Features
-- Total number of patients
-- Total number of doctors
-- Number of appointments per day
-- Doctor-wise appointment statistics
-- Graphical charts for hospital activity
-
----
-
-## 7. Technologies Used
+## 6. Technologies Used
 
 ### Frontend
-- React.js
-- TypeScript
+- **React.js (Vite)**: Component-based UI with dynamic routing.
+- **TypeScript**: Ensuring type safety across the application.
+- **Tailwind CSS**: Modern UI styling.
 
 ### Backend
-- Python
-- Flask
-Handles:
-  - Authentication
-  - API services
-  - Appointment management logic
-  - Data processing
+- **FastAPI (Python)**: High-performance asynchronous framework.
+- **Motor**: Async MongoDB driver.
+- **Jose**: JWT-based secure authentication.
+- **Google Auth**: Secure ID token verification.
 
 ### Database
-- MongoDB
-Stores:
-  - Patient records
-  - Doctor profiles
-  - Appointment details
-  - Visit history
-
+- **MongoDB**: NoSQL database for flexible data storage.
 
 ---
 
-## 8. System Architecture Overview
+## 7. System Architecture Overview
 
 1. **Frontend Layer**
-  Implemented using React.js, which provides:
-  - Component-based UI
-  - Dynamic page rendering
-  - API integration with backend services
+   - React components interact with FastAPI endpoints.
+   - Session management via JWT stored in LocalStorage.
+   - Google OAuth provider wrapping the application.
 
-2. **Backend Layer**
-   - Flask server processes requests.
-   - Handles authentication, appointment logic, and API responses.
+2. **Backend Layer (API)**
+   - Asynchronous FastAPI routes for high concurrency.
+   - Service-based architecture (Auth, Appointments, AI, Analytics).
+   - Unified login logic detecting Email vs Phone.
 
-3. **Database Layer**
-   - MongoDB stores:
-     - patient records
-     - doctor profiles
-     - appointment data
-     - visit history
+3. **Service Layer**
+   - **SMS Gateway Service**: Communicates with local Android API.
+   - **Google Auth Service**: Verifies ID tokens via Google libraries.
+   - **Analytics Service**: Provides real-time hospital insights.
 
 ---
 

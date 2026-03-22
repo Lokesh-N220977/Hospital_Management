@@ -2,10 +2,11 @@ import { NavLink } from "react-router-dom"
 import { 
   LayoutDashboard, ClipboardList, Clock, Users, History, 
   FileText, User, Settings, LogOut, 
-  CalendarX, X, PlusSquare 
+  CalendarX, X
 } from "lucide-react"
 
 import { useAuth } from "../../../context/AuthContext"
+import logo from "../../../assets/logo.png"
 
 interface DoctorSidebarProps {
   mobileOpen?: boolean
@@ -34,10 +35,8 @@ const DoctorSidebar = ({ mobileOpen = false, onClose }: DoctorSidebarProps) => {
       )}
 
       <aside className={`patient-sidebar dr-sidebar-theme${mobileOpen ? " ps-open" : ""}`}>
-        <div className="ps-logo">
-          <div className="ps-logo-icon" style={{ background: 'linear-gradient(135deg, #0dcb6e, #0ba358)' }}>
-            <PlusSquare size={24} color="#fff" fill="#fff" />
-          </div>
+        <div className="ps-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src={logo} alt="Logo" style={{ height: '32px', width: 'auto' }} />
           <span className="ps-logo-text">MedicPulse</span>
           <button className="ps-close-btn" onClick={onClose}>
             <X size={20} />
