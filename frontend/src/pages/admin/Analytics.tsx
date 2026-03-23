@@ -126,8 +126,14 @@ export default function Analytics() {
             <Icon size={100} color={color} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div style={{ background: `${color}15`, padding: "8px", borderRadius: "10px" }}>
-                <Icon size={20} color={color} />
+            <div style={{ 
+                background: `linear-gradient(135deg, ${color}, ${color}dd)`, 
+                padding: "8px", 
+                borderRadius: "10px",
+                color: '#fff',
+                boxShadow: `0 4px 10px ${color}20`
+            }}>
+                <Icon size={18} />
             </div>
             <p className="ad-stat-label">{label}</p>
         </div>
@@ -141,7 +147,7 @@ export default function Analytics() {
             
             <div className="ad-analytics-header">
                 <div className="ad-header-content">
-                    <h1>Intelligence Report</h1>
+                    <h1 className="text-primary-gradient">Intelligence Report</h1>
                     <p>Data-driven oversight for hospital operations.</p>
                 </div>
                 <div className="ad-sync-badge">
@@ -214,7 +220,7 @@ export default function Analytics() {
                                     animationBegin={200}
                                     animationDuration={1200}
                                 >
-                                    {pieData.map((entry, index) => (
+                                    {pieData.map((_, index) => (
                                         <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -301,7 +307,7 @@ export default function Analytics() {
                                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
                                 <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
                                 <Bar dataKey="total" radius={[8, 8, 0, 0]} maxBarSize={50} animationDuration={1000}>
-                                    {filteredDoctors.map((entry, index) => (
+                                    {filteredDoctors.map((_, index) => (
                                         <Cell key={`barcel-${index}`} fill={index % 2 === 0 ? "#8b5cf6" : "#c084fc"} />
                                     ))}
                                 </Bar>

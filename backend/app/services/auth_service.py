@@ -237,46 +237,6 @@ async def verify_otp(verify_data):
         }
     }
 
-async def send_phone_verification_otp(send_data):
-    """Dedicated for verifying phone during registration/profile update (no login)."""
-    phone = send_data.phone
-    otp_code = generate_otp_code()
-    
-    otp_record = {
-        "phone_verify": phone,
-        "otp_code": otp_code,
-        "expires_at": datetime.utcnow() + timedelta(minutes=5),
-        "created_at": datetime.utcnow()
-    }
-    
-    await otp_collection.delete_many({"phone_verify": phone})
-    await otp_collection.insert_one(otp_record)
-    
-    # Send REAL SMS via Gateway
-    sms_sent = await send_sms_gateway(phone, otp_code)
-    
-    if not sms_sent:
-        logger.info(f"--- MOCK PHONE VERIFICATION SMS (Fallback) TO {phone} ---")
-        logger.info(f"Verification Code: {otp_code}")
-    
-    return {"message": "Verification code sent to your phone", "phone": phone, "real_sms": sms_sent}
-
-async def verify_phone_verification_otp(verify_data):
-    """Verify phone OTP without logging in or creating a user."""
-    phone = verify_data.phone
-    otp = verify_data.otp
-    
-    record = await otp_collection.find_one({"phone_verify": phone, "otp_code": otp})
-    
-    if not record:
-        raise HTTPException(status_code=400, detail="Invalid verification code")
-        
-    if record["expires_at"] < datetime.utcnow():
-        raise HTTPException(status_code=400, detail="Verification code expired")
-
-    await otp_collection.delete_many({"phone_verify": phone})
-    return {"status": "success", "message": "Phone verified successfully"}
-
 # --- EMAIL LOGIN & IDENTITY ---
 
 async def login_email(login_data):
@@ -327,6 +287,12 @@ async def login_unified(login_data):
     
     # Detect if email or phone
     is_email = "@" in identifier
+    
+    if not is_email and role == "patient":
+        raise HTTPException(
+            status_code=400, 
+            detail="Patients must log in using their email address. Phone login is not supported."
+        )
     
     if is_email:
         query = {"email": identifier.lower()}

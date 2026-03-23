@@ -67,7 +67,7 @@ function Doctors() {
             <div className="ad-page" style={{ animation: 'slideDownIn 0.4s ease-out' }}>
                 <div className="ad-header">
                     <div className="ad-header-content">
-                        <h1 className="ad-page-title">Manage Doctors</h1>
+                        <h1 className="ad-page-title text-primary-gradient">Manage Doctors</h1>
                         <p className="ad-page-sub">View, edit, and manage all healthcare professionals on the platform.</p>
                     </div>
                     <button className="ad-btn-duo" onClick={() => navigate("/admin/add-doctor")}>

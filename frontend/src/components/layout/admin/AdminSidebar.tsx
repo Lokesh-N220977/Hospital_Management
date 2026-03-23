@@ -60,9 +60,9 @@ const AdminSidebar = ({ mobileOpen = false, onClose }: AdminSidebarProps) => {
       <div className={`ps-overlay${mobileOpen ? " ps-overlay-open" : ""}`} onClick={onClose} />
 
       <aside className={`patient-sidebar ad-sidebar-theme${mobileOpen ? " ps-open" : ""}`}>
-        <div className="ps-logo" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src={logo} alt="Logo" style={{ height: '32px', width: 'auto' }} />
-          <span className="ps-logo-text">MedicPulse Admin</span>
+        <div className="ps-logo">
+          <img src={logo} alt="Logo" className="ps-logo-img" />
+          <span className="ps-logo-text">Medic<span className="text-primary-gradient">Pulse</span></span>
           <button className="ps-close-btn" onClick={onClose}>
             <X size={20} />
           </button>

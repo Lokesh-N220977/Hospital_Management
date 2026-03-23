@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { getAdminDashboardData, getAllAppointments } from "../../services/adminService"
 import { 
     ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
-    PieChart, Pie, Cell, Legend, BarChart as ReBarChart, Bar 
+    PieChart, Pie, Cell, Legend
 } from 'recharts'
 
 function AdminDashboard() {
@@ -93,11 +93,15 @@ function AdminDashboard() {
                 <div className="ad-stats-grid">
                     {statCards.map((stat, i) => (
                         <div key={i} className={`ad-stat-card ad-stat--${stat.color}`}>
-                            <div className="ad-stat-icon-wrap">{stat.icon}</div>
+                            <div className="ad-stat-icon-wrap" style={{ 
+                                background: `linear-gradient(135deg, ${stat.color === 'blue' ? '#3b82f6, #2563eb' : stat.color === 'green' ? '#10b981, #059669' : stat.color === 'purple' ? '#8b5cf6, #7c3aed' : '#f59e0b, #d97706'})`,
+                                color: '#fff',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                            }}>{stat.icon}</div>
                             <div className="ad-stat-info">
                                 <span className="ad-stat-value">{stat.value}</span>
                                 <span className="ad-stat-label">{stat.title}</span>
-                                <span className="ad-stat-trend">{stat.trend}</span>
+                                <span className="ad-stat-trend" style={{ color: '#10b981' }}>{stat.trend}</span>
                             </div>
                         </div>
                     ))}
@@ -107,7 +111,10 @@ function AdminDashboard() {
                     {/* Weekly Trend Chart */}
                     <div className="ad-card" style={{ padding: '25px' }}>
                         <div className="ad-card-header" style={{ marginBottom: '20px' }}>
-                            <h2 className="ad-card-title"><BarChart size={20} style={{ marginRight: '8px' }} /> Booking Velocity (7D)</h2>
+                            <h2 className="ad-card-title">
+                                <span style={{ color: '#3b82f6' }}><BarChart size={20} style={{ marginRight: '8px' }} /></span>
+                                Booking Velocity (7D)
+                            </h2>
                         </div>
                         <div style={{ width: '100%', height: '300px' }}>
                             <ResponsiveContainer width="100%" height="100%">
@@ -127,7 +134,10 @@ function AdminDashboard() {
                     {/* Status Breakdown Chart */}
                     <div className="ad-card" style={{ padding: '25px' }}>
                         <div className="ad-card-header" style={{ marginBottom: '20px' }}>
-                            <h2 className="ad-card-title"><PieIcon size={20} style={{ marginRight: '8px' }} /> Status Mix</h2>
+                            <h2 className="ad-card-title">
+                                <span style={{ color: '#8b5cf6' }}><PieIcon size={20} style={{ marginRight: '8px' }} /></span>
+                                Status Mix
+                            </h2>
                         </div>
                         <div style={{ width: '100%', height: '300px' }}>
                             <ResponsiveContainer width="100%" height="100%">

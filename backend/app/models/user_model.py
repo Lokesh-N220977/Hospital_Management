@@ -3,7 +3,7 @@ from typing import Optional, List
 
 class UserRegister(BaseModel):
     name: str
-    phone: str
+    phone: Optional[str] = None  # Optional — format validation done on frontend
     email: EmailStr
     password: Optional[str] = None
     role: str = "patient"

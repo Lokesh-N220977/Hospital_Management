@@ -96,7 +96,7 @@ function Patients() {
             <div className="ad-page" style={{ animation: 'slideUp 0.4s ease-out' }}>
                 <div className="ad-header">
                     <div className="ad-header-content">
-                        <h1 className="ad-page-title">Patient Management</h1>
+                        <h1 className="ad-page-title text-primary-gradient">Patient Management</h1>
                         <p className="ad-page-sub">Centralized repository for patient records, medical history, and status tracking.</p>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
