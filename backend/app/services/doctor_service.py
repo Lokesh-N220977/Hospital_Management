@@ -23,7 +23,8 @@ async def create_doctor(doctor_data_obj):
         "password": hash_password(temp_password),
         "role": "doctor",
         "must_change_password": True,
-        "is_active": True,
+        "is_active": False,
+        "verification_status": "PENDING",
         "created_at": datetime.utcnow()
     }
     user_res = await users_collection.insert_one(user_data)
@@ -38,14 +39,18 @@ async def create_doctor(doctor_data_obj):
         "specialization": doctor_data_obj.specialization,
         "degree": doctor_data_obj.degree,
         "experience": doctor_data_obj.experience,
+        "registration_number": getattr(doctor_data_obj, 'registration_number', None),
+        "qualification": doctor_data_obj.qualification,
         "consultation_fee": doctor_data_obj.consultation_fee,
         "department": doctor_data_obj.department or "General",
         "location": doctor_data_obj.location or "Clinic",
-        "qualification": doctor_data_obj.degree,
         "about": "",
         "profile_image_url": doctor_data_obj.profile_image_url,
         "profile_image_source": doctor_data_obj.profile_image_source or "admin",
-        "available": True,
+        "proof_document_url": getattr(doctor_data_obj, 'proof_document_url', None),
+        "verification_status": "PENDING",
+        "is_verified": False,
+        "available": False,
         "created_at": datetime.utcnow()
     }
     doc_res = await doctors_collection.insert_one(doctor_record)
@@ -67,7 +72,7 @@ async def update_doctor_profile(doctor_id: str, update_data: dict):
     return False
 
 async def get_doctors(specialization: Optional[str] = None, location: Optional[str] = None, min_experience: Optional[int] = None):
-    query: dict = {"available": True}
+    query: dict = {"available": True, "verification_status": "VERIFIED"}
     if specialization and specialization not in ["All", "All Specialties", "any"]:
         query["specialization"] = specialization
     

@@ -27,7 +27,7 @@ function PatientLayout({ children }: Props) {
   const themeClass = theme === 'dark' ? 'dark' : ''
 
   return (
-    <div key={prefKey} className={`pl-wrapper ${fontClass} ${themeClass}`.trim()}>
+    <div key={prefKey} className={`pl-wrapper patient-portal ${fontClass} ${themeClass}`.trim()}>
       <PatientSidebar
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

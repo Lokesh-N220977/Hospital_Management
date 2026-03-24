@@ -100,7 +100,7 @@ function Patients() {
                         <p className="ad-page-sub">Centralized repository for patient records, medical history, and status tracking.</p>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
-                        <button className="ad-btn-primary" onClick={handleExport} style={{ background: '#fff', color: '#475569', border: '1px solid #e2e8f0' }}>
+                        <button className="ad-btn-primary" onClick={handleExport} style={{ background: 'var(--bg-soft)', color: 'var(--text-gray)', border: '1px solid var(--border-color)' }}>
                             <Download size={18} />
                             <span>Export CSV</span>
                         </button>
@@ -131,14 +131,14 @@ function Patients() {
 
                 <div className="ad-card" style={{ position: 'relative' }}>
                     {loading && (
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(2px)', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <Loader2 className="animate-spin" size={40} color="#3b82f6" />
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(2px)', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '16px' }}>
+                            <Loader2 className="animate-spin" size={40} color="var(--primary)" />
                         </div>
                     )}
 
                     <div className="ad-list-header">
                         <div className="ad-search-bar" style={{ width: '400px' }}>
-                            <Search size={18} color="#94a3b8" />
+                            <Search size={18} color="var(--text-muted)" />
                             <input 
                                 type="text" 
                                 placeholder="Search patients by name, ID or email..." 
@@ -176,7 +176,7 @@ function Patients() {
                                 <tbody>
                                     {patients.length === 0 && !loading ? (
                                         <tr>
-                                            <td colSpan={5} style={{ textAlign: 'center', padding: '100px 0', color: '#94a3b8' }}>
+                                            <td colSpan={5} style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-muted)' }}>
                                                 <ShieldCheck size={48} style={{ opacity: 0.2, margin: '0 auto 15px' }} />
                                                 <p>No patient records found in search.</p>
                                             </td>
@@ -186,27 +186,21 @@ function Patients() {
                                             <tr key={pt._id || i} style={{ animation: `fadeIn 0.3s ease-out ${i*0.05}s forwards`, opacity: 0 }}>
                                                 <td>
                                                     <div className="ad-user-cell">
-                                                        <div className="ad-avatar" style={{
-                                                            background: `hsl(${i * 60 + 200}, 70%, 50%)`,
-                                                            width: '40px',
-                                                            height: '40px',
-                                                            fontSize: '0.9rem',
-                                                            fontWeight: 700
-                                                        }}>
+                                                        <div className="ad-premium-avatar">
                                                             {(pt.name || "P").charAt(0)}
                                                         </div>
                                                         <div className="ad-user-info">
                                                             <span className="ad-user-name" style={{ fontSize: '0.95rem' }}>{pt.name}</span>
                                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                                <span className="ad-user-sub" style={{ fontWeight: 600 }}>#{pt._id?.slice(-6).toUpperCase()}</span>
-                                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>•</span>
+                                                                <span className="ad-user-sub" style={{ fontWeight: 600, color: 'var(--primary)' }}>#{pt._id?.slice(-6).toUpperCase()}</span>
+                                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>•</span>
                                                                  {pt.age && <span className="ad-user-sub">{pt.age} Yrs</span>}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span className="ad-user-name" style={{ fontSize: '0.85rem', color: '#1e293b' }}>{pt.issue || "General Checkup"}</span>
+                                                    <span className="ad-user-name" style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{pt.issue || "General Checkup"}</span>
                                                 </td>
                                                 <td>
                                                     <span className="ad-user-name" style={{ fontSize: '0.85rem' }}>{pt.phone || "N/A"}</span>
@@ -232,12 +226,12 @@ function Patients() {
                         </table>
                     </div>
 
-                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9' }}>
-                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {patients.length} records</span>
+                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Showing {patients.length} records</span>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', cursor: 'pointer' }}>Previous</button>
-                            <button style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>1</button>
-                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', cursor: 'pointer' }}>Next</button>
+                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-soft)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-gray)', cursor: 'pointer' }}>Previous</button>
+                            <button style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: 'var(--primary)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>1</button>
+                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-soft)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-gray)', cursor: 'pointer' }}>Next</button>
                         </div>
                     </div>
                 </div>
@@ -245,9 +239,9 @@ function Patients() {
 
             {/* View Modal */}
             {showViewModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
-                    <div className="ad-card" style={{ width: '100%', maxWidth: '500px', padding: '0', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.3)', margin: 'auto' }}>
-                        <div style={{ background: '#3b82f6', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="ad-modal-overlay">
+                    <div className="ad-modal-content" style={{ maxWidth: '500px' }}>
+                        <div style={{ background: 'var(--primary)', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Patient Summary</h3>
                                 <p style={{ opacity: 0.9, fontSize: '0.85rem' }}>ID: {selectedPatient._id}</p>
@@ -257,20 +251,20 @@ function Patients() {
                         <div style={{ padding: '30px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                                 <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Full Name</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.name}</p>
+                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Full Name</label>
+                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-dark)' }}>{selectedPatient.name}</p>
                                 </div>
                                 <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Phone Number</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.phone}</p>
+                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Phone Number</label>
+                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-dark)' }}>{selectedPatient.phone}</p>
                                 </div>
                                 <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Email Address</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.email || "N/A"}</p>
+                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Email Address</label>
+                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-dark)' }}>{selectedPatient.email || "N/A"}</p>
                                 </div>
                                 <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Current Status</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.status || "Active"}</p>
+                                    <label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 800 }}>Current Status</label>
+                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-dark)' }}>{selectedPatient.status || "Active"}</p>
                                 </div>
                             </div>
                             <button onClick={() => setShowViewModal(false)} className="ad-btn-duo" style={{ width: '100%', justifyContent: 'center' }}>Close Record</button>
@@ -281,9 +275,9 @@ function Patients() {
 
             {/* Edit Modal */}
             {showEditModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 1000 }}>
-                    <div className="ad-card" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', margin: 'auto' }}>
-                        <div style={{ background: '#22c55e', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="ad-modal-overlay">
+                    <div className="ad-modal-content" style={{ maxWidth: '550px' }}>
+                        <div style={{ background: 'var(--primary)', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Modify Patient Info</h3>
                             <button onClick={() => setShowEditModal(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', color: '#fff', padding: '8px', cursor: 'pointer', display: 'flex' }}><X size={20} /></button>
                         </div>
@@ -325,8 +319,8 @@ function Patients() {
                                 </select>
                             </div>
                             <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-                                <button onClick={() => setShowEditModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
-                                <button onClick={handleUpdate} disabled={saving} className="ad-btn-duo" style={{ flex: 1.5, justifyContent: 'center', background: '#22c55e' }}>
+                                <button onClick={() => setShowEditModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center', background: 'var(--bg-soft)', color: 'var(--text-gray)', border: '1px solid var(--border-color)' }}>Cancel</button>
+                                <button onClick={handleUpdate} disabled={saving} className="ad-btn-duo" style={{ flex: 1.5, justifyContent: 'center' }}>
                                     {saving ? <Loader2 size={20} className="animate-spin" /> : <ShieldCheck size={20} />}
                                     <span>{saving ? 'Saving...' : 'Save Changes'}</span>
                                 </button>
@@ -338,17 +332,17 @@ function Patients() {
 
             {/* Delete Confirmation */}
             {showDeleteModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', zIndex: 1000 }}>
-                    <div className="ad-card" style={{ width: '100%', maxWidth: '400px', textAlign: 'center', padding: '40px', margin: 'auto' }}>
-                        <div style={{ width: '70px', height: '70px', background: '#fef2f2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                            <AlertTriangle size={35} color="#ef4444" />
+                <div className="ad-modal-overlay">
+                    <div className="ad-modal-content" style={{ maxWidth: '400px', textAlign: 'center', padding: '40px' }}>
+                        <div style={{ width: '70px', height: '70px', background: 'var(--status-error-bg)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                            <AlertTriangle size={35} color="var(--status-error-text)" />
                         </div>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e293b', marginBottom: '10px' }}>Remove Account?</h3>
-                        <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '30px' }}>
+                        <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '10px' }}>Remove Account?</h3>
+                        <p style={{ color: 'var(--text-gray)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '30px' }}>
                             You are about to permanently delete <strong>{selectedPatient.name}</strong>. This action cannot be undone.
                         </p>
                         <div style={{ display: 'flex', gap: '15px' }}>
-                            <button onClick={() => setShowDeleteModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
+                            <button onClick={() => setShowDeleteModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center', background: 'var(--bg-soft)', color: 'var(--text-gray)', border: '1px solid var(--border-color)' }}>Cancel</button>
                             <button onClick={handleDelete} disabled={saving} className="ad-btn-duo" style={{ flex: 1, justifyContent: 'center', background: '#ef4444' }}>
                                 {saving ? <Loader2 size={18} className="animate-spin" /> : <Ban size={18} />}
                                 <span>{saving ? 'Deleting...' : 'Confirm'}</span>

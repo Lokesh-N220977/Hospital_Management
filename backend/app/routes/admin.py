@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
+from typing import Optional
 from app.core.role_checker import get_admin_user
 from app.database import doctor_leaves_collection, doctors_collection
 from app.models.doctor_model import DoctorCreate, DoctorUpdate
@@ -11,14 +12,103 @@ import uuid
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin"], dependencies=[Depends(get_admin_user)])
 
 @router.post("/add-doctor")
-async def add_doctor(doctor: DoctorCreate):
-    logger.info(f"Admin adding new doctor: {doctor.email}")
-    password, doctor_id = await doctor_service.create_doctor(doctor)
+async def add_doctor(
+    name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    gender: str = Form("Male"),
+    specialization: str = Form(...),
+    degree: str = Form(...),
+    experience: int = Form(...),
+    registration_number: str = Form(...),
+    qualification: str = Form(...),
+    consultation_fee: int = Form(500),
+    department: Optional[str] = Form(None),
+    location: Optional[str] = Form(None),
+    proof_document: UploadFile = File(...)
+):
+    logger.info(f"Admin adding new doctor with document: {email}")
+    
+    # Strictly enforce proof document
+    if not proof_document:
+        raise HTTPException(status_code=400, detail="Proof document is required")
+
+    # Save proof document
+    UPLOAD_DIR = "uploads/doctors"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    
+    file_ext = proof_document.filename.split(".")[-1]
+    file_name = f"proof_{uuid.uuid4()}.{file_ext}"
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+    
+    with open(file_path, "wb") as f:
+        f.write(await proof_document.read())
+    
+    proof_url = f"/uploads/doctors/{file_name}"
+
+    doctor_data = DoctorCreate(
+        name=name,
+        email=email,
+        phone=phone,
+        gender=gender,
+        specialization=specialization,
+        degree=degree,
+        experience=experience,
+        registration_number=registration_number,
+        qualification=qualification,
+        consultation_fee=consultation_fee,
+        department=department,
+        location=location,
+        proof_document_url=proof_url
+    )
+
+    password, doctor_id = await doctor_service.create_doctor(doctor_data)
     return {
-        "message": "Doctor account and profile created successfully",
+        "message": "Doctor account created and pending verification",
         "temp_password": password,
-        "doctor_id": str(doctor_id)
+        "doctor_id": str(doctor_id),
+        "proof_document_url": proof_url
     }
+
+@router.get("/pending-doctors")
+async def get_pending_doctors():
+    from app.database import doctors_collection
+    doctors = await doctors_collection.find({"verification_status": "PENDING"}).to_list(100)
+    for d in doctors:
+        d["_id"] = str(d["_id"])
+    return doctors
+
+@router.post("/verify-doctor/{doctor_id}")
+async def verify_doctor(doctor_id: str, payload: dict, current_admin=Depends(get_admin_user)):
+    from app.database import doctors_collection, users_collection
+    from datetime import datetime
+    
+    status = payload.get("status")
+    if status not in ["VERIFIED", "REJECTED"]:
+        raise HTTPException(status_code=400, detail="Invalid status. Use 'VERIFIED' or 'REJECTED'.")
+    
+    doctor = await doctors_collection.find_one({"_id": ObjectId(doctor_id)})
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    
+    update_data = {
+        "verification_status": status,
+        "is_verified": (status == "VERIFIED"),
+        "verified_at": datetime.utcnow(),
+        "verified_by": str(current_admin["_id"]),
+        "available": (status == "VERIFIED")
+    }
+    
+    await doctors_collection.update_one({"_id": ObjectId(doctor_id)}, {"$set": update_data})
+    
+    # Update associated user account
+    user_active = (status == "VERIFIED")
+    await users_collection.update_one(
+        {"_id": ObjectId(doctor["user_id"])},
+        {"$set": {"is_active": user_active}}
+    )
+    
+    return {"message": f"Doctor status updated to {status}"}
 
 @router.post("/doctor/{doctor_id}/image")
 async def upload_doctor_image(doctor_id: str, file: UploadFile = File(...)):
@@ -138,6 +228,11 @@ async def get_analytics_doctors():
 @router.get("/analytics/slots")
 async def get_analytics_slots():
     data = await analytics_service.get_peak_slots()
+    return {"success": True, "data": data}
+
+@router.get("/analytics/departments")
+async def get_analytics_departments():
+    data = await analytics_service.get_department_workload()
     return {"success": True, "data": data}
 
 @router.put("/update-doctor/{doctor_id}")

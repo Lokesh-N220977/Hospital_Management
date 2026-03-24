@@ -51,6 +51,9 @@ async def book_appointment(appointment_data: dict):
         raise HTTPException(status_code=400, detail="Doctor not found")
     if not doc.get("is_active", True) or doc.get("is_deleted", False):
         raise HTTPException(status_code=400, detail="Doctor is not active or deleted")
+    
+    if doc.get("verification_status") != "VERIFIED":
+        raise HTTPException(status_code=400, detail="Doctor not available for booking (Verification Pending/Rejected)")
         
     if not patient:
         raise HTTPException(status_code=400, detail="Patient profile not found")

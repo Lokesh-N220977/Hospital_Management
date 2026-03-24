@@ -29,7 +29,7 @@ export const appointmentService = {
       params: { doctor_id: doctorId, date }
     });
     // This wasn't changed but just in case
-    return data.success ? data.data : data as { slots: {time: string, booked: boolean}[]; message?: string };
+    return data as { slots: {time: string, booked: boolean}[]; reason?: string; success?: boolean; data?: any };
   },
 
   async updateAppointmentStatus(appointmentId: string, status: string) {
@@ -48,6 +48,42 @@ export const appointmentService = {
     return data.success ? data.data : data;
   },
 
+  async getHardenedAvailability(doctorId: string, date: string) {
+    const { data } = await api.get(`/doctors/${doctorId}/availability`, {
+      params: { date }
+    });
+    // Now returns { date, locations: [{location_id, location_name, shifts: [...]}] }
+    return data as { date: string; locations: any[] };
+  },
+
+  async getDoctorLocations(doctorId: string) {
+    const { data } = await api.get(`/doctors/${doctorId}/locations`);
+    return data as any[];
+  },
+
+  async bookHardenedAppointment(bookingData: { 
+    doctor_id: string; 
+    patient_id: string; 
+    location_id: string;
+    date: string; 
+    shift_id: string;
+    symptoms: string[];
+    idempotency_key: string;
+  }) {
+    const { data } = await api.post('/appointments/book', bookingData);
+    return data;
+  },
+
+  async getAppointmentStatus(appointmentId: string) {
+    const { data } = await api.get(`/appointments/status/${appointmentId}`);
+    return data;
+  },
+
+  async cancelHardenedAppointment(appointmentId: string) {
+    const { data } = await api.post(`/appointments/cancel/${appointmentId}`);
+    return data;
+  },
+
   async getMyAppointments() {
     const { data } = await api.get('/appointments/my-appointments');
     return data.success ? data.data : data;
@@ -56,11 +92,6 @@ export const appointmentService = {
   async getMyPatients() {
     const { data } = await api.get('/patients/my');
     return data.success ? data.data : data as PatientRecord[];
-  },
-
-  async cancelAppointment(appointmentId: string) {
-    const { data } = await api.patch(`/appointments/${appointmentId}/cancel`);
-    return data.success ? data.data : data;
   },
 
   async getDashboardData() {

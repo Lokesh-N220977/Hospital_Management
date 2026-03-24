@@ -70,6 +70,18 @@ html {
     --status-warning-text: #EF6C00;
     --status-error-bg: #FFEBEE;
     --status-error-text: #C62828;
+
+    /* Scrollbar Variables - Ultra Vibrant 5-Color Gradient */
+    --sb-track: #f1f5f9;
+    --sb-thumb: linear-gradient(to bottom, #0dcb6e, #3b82f6, #a855f7, #ff6b6b, #feca57);
+    --sb-thumb-hover: linear-gradient(to bottom, #0bb15f, #2563eb, #9333ea, #ee5253, #ff9f43);
+    --sb-size: 10px;
+
+    /* Vibrant Gradients */
+    --grad-primary: linear-gradient(135deg, #0dcb6e 0%, #3b82f6 100%);
+    --grad-vibrant: linear-gradient(135deg, #0dcb6e, #3b82f6, #a855f7);
+    --grad-active: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%);
+    --grad-glass: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));
 }
 
 /* Premium Animations */
@@ -90,92 +102,170 @@ html {
     100% { transform: translateY(0); opacity: 1; }
 }
 
-/* Global Dark Mode Style System (Tailwind-like Strategy) */
+/* --- NEW PREMIUM DARK MODE SYSTEM --- */
 :root.dark {
-    --glass-bg: rgba(10, 15, 30, 0.8);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --bg-white: #0a0f1e;
-    --bg-light: #0a0f1e;
-    --bg-soft: #111827; 
-    --text-dark: #f9fafb;
-    --text-main: #e5e7eb;
-    --text-gray: #9ca3af;
-    --text-muted: #6b7280;
-    --border-color: #1f2937;
-    --border-light: #1f2937;
-    --primary: #3b82f6;
-    --primary-light: rgba(59, 130, 246, 0.1);
-    --primary-hover: #1d4ed8;
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+    /* Base Dark Palette (Deep & Immersive) */
+    --bg-white: rgba(7, 10, 19, 0.85);   /* Translucent Obsidian */
+    --bg-light: #02040a;                /* Pure Deep Navy */
+    --bg-soft: #0a0f1d;                 /* Midnight Slate */
+    
+    --text-dark: #f8fafc;               /* Crisp White */
+    --text-main: #cbd5e1;               /* Soft Blue Gray */
+    --text-gray: #94a3b8;               /* Muted Steel */
+    --text-muted: #475569;              /* Dark Slate */
 
-    /* Component Tokens */
-    --card-bg: #111827;
-    --dropdown-bg: #111827;
-    --input-bg: #0a0f1e;
-    --success-bg: #064e3b;
-    --success-text: #34d399;
-    --error-bg: #7f1d1d;
-    --error-text: #fca5a5;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.04);
+    
+    /* Common Action Colors (Adjusted for Dark Mode) */
+    --action-success: #10b981;
+    --action-danger: #ef4444;
+    --action-warning: #f59e0b;
+
+    /* Status Colors Dark - Vibrant & Readable */
+    --status-success-bg: rgba(16, 185, 129, 0.12);
+    --status-success-text: #34d399;
+    --status-warning-bg: rgba(245, 158, 11, 0.12);
+    --status-warning-text: #fbbf24;
+    --status-error-bg: rgba(239, 68, 68, 0.12);
+    --status-error-text: #f87171;
+
+    /* Glassmorphism Presets */
+    --glass-bg: rgba(15, 23, 42, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-filter: blur(20px) saturate(180%);
+    
+    /* Input & Component Tokens */
+    --card-bg: rgba(15, 23, 42, 0.6);
+    --input-bg: rgba(2, 6, 23, 0.8);
+    --dropdown-bg: #0f172a;
 }
 
+/* --- PATIENT PORTAL (BLUE PRIORITY) --- */
+.dark.patient-portal {
+    --primary: #3b82f6;           /* Vivid Blue */
+    --primary-light: rgba(59, 130, 246, 0.15);
+    --primary-hover: #60a5fa;
+    --primary-dark: #2563eb;
+    
+    --grad-primary: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --grad-vibrant: linear-gradient(135deg, #3b82f6, #6366f1, #0ea5e9);
+    --glow-primary: 0 0 20px rgba(59, 130, 246, 0.3);
+    
+    --glass-border: rgba(59, 130, 246, 0.2);
+    --sb-thumb: linear-gradient(to bottom, #3b82f6, #0ea5e9);
+}
+
+/* --- DOCTOR PORTAL (GREEN PRIORITY) --- */
+.dark.doctor-portal {
+    --primary: #10b981;           /* Emerald Green */
+    --primary-light: rgba(16, 185, 129, 0.15);
+    --primary-hover: #34d399;
+    --primary-dark: #059669;
+    
+    --grad-primary: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --grad-vibrant: linear-gradient(135deg, #10b981, #06b6d4, #14b8a6);
+    --glow-primary: 0 0 20px rgba(16, 185, 129, 0.3);
+    
+    --glass-border: rgba(16, 185, 129, 0.2);
+    --sb-thumb: linear-gradient(to bottom, #10b981, #06b6d4);
+}
+
+/* --- ADMIN PORTAL (GREEN & BLUE PRIORITY) --- */
+.dark.admin-portal {
+    --primary: #8b5cf6;           /* Electric Violet Base */
+    --primary-light: rgba(139, 92, 246, 0.15);
+    --primary-hover: #a78bfa;
+    
+    /* The Signature Admin Mix: Green + Blue + Violet */
+    --admin-blue: #3b82f6;
+    --admin-green: #10b981;
+    --admin-violet: #8b5cf6;
+    
+    --grad-primary: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    --grad-vibrant: linear-gradient(135deg, #10b981, #3b82f6, #8b5cf6);
+    --glow-primary: 0 0 25px rgba(59, 130, 246, 0.4);
+    
+    --glass-border: rgba(99, 102, 241, 0.25);
+    --glass-filter: blur(25px) saturate(210%);
+    --sb-thumb: linear-gradient(to bottom, #10b981, #3b82f6, #8b5cf6);
+}
+
+/* Base Body Styles for Dark Theme */
 .dark body {
     background-color: var(--bg-light);
     color: var(--text-main);
 }
 
-/* Sidebar Dark Mode */
-.dark .patient-sidebar {
-    background-color: #111827 !important;
-    border-right: 1px solid #1f2937 !important;
+/* Sidebar Dark Mode - Integrated with Portal Themes */
+.dark .patient-sidebar, 
+.dark .doctor-sidebar,
+.dark .admin-sidebar {
+    background: var(--bg-soft) !important;
+    backdrop-filter: var(--glass-filter) !important;
+    border-right: 1px solid var(--glass-border) !important;
 }
 
-.dark .ps-logo-text { color: #3b82f6 !important; }
-.dark .ps-user { background: #1f2937 !important; }
-.dark .ps-link { color: #9ca3af !important; }
+.dark .ps-logo-text { color: var(--primary) !important; text-shadow: var(--glow-primary); }
+.dark .ps-user { background: var(--bg-white) !important; border: 1px solid var(--glass-border) !important; }
+.dark .ps-link { color: var(--text-gray) !important; }
 .dark .ps-link-active, .dark .ps-link:hover {
-    background-color: rgba(59, 130, 246, 0.15) !important;
-    color: #3b82f6 !important;
+    background: var(--primary-light) !important;
+    color: var(--primary) !important;
+    border-left: 3px solid var(--primary) !important;
 }
 
 /* Navbar Dark Mode */
-.dark .pn-navbar {
-    background-color: #030712 !important;
-    border-bottom: 1px solid #1f2937 !important;
+.dark .pn-navbar,
+.dark .admin-navbar,
+.dark .doctor-navbar {
+    background: var(--bg-white) !important;
+    backdrop-filter: var(--glass-filter) !important;
+    border-bottom: 1px solid var(--glass-border) !important;
 }
 
-.dark .pn-page-title { color: #ffffff !important; }
-.dark .pn-breadcrumb { color: #6b7280 !important; }
-.dark .pn-search { background: #111827 !important; border-color: #1f2937 !important; }
-.dark .pn-search-input { color: #f9fafb !important; }
+.dark .pn-page-title { color: var(--text-dark) !important; }
+.dark .pn-breadcrumb { color: var(--text-muted) !important; }
+.dark .pn-search { background: var(--input-bg) !important; border-color: var(--glass-border) !important; }
+.dark .pn-search-input { color: var(--text-main) !important; }
 
-/* Global UI Components in Dark Mode */
+/* Global UI Components in Dark Mode - Glassmorphism Transition */
 .dark .pd-card {
-    background-color: #111827 !important;
-    border: 1px solid #1f2937 !important;
-    box-shadow: var(--shadow-md) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-filter) !important;
+    border: 1px solid var(--glass-border) !important;
 }
 
+.dark .pd-input {
+    background: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+.dark .ad-btn-primary {
+    background: var(--primary) !important;
+    box-shadow: var(--glow-primary);
+}
 .dark h1, .dark h2, .dark .pd-page-title {
-    color: #ffffff !important;
+    color: var(--text-dark) !important;
 }
 
 .dark h3, .dark h4, .dark .pd-card-subtitle {
-    color: #3b82f6 !important;
+    color: var(--primary) !important;
 }
 
 .dark p, .dark span:not(.ps-badge) {
-    color: #e5e7eb;
+    color: var(--text-main);
 }
 
 .dark .pd-input, .dark .pd-textarea, .dark .pd-select {
-    background-color: #111827 !important;
-    border: 1px solid #1f2937 !important;
-    color: #f9fafb !important;
+    background: var(--input-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-main) !important;
 }
 
-.dark .pd-alert-success { background: #064e3b !important; color: #34d399 !important; border: 1px solid #065f46 !important; }
-.dark .pd-alert-error { background: #7f1d1d !important; color: #fca5a5 !important; border: 1px solid #991b1b !important; }
+.dark .pd-alert-success { background: var(--status-success-bg) !important; color: var(--status-success-text) !important; border: 1px solid var(--status-success-text) !important; }
+.dark .pd-alert-error { background: var(--status-error-bg) !important; color: var(--status-error-text) !important; border: 1px solid var(--status-error-text) !important; }
 
 /* Font Size Scaling (Scoped to pl-wrapper for layout safety) */
 .pl-wrapper.font-size-large { font-size: 18px !important; }

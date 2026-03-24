@@ -1,26 +1,64 @@
-from fastapi import APIRouter
-from app.services import appointment_service
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from app.services.hardened_booking_service import HardenedBookingService
+from app.database.collections import appointments_collection
+from bson import ObjectId
+from pydantic import BaseModel
+from typing import List
 
 router = APIRouter()
 
-def success_response(message: str, data=None):
-    return {"success": True, "message": message, "data": data}
+class BookingRequest(BaseModel):
+    doctor_id: str
+    patient_id: str
+    location_id: str # MANDATORY: Booking tied to branch
+    date: str
+    shift_id: str
+    symptoms: List[str]
+    idempotency_key: str
 
-@router.get("/appointments/doctor/{doctor_id}")
-async def get_doctor_appts(doctor_id: str):
-    """Step 1: Get all appointments for a specific doctor."""
-    data = await appointment_service.get_doctor_appointments(doctor_id)
-    return success_response("Appointments fetched successfully", data)
+@router.post("/appointments/book")
+async def book_appointment(data: BookingRequest):
+    """
+    Production-grade: Book appointment with transaction safety and priority logic.
+    """
+    try:
+        result = await HardenedBookingService.book_appointment(
+            data.doctor_id,
+            data.patient_id,
+            data.location_id,
+            data.date,
+            data.shift_id,
+            data.symptoms,
+            data.idempotency_key
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-@router.patch("/appointments/{appointment_id}")
-async def update_status(appointment_id: str, status: str):
-    """Step 1: Update the status of an appointment."""
-    await appointment_service.update_appointment_status(appointment_id, status)
-    return success_response(f"Appointment status updated to {status}")
+@router.post("/appointments/cancel/{appointment_id}")
+async def cancel_appointment(appointment_id: str):
+    """
+    Production-grade: Atomic cancellation with queue adjustment.
+    """
+    success = await HardenedBookingService.cancel_appointment(appointment_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Appointment not found or already cancelled")
+    return {"message": "Appointment cancelled successfully"}
 
-@router.get("/appointments/doctor/{doctor_id}/patients")
-async def get_patients(doctor_id: str):
-    """Retrieve unique patients for a specific doctor."""
-    data = await appointment_service.get_doctor_patients(doctor_id)
-    return success_response("Patients fetched successfully", data)
-
+@router.get("/appointments/status/{appointment_id}")
+async def get_appt_status(appointment_id: str):
+    """
+    Fresh read for status, queue position, and wait time.
+    """
+    appt = await appointments_collection.find_one({"_id": ObjectId(appointment_id)})
+    if not appt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+        
+    return {
+        "id": str(appt["_id"]),
+        "status": appt.get("status"),
+        "queue_position": appt.get("queue_position"),
+        "estimated_wait_time": appt.get("estimated_wait_time"),
+        "priority_level": appt.get("priority_level"),
+        "is_overflow": appt.get("is_overflow", False)
+    }

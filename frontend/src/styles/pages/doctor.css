@@ -3705,7 +3705,7 @@
 
 /* ── Base dark background ── */
 .dark .pl-wrapper {
-  background: #0a0f1e !important;
+  background: var(--bg-light) !important;
   color: #e5e7eb !important;
 }
 
@@ -3715,8 +3715,8 @@
 .dark .pd-patient-card,
 .dark .pd-quick-btn,
 .dark .pd-presc-card {
-  background: #111827 !important;
-  border-color: #1e293b !important;
+  background: var(--glass-bg) !important;
+  border-color: var(--bg-soft) !important;
   color: #e5e7eb !important;
 }
 
@@ -3731,7 +3731,7 @@
 
 .dark .pd-card-subtitle {
   color: #f1f5f9 !important;
-  border-bottom-color: #1e293b !important;
+  border-bottom-color: var(--bg-soft) !important;
 }
 
 .dark .pd-page-sub,
@@ -3739,7 +3739,7 @@
 .dark .pd-table-meta,
 .dark .pd-appt-meta,
 .dark .pd-quick-label {
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 /* ── Inputs ── */
@@ -3747,7 +3747,7 @@
 .dark .pd-search-bar,
 .dark .pd-filter-btn,
 .dark .pd-action-btn-secondary {
-  background: #1e293b !important;
+  background: var(--bg-soft) !important;
   border-color: #334155 !important;
   color: #f1f5f9 !important;
 }
@@ -3776,16 +3776,16 @@
 
 /* ── Field labels ── */
 .dark .pd-field label {
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 /* ── Settings sidebar ── */
 .dark .pd-settings-tab {
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 .dark .pd-settings-tab:hover {
-  background: #1e293b !important;
+  background: var(--bg-soft) !important;
   color: #f1f5f9 !important;
 }
 
@@ -3804,25 +3804,25 @@
 
 .dark .pd-divider,
 .dark .pd-settings-footer {
-  border-color: #1e293b !important;
+  border-color: var(--bg-soft) !important;
 }
 
 /* ── Settings card subtitle border ── */
 .dark .pd-card .pd-card-subtitle {
-  border-bottom-color: #1e293b !important;
+  border-bottom-color: var(--bg-soft) !important;
   color: #f9fafb !important;
 }
 
 /* Settings menu title*/
 .dark .pd-card h3[style] {
   color: #f9fafb !important;
-  border-bottom-color: #1e293b !important;
+  border-bottom-color: var(--bg-soft) !important;
 }
 
 /* ── Tables ── */
 .dark .pd-table th {
-  color: #94a3b8 !important;
-  border-bottom-color: #1e293b !important;
+  color: var(--text-gray) !important;
+  border-bottom-color: var(--bg-soft) !important;
 }
 
 .dark .pd-table td {
@@ -3834,7 +3834,7 @@
 }
 
 .dark .pd-appt-item {
-  border-color: #1e293b !important;
+  border-color: var(--bg-soft) !important;
   background: transparent !important;
 }
 
@@ -3852,15 +3852,15 @@
 }
 
 .dark .pd-time-badge {
-  background: #1e293b !important;
+  background: var(--bg-soft) !important;
   color: #f1f5f9 !important;
 }
 
 /* ── Action buttons ── */
 .dark .pd-action-icon-btn {
-  background: #1e293b !important;
+  background: var(--bg-soft) !important;
   border-color: #334155 !important;
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 .dark .pd-action-icon-btn:hover {
@@ -3876,7 +3876,7 @@
 }
 
 .dark .pd-appt-btn {
-  background: #1e293b !important;
+  background: var(--bg-soft) !important;
   color: #e5e7eb !important;
 }
 
@@ -3906,12 +3906,12 @@
 
 .dark .pd-appt-status--review {
   background: rgba(139, 92, 246, 0.15) !important;
-  color: #a78bfa !important;
+  color: var(--primary) !important;
 }
 
 .dark .pd-status--upcoming {
   background: rgba(100, 116, 139, 0.15) !important;
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 /* .dark .pd-status-pill inherits colors from the specific variant rules above */
@@ -3952,13 +3952,13 @@
 
 /* ── Calendar ── */
 .dark .pd-cal-header {
-  border-bottom-color: #1e293b !important;
+  border-bottom-color: var(--bg-soft) !important;
 }
 
 .dark .pd-cal-btn-today {
-  background: #1e293b !important;
+  background: var(--bg-soft) !important;
   border-color: #334155 !important;
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 .dark .pd-cal-btn-today:hover {
@@ -3983,8 +3983,8 @@
 
 /* ── Prescription cards ── */
 .dark .pd-presc-card {
-  background: #111827 !important;
-  border-color: #1e293b !important;
+  background: var(--glass-bg) !important;
+  border-color: var(--bg-soft) !important;
 }
 
 .dark .pd-presc-status--active {
@@ -3994,12 +3994,12 @@
 
 .dark .pd-presc-status--inactive {
   background: rgba(100, 116, 139, 0.12) !important;
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 /* ── Header breadcrumb ── */
 .dark .pd-header-content p {
-  color: #94a3b8 !important;
+  color: var(--text-gray) !important;
 }
 
 /* ── Profile Page ── */
@@ -4101,17 +4101,17 @@
 .pd-fee-freq { font-size: 0.75rem; color: var(--text-gray); font-weight: 500; margin-left: 4px; }
 
 /* Dark Mode Overrides for Profile */
-.dark .pd-card { background: #0f172a; border-color: #1e293b; }
-.dark .pd-id-card { border-color: #1e293b; }
-.dark .pd-contact-item-vertical { background: #1e293b; border-color: #334155; }
-.dark .pd-doc-name { color: #f1f5f9 !important; }
-.dark .pd-credential-box { background: #111827; border-color: #1e293b; }
-.dark .pd-cred-val { color: #f1f5f9 !important; }
-.dark .pd-fee-text { color: #f1f5f9 !important; }
-.dark .pd-avatar-img { border-color: #1e293b; }
-.dark .pd-avatar-trigger { border-color: #0f172a; }
-.dark .pd-contact-value-static { color: #f1f5f9 !important; }
-.dark .pd-status-pill { background: rgba(16, 185, 129, 0.15) !important; color: #34d399 !important; }
+.dark .pd-card { background: var(--glass-bg) !important; border-color: var(--glass-border) !important; backdrop-filter: var(--glass-filter) !important; }
+.dark .pd-id-card { border-color: var(--glass-border); }
+.dark .pd-contact-item-vertical { background: var(--bg-soft) !important; border-color: var(--glass-border); }
+.dark .pd-doc-name { color: var(--text-dark) !important; }
+.dark .pd-credential-box { background: var(--bg-white); border-color: var(--glass-border); }
+.dark .pd-cred-val { color: var(--text-dark) !important; }
+.dark .pd-fee-text { color: var(--text-dark) !important; }
+.dark .pd-avatar-img { border-color: var(--glass-border); }
+.dark .pd-avatar-trigger { border-color: var(--bg-soft); }
+.dark .pd-contact-value-static { color: var(--text-dark) !important; }
+.dark .pd-status-pill { background: var(--status-success-bg) !important; color: var(--status-success-text) !important; }
 
 .pd-stat-star-icon {
   display: inline;

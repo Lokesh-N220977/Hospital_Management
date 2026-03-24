@@ -55,7 +55,7 @@ function DoctorLayout({ children }: Props) {
   }
 
   return (
-    <div className={`pl-wrapper${theme === 'dark' ? ' dark' : ''}`}>
+    <div className={`pl-wrapper doctor-portal${theme === 'dark' ? ' dark' : ''}`}>
       <DoctorSidebar 
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

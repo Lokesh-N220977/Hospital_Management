@@ -45,7 +45,7 @@ function LeaveRequests() {
         switch (status) {
             case "approved": return "green"
             case "rejected": return "red"
-            case "pending": return "orange"
+            case "pending": return "yellow"
             default: return "blue"
         }
     }
@@ -64,30 +64,30 @@ function LeaveRequests() {
                     <div className="ad-list-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
                         <div className="ad-filter-bar">
                             <button 
-                                className={`ad-btn-primary ${filter === 'pending' ? '' : 'ad-btn-outline'}`}
+                                className={`ad-btn-warning ${filter === 'pending' ? '' : 'ad-btn-outline'}`}
                                 onClick={() => setFilter("pending")}
-                                style={{ background: filter === 'pending' ? '#f59e0b' : 'transparent', color: filter === 'pending' ? '#fff' : '#64748b', borderColor: filter === 'pending' ? '#f59e0b' : '#e2e8f0' }}
+                                style={{ padding: '8px 16px', borderRadius: '10px' }}
                             >
                                 Pending
                             </button>
                             <button 
-                                className={`ad-btn-primary ${filter === 'approved' ? '' : 'ad-btn-outline'}`}
+                                className={`ad-btn-success ${filter === 'approved' ? '' : 'ad-btn-outline'}`}
                                 onClick={() => setFilter("approved")}
-                                style={{ background: filter === 'approved' ? '#10b981' : 'transparent', color: filter === 'approved' ? '#fff' : '#64748b', borderColor: filter === 'approved' ? '#10b981' : '#e2e8f0' }}
+                                style={{ padding: '8px 16px', borderRadius: '10px' }}
                             >
                                 Approved
                             </button>
                             <button 
-                                className={`ad-btn-primary ${filter === 'rejected' ? '' : 'ad-btn-outline'}`}
+                                className={`ad-btn-danger ${filter === 'rejected' ? '' : 'ad-btn-outline'}`}
                                 onClick={() => setFilter("rejected")}
-                                style={{ background: filter === 'rejected' ? '#ef4444' : 'transparent', color: filter === 'rejected' ? '#fff' : '#64748b', borderColor: filter === 'rejected' ? '#ef4444' : '#e2e8f0' }}
+                                style={{ padding: '8px 16px', borderRadius: '10px' }}
                             >
                                 Rejected
                             </button>
                             <button 
-                                className={`ad-btn-primary ${filter === 'all' ? '' : 'ad-btn-outline'}`}
+                                className={`ad-btn-duo ${filter === 'all' ? '' : 'ad-btn-outline'}`}
                                 onClick={() => setFilter("all")}
-                                style={{ background: filter === 'all' ? '#3b82f6' : 'transparent', color: filter === 'all' ? '#fff' : '#64748b', borderColor: filter === 'all' ? '#3b82f6' : '#e2e8f0' }}
+                                style={{ padding: '8px 16px', borderRadius: '10px' }}
                             >
                                 All
                             </button>
@@ -147,8 +147,8 @@ function LeaveRequests() {
                                                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                         <button 
                                                             disabled={!!actionLoading}
-                                                            className="ad-btn-icon" 
-                                                            style={{ background: '#ecfdf5', color: '#059669' }}
+                                                            className="ad-btn-success" 
+                                                            style={{ padding: '8px', borderRadius: '8px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                             onClick={() => handleAction(leave._id, 'approved')}
                                                             title="Approve Leave"
                                                         >
@@ -156,8 +156,8 @@ function LeaveRequests() {
                                                         </button>
                                                         <button 
                                                             disabled={!!actionLoading}
-                                                            className="ad-btn-icon" 
-                                                            style={{ background: '#fef2f2', color: '#dc2626' }}
+                                                            className="ad-btn-danger" 
+                                                            style={{ padding: '8px', borderRadius: '8px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                             onClick={() => handleAction(leave._id, 'rejected')}
                                                             title="Reject Leave"
                                                         >

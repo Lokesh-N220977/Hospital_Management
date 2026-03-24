@@ -1,0 +1,11 @@
+﻿Connecting to MongoDB...
+Available databases: ['admin', 'config', 'hospital_db', 'i_mongoDB', 'local', 'medicpulse']
+Using database: health_appointment_new
+
+--- DOCTORS ---
+
+--- SCHEDULES ---
+
+--- APPROVED LEAVES ---
+
+--- RECENT APPOINTMENTS ---

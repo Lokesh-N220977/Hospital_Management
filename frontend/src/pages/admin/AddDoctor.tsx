@@ -1,5 +1,5 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { UserPlus, Image, Mail, Phone, MapPin, Building, Award, Loader2, Copy, Check, DollarSign } from "lucide-react"
+import { Plus, Image, Mail, Phone, MapPin, Building, Award, Copy, Check, DollarSign } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { addDoctor, uploadDoctorImage } from "../../services/adminService"
@@ -16,7 +16,9 @@ function AddDoctor() {
         department: "",
         location: "",
         gender: "Male",
-        consultation_fee: "500" // Added default fee
+        consultation_fee: "500",
+        registration_number: "",
+        qualification: ""
     })
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
@@ -25,6 +27,7 @@ function AddDoctor() {
     const [copied, setCopied] = useState(false)
     const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const [proofFile, setProofFile] = useState<File | null>(null)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -47,19 +50,33 @@ function AddDoctor() {
         setLoading(true)
         setError("")
         try {
-            const res = await addDoctor({
-                ...formData,
-                experience: parseInt(formData.experience) || 0,
-                consultation_fee: parseInt(formData.consultation_fee) || 500
-            })
-            
-            // If image is selected, upload it
-            if (selectedFile && res.doctor_id) {
-                const imgData = new FormData()
-                imgData.append('file', selectedFile)
-                await uploadDoctorImage(res.doctor_id, imgData)
+            if (!proofFile) {
+                setError("Proof document is mandatory for doctor registration.")
+                setLoading(false)
+                return
             }
 
+            const doctorFormData = new FormData()
+            // Add basic fields
+            Object.entries(formData).forEach(([key, value]) => {
+                doctorFormData.append(key, value)
+            });
+            
+            // Add professional numeric fields explicitly if needed, but Form handles strings too
+            // Add mandatory proof document
+            doctorFormData.append('proof_document', proofFile)
+            
+            // Add profile photo if exists
+            if (selectedFile) {
+                doctorFormData.append('profile_photo', selectedFile) // Note: Backend uses /image endpoint for separate upload usually, but let's see
+            }
+
+            const res = await addDoctor(doctorFormData)
+            
+            // If image is selected and backend supports separate upload, we keep it as fallback
+            // but the new constraint says "Single step creation with document"
+            // So we send everything in doctorFormData.
+            
             setTempPassword(res.temp_password) 
             setShowModal(true)
         } catch (err: any) {
@@ -92,20 +109,20 @@ function AddDoctor() {
                     </div>
 
                     {error && (
-                        <div style={{ padding: '12px', background: '#fef2f2', color: '#ef4444', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem' }}>
+                        <div style={{ padding: '12px', background: 'var(--status-error-bg)', color: 'var(--status-error-text)', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', border: '1px solid var(--status-error-text)' }}>
                             {error}
                         </div>
                     )}
 
                         <div className="pd-field" style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '30px' }}>
-                            <label style={{ marginBottom: '10px', fontSize: '0.9rem', color: '#64748b' }}>Doctor Profile Photo (Passport Size)</label>
+                            <label style={{ marginBottom: '10px', fontSize: '0.9rem', color: 'var(--text-gray)' }}>Doctor Profile Photo (Passport Size)</label>
                             <div 
                                 className="ad-upload-area" 
                                 onClick={() => document.getElementById('doctor-photo-input')?.click()}
                                 style={{ 
                                     cursor: 'pointer', 
                                     position: 'relative',
-                                    border: '2px dashed #cbd5e1',
+                                    border: '2px dashed var(--glass-border)',
                                     width: '150px',
                                     height: '180px',
                                     display: 'flex',
@@ -113,18 +130,19 @@ function AddDoctor() {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     overflow: 'hidden',
-                                    borderRadius: '8px',
-                                    backgroundColor: '#f8fafc',
-                                    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                                    transition: 'all 0.2s'
+                                    borderRadius: '12px',
+                                    backgroundColor: 'var(--input-bg)',
+                                    boxShadow: 'var(--shadow-sm)',
+                                    transition: 'all 0.2s',
+                                    backdropFilter: 'blur(10px)'
                                 }}
                             >
                                 {imagePreview ? (
                                     <img src={imagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
                                     <>
-                                        <Image size={32} color="#94a3b8" />
-                                        <span className="ad-upload-text" style={{ marginTop: '10px', color: '#64748b', fontSize: '0.75rem', textAlign: 'center', padding: '0 10px' }}>Upload Photo</span>
+                                        <Image size={32} color="var(--primary)" />
+                                        <span className="ad-upload-text" style={{ marginTop: '10px', color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center', padding: '0 10px' }}>Upload Photo</span>
                                     </>
                                 )}
                                 <input 
@@ -135,10 +153,10 @@ function AddDoctor() {
                                     onChange={handleFileChange} 
                                 />
                             </div>
-                            <span className="pd-page-sub" style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '8px' }}>Recommended: 400x500px square or 3:4 ratio</span>
+                            <span className="pd-page-sub" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '8px' }}>Recommended: 400x500px square or 3:4 ratio</span>
                         </div>
-
-                    <h3 className="pd-card-subtitle" style={{ borderBottom: '1px solid #eef2f6', paddingBottom: '10px', marginBottom: '20px' }}>Personal Details</h3>
+ 
+                    <h3 className="pd-card-subtitle" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginBottom: '20px', color: 'var(--text-main)' }}>Personal Details</h3>
                     <div className="ad-form-grid">
                         <div className="ad-field">
                             <label>Full Name</label>
@@ -155,7 +173,7 @@ function AddDoctor() {
                         <div className="ad-field">
                             <label>Email Address</label>
                             <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                <Mail size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                <Mail size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                 <input
                                     type="email"
                                     name="email"
@@ -171,7 +189,7 @@ function AddDoctor() {
                         <div className="ad-field">
                             <label>Phone Number</label>
                             <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                <Phone size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                <Phone size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                 <input
                                     type="tel"
                                     name="phone"
@@ -193,8 +211,8 @@ function AddDoctor() {
                             </select>
                         </div>
                     </div>
-
-                    <h3 className="pd-card-subtitle" style={{ borderBottom: '1px solid #eef2f6', paddingBottom: '10px', marginTop: '30px', marginBottom: '20px' }}>Professional Details</h3>
+ 
+                    <h3 className="pd-card-subtitle" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginTop: '30px', marginBottom: '20px', color: 'var(--text-main)' }}>Professional Details</h3>
                     <div className="ad-form-grid">
                         <div className="ad-field">
                             <label>Specialization</label>
@@ -216,7 +234,7 @@ function AddDoctor() {
                         <div className="ad-field">
                             <label>Medical Degree</label>
                             <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                <Award size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                <Award size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                 <input
                                     type="text"
                                     name="degree"
@@ -244,7 +262,7 @@ function AddDoctor() {
                         <div className="ad-field">
                             <label>Consultation Fee</label>
                             <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                <DollarSign size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                <DollarSign size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                 <input
                                     type="number"
                                     name="consultation_fee"
@@ -257,10 +275,37 @@ function AddDoctor() {
                                 />
                             </div>
                         </div>
+
+                        <div className="ad-field">
+                            <label>Registration Number (Medical Council)</label>
+                            <input
+                                type="text"
+                                name="registration_number"
+                                value={formData.registration_number}
+                                onChange={handleChange}
+                                className="ad-input"
+                                placeholder="e.g. MC-12345"
+                                required
+                                minLength={5}
+                            />
+                        </div>
+
+                        <div className="ad-field">
+                            <label>Specialist Qualification</label>
+                            <input
+                                type="text"
+                                name="qualification"
+                                value={formData.qualification}
+                                onChange={handleChange}
+                                className="ad-input"
+                                placeholder="e.g. MS (Orthopaedics), DNB"
+                                required
+                            />
+                        </div>
                         <div className="ad-field">
                             <label>Department / Clinic</label>
                             <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                <Building size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                <Building size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                 <input
                                     type="text"
                                     name="department"
@@ -275,7 +320,7 @@ function AddDoctor() {
                         <div className="ad-field">
                             <label>Location / City</label>
                             <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                <MapPin size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                <MapPin size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                 <input
                                     type="text"
                                     name="location"
@@ -289,13 +334,39 @@ function AddDoctor() {
                         </div>
                     </div>
 
-                    <div className="pd-settings-footer" style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-                        <button type="button" onClick={() => navigate("/admin/doctors")} className="ad-btn-primary" style={{ background: '#f1f5f9', color: '#475569' }}>Cancel</button>
-                        <button type="submit" disabled={loading} className="ad-btn-duo">
-                            {loading ? <Loader2 className="animate-spin" size={18} /> : <UserPlus size={18} />}
-                            <span>{loading ? "Creating..." : "Create Doctor Profile"}</span>
-                        </button>
+                    <h3 className="pd-card-subtitle" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginTop: '30px', marginBottom: '20px', color: 'var(--text-main)' }}>Verification Document</h3>
+                    <div style={{ padding: '15px', background: 'var(--bg-soft)', borderRadius: '12px', border: '1px dashed var(--glass-border)' }}>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '15px' }}>
+                            Please upload a scan of your Medical Registration Certificate or Degree (PDF or Image).
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                             <input 
+                                type="file" 
+                                id="proof-doc-input" 
+                                accept=".pdf,image/*"
+                                onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+                                style={{ 
+                                    fontSize: '0.85rem',
+                                    color: 'var(--text-main)',
+                                    cursor: 'pointer'
+                                }}
+                                required
+                             />
+                             {proofFile && (
+                                <span style={{ fontSize: '0.8rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Check size={14} /> {proofFile.name} ready
+                                </span>
+                             )}
+                        </div>
                     </div>
+
+                        <div className="pd-settings-footer" style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
+                            <button type="button" onClick={() => navigate("/admin/doctors")} className="ad-btn-danger" style={{ padding: '10px 20px', borderRadius: '12px', cursor: 'pointer' }}>Cancel</button>
+                            <button type="submit" className="ad-btn-success" disabled={loading} style={{ opacity: loading ? 0.7 : 1, padding: '10px 25px', borderRadius: '12px' }}>
+                                <Plus size={18} />
+                                <span>{loading ? "Adding..." : "Add Doctor"}</span>
+                            </button>
+                        </div>
                 </form>
 
                 {/* Temp Password Modal */}
@@ -309,22 +380,24 @@ function AddDoctor() {
                         <div className="ad-card" style={{ maxWidth: '420px', width: '100%', textAlign: 'center', padding: '40px', margin: 'auto' }}>
                             <div style={{ 
                                 width: '60px', height: '60px', borderRadius: '50%', 
-                                background: '#f0fdf4', color: '#16a34a', 
+                                background: 'var(--status-success-bg)', color: 'var(--status-success-text)', 
+                                border: '1px solid var(--status-success-text)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                margin: '0 auto 20px'
+                                margin: '0 auto 20px',
+                                boxShadow: 'var(--glow-success)'
                             }}>
                                 <Check size={32} />
                             </div>
-                            <h2 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>Doctor Created Successfully!</h2>
-                            <p style={{ color: '#64748b', marginBottom: '24px' }}>Please share this temporary password with the doctor. They will be required to change it upon first login.</p>
+                            <h2 style={{ fontSize: '1.5rem', marginBottom: '10px', color: 'var(--text-main)' }}>Doctor Created Successfully!</h2>
+                            <p style={{ color: 'var(--text-gray)', marginBottom: '24px' }}>Please share this temporary password with the doctor. They will be required to change it upon first login.</p>
                             
                             <div style={{ 
-                                background: '#f8fafc', border: '1px dashed #cbd5e1', 
-                                padding: '15px', borderRadius: '8px', 
+                                background: 'var(--bg-light)', border: '1px dashed var(--glass-border)', 
+                                padding: '15px', borderRadius: '12px', 
                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                 marginBottom: '30px'
                             }}>
-                                <code style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '2px', color: '#0f172a' }}>{tempPassword}</code>
+                                <code style={{ fontSize: '1.2rem', fontWeight: 700, letterSpacing: '2px', color: 'var(--primary)' }}>{tempPassword}</code>
                                 <button 
                                     onClick={copyToClipboard}
                                     style={{ 

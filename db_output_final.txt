@@ -1,0 +1,39 @@
+﻿Connecting to MongoDB Atlas...
+Using database: health_appointment
+
+--- DOCTORS ---
+ID: 69c171038bd280aa0256b812, Name: Dr. Ravi Kumar, Spec: Cardiology
+ID: 69c171048bd280aa0256b814, Name: Dr. Priya Sharma, Spec: Dermatology
+ID: 69c171048bd280aa0256b816, Name: Dr. Sameer Khan, Spec: Orthopedics
+
+--- SCHEDULES ---
+Doc: Unknown (69bce8d9aecbff4e4b3ebcb0), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8d9aecbff4e4b3ebcb0), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8d9aecbff4e4b3ebcb0), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8d9aecbff4e4b3ebcb0), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8d9aecbff4e4b3ebcb0), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8daaecbff4e4b3ebcb2), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8daaecbff4e4b3ebcb2), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8daaecbff4e4b3ebcb2), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8daaecbff4e4b3ebcb2), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bce8daaecbff4e4b3ebcb2), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69bd54bc059bf288f150c81e), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Unknown (69be484605e0c1e469f34fbf), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+Doc: Dr. Priya Sharma (Dermatology), Days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], Hours: 09:00 - 17:00, Slots/Day: 14
+
+--- APPROVED LEAVES ---
+Doc: Unknown (69bce8daaecbff4e4b3ebcb2), Date: None
+Doc: Unknown (69bce8daaecbff4e4b3ebcb2), Date: 2026-03-24
+Doc: Unknown (69bce8d9aecbff4e4b3ebcb0), Date: 2026-03-24
+
+--- RECENT APPOINTMENTS ---
+Doc: Dr. Priya Sharma, Date: 2026-03-27, Time: 14:00, Status: completed
+Doc: Dr. Priya Sharma, Date: 2026-03-24, Time: 14:00, Status: cancelled
+Doc: Dr. Priya Sharma, Date: 2026-03-24, Time: 11:00, Status: cancelled
+Doc: mobile, Date: 2026-03-24, Time: 14:00, Status: completed
+Doc: Dr. Ravi Kumar, Date: 2026-03-23, Time: 09:00, Status: cancelled
+Doc: Dr. Priya Sharma, Date: 2026-03-23, Time: 09:00, Status: cancelled
+Doc: Dr. Priya Sharma, Date: 2026-03-23, Time: 13:30, Status: completed
+Doc: Dr. Ravi Kumar, Date: None, Time: None, Status: cancelled
+Doc: mobile, Date: None, Time: None, Status: completed
+Doc: Dr. Priya Sharma, Date: None, Time: None, Status: booked

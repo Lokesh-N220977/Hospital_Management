@@ -257,6 +257,14 @@ async def login_email(login_data):
     if user.get("role", "").lower() != role.lower():
         logger.warning(f"Email login failed: Role mismatch for {email}")
         raise HTTPException(status_code=403, detail="Role mismatch. Access denied.")
+    
+    # Verification check for doctors
+    if role.lower() == "doctor":
+        from app.database import doctors_collection
+        doctor_profile = await doctors_collection.find_one({"user_id": str(user["_id"])})
+        if not doctor_profile or doctor_profile.get("verification_status") != "VERIFIED":
+            logger.warning(f"Login denied: Doctor {email} is not VERIFIED")
+            raise HTTPException(status_code=403, detail="Account pending verification. Please contact administrator.")
         
     if not user.get("password"):
         logger.warning(f"Email login failed: No password set for {email}")
@@ -316,6 +324,14 @@ async def login_unified(login_data):
         
     if user.get("role", "").lower() != role.lower():
         raise HTTPException(status_code=403, detail="Role mismatch")
+
+    # Verification check for doctors
+    if role.lower() == "doctor":
+        from app.database import doctors_collection
+        doctor_profile = await doctors_collection.find_one({"user_id": str(user["_id"])})
+        if not doctor_profile or doctor_profile.get("verification_status") != "VERIFIED":
+            logger.warning(f"Login denied: Doctor {identifier} is not VERIFIED")
+            raise HTTPException(status_code=403, detail="Account pending verification. Please contact administrator.")
 
     if not user.get("password"):
         raise HTTPException(status_code=401, detail="Please set up your password via OTP login first")

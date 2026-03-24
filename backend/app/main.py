@@ -32,6 +32,8 @@ async def create_db_indexes():
             doctors_collection,
             patients_collection,
             doctor_schedules_collection,
+            doctor_shifts_collection,
+            doctor_slots_collection,
             doctor_leaves_collection,
             visit_history_collection
         )
@@ -71,12 +73,34 @@ async def create_db_indexes():
         )
 
         # Schedules and Leaves
-        await doctor_schedules_collection.create_index([("doctor_id", ASCENDING)], unique=True)
-        await doctor_leaves_collection.create_index([("doctor_id", ASCENDING), ("date", ASCENDING)])
+        await doctor_schedules_collection.create_index([("doctor_id", ASCENDING), ("location_id", ASCENDING)], unique=True)
+        await doctor_leaves_collection.create_index([("doctor_id", ASCENDING), ("location_id", ASCENDING), ("date", ASCENDING)])
+
+        # Doctor Locations
+        from app.database.collections import doctor_locations_collection
+        await doctor_locations_collection.create_index([("doctor_id", ASCENDING), ("location_id", ASCENDING)], unique=True)
 
         # Visit History
         await visit_history_collection.create_index([("patient_id", ASCENDING)])
         await visit_history_collection.create_index([("appointment_id", ASCENDING)], unique=True)
+
+        # Hardened Scheduling System Indexes
+        # 1. Unique Slots: (doctor_id, location_id, shift_id, date, slot_time)
+        await doctor_slots_collection.create_index(
+            [("doctor_id", ASCENDING), ("location_id", ASCENDING), ("shift_id", ASCENDING), ("date", ASCENDING), ("slot_time", ASCENDING)],
+            unique=True
+        )
+
+        # 2. Unique Appointments (Idempotency): (idempotency_key)
+        await appointments_collection.create_index([("idempotency_key", ASCENDING)], unique=True)
+
+        # 3. Appointment Query Index: (slot_id, priority_score DESC, created_at ASC, _id ASC)
+        await appointments_collection.create_index(
+            [("location_id", ASCENDING), ("slot_id", ASCENDING), ("priority_score", DESCENDING), ("created_at", ASCENDING), ("_id", ASCENDING)]
+        )
+
+        # 4. Slots query index
+        await doctor_slots_collection.create_index([("doctor_id", ASCENDING), ("location_id", ASCENDING), ("date", ASCENDING), ("shift_id", ASCENDING)])
         
         # Drop legacy unique index if it exists
         try:

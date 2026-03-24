@@ -10,6 +10,38 @@ body {
     color: var(--text-dark);
     line-height: 1.6;
     overflow-x: hidden;
+    
+    /* Global All-Page Scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #3b82f6 var(--sb-track);
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+    width: var(--sb-size);
+    height: var(--sb-size);
+}
+
+::-webkit-scrollbar-track {
+    background: var(--sb-track);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb);
+    border-radius: 10px;
+    border: 2px solid var(--sb-track);
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--sb-thumb-hover);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Full body scrollbar specific */
+body::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb);
 }
 
 a {

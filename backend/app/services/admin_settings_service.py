@@ -11,6 +11,10 @@ async def get_hospital_settings():
             "email": "support@medicpulse.com",
             "mobile_number": "+91 91234 56789",
             "address": "Medical District Healthcare Center",
+            "facebook_url": "#",
+            "twitter_url": "#",
+            "instagram_url": "#",
+            "linkedin_url": "#",
             "updated_at": datetime.utcnow()
         }
         await hospital_settings_collection.insert_one(default_settings)
@@ -21,7 +25,11 @@ async def get_hospital_settings():
         "hospital_name": doc.get("hospital_name"),
         "email": doc.get("email"),
         "mobile_number": doc.get("mobile_number"),
-        "address": doc.get("address")
+        "address": doc.get("address"),
+        "facebook_url": doc.get("facebook_url", "#"),
+        "twitter_url": doc.get("twitter_url", "#"),
+        "instagram_url": doc.get("instagram_url", "#"),
+        "linkedin_url": doc.get("linkedin_url", "#")
     }
 
 async def update_hospital_settings(data: HospitalSettingsUpdate):

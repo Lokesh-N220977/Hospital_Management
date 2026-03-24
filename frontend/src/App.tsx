@@ -49,6 +49,7 @@ import AdminSchedules from "./pages/admin/DoctorSchedules"
 import AdminEditDoctor from "./pages/admin/EditDoctor"
 const AdminLeaves = lazy(() => import("./pages/admin/LeaveRequests"))
 import AdminNotifications from "./pages/admin/Notifications"
+import AdminDoctorVerification from "./pages/admin/DoctorVerification"
 
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
@@ -118,6 +119,7 @@ function App() {
               <Route path="/admin/schedules" element={<AdminSchedules />} />
               <Route path="/admin/leaves" element={<Suspense fallback={<div>Loading...</div>}><AdminLeaves /></Suspense>} />
               <Route path="/admin/notifications" element={<AdminNotifications />} />
+              <Route path="/admin/doctor-verification" element={<AdminDoctorVerification />} />
             </Route>
           </Route>
 

@@ -6,8 +6,10 @@ export const getAdminDashboardData = () =>
 export const getAllDoctors = (search?: string, specialization?: string, status?: string, page: number = 1, limit: number = 10) => 
     api.get(`/admin/doctors`, { params: { search, specialization, status, page, limit } }).then(res => res.data);
 
-export const addDoctor = (doctorData: any) => 
-    api.post(`/admin/add-doctor`, doctorData).then(res => res.data);
+export const addDoctor = (formData: FormData) => 
+    api.post(`/admin/add-doctor`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }).then(res => res.data);
 
 export const getDoctorById = (doctorId: string) => 
     api.get(`/admin/doctor/${doctorId}`).then(res => res.data);
@@ -62,6 +64,12 @@ export const getGlobalSchedules = (search?: string) =>
 
 export const resetGlobalSchedules = () => 
     api.post(`/admin/reset-all-schedules`).then(res => res.data);
+
+export const getPendingDoctors = () => 
+    api.get(`/admin/pending-doctors`).then(res => res.data);
+
+export const verifyDoctor = (doctorId: string, status: 'VERIFIED' | 'REJECTED') => 
+    api.post(`/admin/verify-doctor/${doctorId}`, { status }).then(res => res.data);
 
 export const updateDoctorSchedule = (scheduleId: string, data: any) => 
     api.put(`/admin/schedule/${scheduleId}`, data).then(res => res.data);

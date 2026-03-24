@@ -27,17 +27,26 @@ async def get_available_slots(doctor_id: str, date: str):
     
     leave, sched = await asyncio.gather(leave_task, sched_task)
     
-    if leave or not sched:
-        return []
+    if leave:
+        return [], "doctor_on_leave"
+    if not sched:
+        return [], "no_schedule_found"
 
     # 2. Check working day
     try:
-        day = datetime.datetime.strptime(date, "%Y-%m-%d").strftime("%a")
+        now = datetime.datetime.now()
+        requested_date = datetime.datetime.strptime(date, "%Y-%m-%d")
+        
+        # Check if date is in the past
+        if requested_date.date() < now.date():
+            return [], "date_in_past"
+            
+        day = requested_date.strftime("%a")
     except Exception:
-        return []
+        return [], "invalid_date"
 
     if day not in sched.get("working_days", []):
-        return []
+        return [], "not_working_day"
 
     # 3. Generate slots
     start = to_minutes(sched["start_time"])
@@ -104,8 +113,16 @@ async def get_available_slots(doctor_id: str, date: str):
             is_booked = True # mark past times today as booked
         
         result.append({"time": s, "booked": is_booked})
+    
+    # Check if all slots are booked
+    if not result:
+        return [], "no_slots_generated"
         
-    return result
+    all_booked = all(s["booked"] for s in result)
+    if all_booked:
+        return result, "all_slots_full"
+        
+    return result, "available"
 
 async def book_slot(doctor_id: str, date: str, time: str):
     """Checks if a slot is available before booking."""

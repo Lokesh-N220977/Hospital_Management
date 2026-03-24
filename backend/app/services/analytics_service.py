@@ -85,3 +85,21 @@ async def get_peak_slots():
         logger.error(f"Error fetching peak slots: {e}")
         return []
 
+async def get_department_workload():
+    """Aggregates total appointments by doctor specialization (department)."""
+    try:
+        pipeline = [
+            {"$group": {"_id": "$specialization", "total": {"$sum": 1}}},
+            {"$sort": {"total": -1}}
+        ]
+        results = await appointments_collection.aggregate(pipeline).to_list(100)
+        # Ensure we have a label if specialization is missing or empty
+        processed = []
+        for r in results:
+            label = r["_id"] if r["_id"] else "General/Other"
+            processed.append({"_id": label, "total": r["total"]})
+        return processed
+    except Exception as e:
+        logger.error(f"Error fetching department workload: {e}")
+        return []
+
