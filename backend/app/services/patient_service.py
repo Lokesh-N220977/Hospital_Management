@@ -25,7 +25,9 @@ async def get_my_patients(user_id: str):
     patients = []
     has_primary = False
     
-    async for p in patients_collection.find({"user_id": user_id, "is_active": {"$ne": False}}):
+    # Query by both string and ObjectId to be safe
+    query = {"$or": [{"user_id": user_id}, {"user_id": ObjectId(user_id)} if ObjectId.is_valid(user_id) else {}], "is_active": {"$ne": False}}
+    async for p in patients_collection.find(query):
         p["_id"] = str(p["_id"])
         if p.get("created_by") == "self":
             has_primary = True
@@ -35,7 +37,8 @@ async def get_my_patients(user_id: str):
     if not has_primary and user_id:
         from app.database import users_collection
         user = await users_collection.find_one({"_id": ObjectId(user_id)})
-        if user and user.get("role") == "patient":
+        # Relax role check: any logged in user should have a patient identity if they reach here
+        if user:
             # 1. Check if they have an un-tagged walk-in record with matching phone
             matching_walkin = next((p for p in patients if p.get("phone") == user.get("phone")), None)
             
@@ -90,17 +93,41 @@ async def update_patient(patient_id: str, update_data: dict):
     logger.info(f"Patient record updated: {patient_id}")
 
 async def delete_patient(patient_id: str):
-    """Soft delete a patient record and cancel their future appointments."""
+    """Soft delete a patient record, deactivate linked user, and cancel future appointments."""
     from datetime import datetime
-    from app.database import appointments_collection
+    from app.database import appointments_collection, users_collection
     
-    # Soft delete the patient
+    # Get patient details to check for user_id
+    patient = await patients_collection.find_one({"_id": ObjectId(patient_id)})
+    if not patient:
+        return False
+
+    # 1. Soft delete the patient
     await patients_collection.update_one(
         {"_id": ObjectId(patient_id)},
-        {"$set": {"is_active": False, "status": "deleted", "deleted_at": datetime.utcnow()}}
+        {"$set": {
+            "is_active": False, 
+            "status": "deleted", 
+            "deleted_at": datetime.utcnow()
+        }}
     )
     
-    # Cancel future appointments associated with this patient
+    # 2. Deactivate associated User account if exists
+    user_id = patient.get("user_id")
+    if user_id:
+        try:
+            # user_id might be string or ObjectId
+            u_oid = ObjectId(user_id) if isinstance(user_id, str) and len(user_id) == 24 else user_id
+            await users_collection.update_one(
+                {"_id": u_oid},
+                {"$set": {"is_active": False, "status": "suspended", "updated_at": datetime.utcnow()}}
+            )
+            logger.info(f"Associated User account {user_id} deactivated for patient {patient_id}")
+        except Exception as e:
+            logger.error(f"Failed to deactivate User {user_id}: {e}")
+
+    # 3. Cancel future appointments associated with this patient
+    # We keep the record for analytics as requested.
     now_str = datetime.utcnow().strftime("%Y-%m-%d")
     result = await appointments_collection.update_many(
         {
@@ -108,7 +135,13 @@ async def delete_patient(patient_id: str):
             "status": "booked", 
             "$or": [{"date": {"$gte": now_str}}, {"appointment_date": {"$gte": now_str}}]
         },
-        {"$set": {"status": "cancelled", "cancel_reason": "Patient member removed.", "cancelled_by": "system", "is_active": False}}
+        {"$set": {
+            "status": "cancelled", 
+            "cancel_reason": "Patient account suspended.", 
+            "cancelled_by": "system", 
+            "is_active": False
+        }}
     )
     
     logger.info(f"Patient record soft-deleted: {patient_id}. Cancelled {result.modified_count} future appointments.")
+    return True

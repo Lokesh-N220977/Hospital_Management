@@ -28,8 +28,13 @@ export const appointmentService = {
     const { data } = await api.get('/slots', {
       params: { doctor_id: doctorId, date }
     });
-    // This wasn't changed but just in case
-    return data.success ? data.data : data as { slots: {time: string, booked: boolean}[]; message?: string };
+    // Handle backend returning an array directly
+    if (Array.isArray(data)) {
+        return { slots: data.map(s => ({ time: s.time, booked: s.is_full })) };
+    }
+    // Handle backend returning { success: true, data: [...] } or { slots: [...] }
+    const actualSlots = data.slots || data.data || [];
+    return { slots: actualSlots.map((s:any) => ({ time: s.time, booked: s.booked ?? s.is_full })) };
   },
 
   async updateAppointmentStatus(appointmentId: string, status: string) {
@@ -48,6 +53,50 @@ export const appointmentService = {
     return data.success ? data.data : data;
   },
 
+  async getHardenedAvailability(doctorId: string, date: string) {
+    const { data } = await api.get(`/slots`, {
+      params: { doctor_id: doctorId, date }
+    });
+    return data as any[];
+  },
+
+  async getDoctorLocations(doctorId: string) {
+    const { data } = await api.get(`/doctors/${doctorId}/locations`);
+    return data as any[];
+  },
+
+
+  async getEmergencySlot(symptoms: string, preferredDate: string) {
+    const { data } = await api.post('/emergency-slot', { symptoms, preferred_date: preferredDate });
+    return data;
+  },
+
+  async bookHardenedAppointment(bookingData: { 
+    doctor_id: string; 
+    patient_id: string; 
+    date: string; 
+    slot_time: string;
+    symptoms: string[];
+    idempotency_key: string;
+  }) {
+    const { data } = await api.post('/appointments', bookingData);
+    return data;
+  },
+
+  async getAppointmentStatus(appointmentId: string) {
+    const { data } = await api.get(`/appointments/status/${appointmentId}`);
+    return data;
+  },
+
+  async cancelHardenedAppointment(appointmentId: string) {
+    const { data } = await api.post(`/appointments/cancel/${appointmentId}`);
+    return data;
+  },
+
+  async cancelAppointment(appointmentId: string) {
+    return this.cancelHardenedAppointment(appointmentId);
+  },
+
   async getMyAppointments() {
     const { data } = await api.get('/appointments/my-appointments');
     return data.success ? data.data : data;
@@ -58,9 +107,9 @@ export const appointmentService = {
     return data.success ? data.data : data as PatientRecord[];
   },
 
-  async cancelAppointment(appointmentId: string) {
-    const { data } = await api.patch(`/appointments/${appointmentId}/cancel`);
-    return data.success ? data.data : data;
+  async getBranches() {
+    const { data } = await api.get('/locations');
+    return data as any[];
   },
 
   async getDashboardData() {

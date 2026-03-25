@@ -191,8 +191,8 @@ function MyAppointments() {
                       <p className="ma-expand-val">{appt._id}</p>
                     </div>
                     <div>
-                      <p className="ma-expand-label">Reason</p>
-                      <p className="ma-expand-val">{appt.reason || "General Consultation"}</p>
+                      <p className="ma-expand-label">Reason / Symptoms</p>
+                      <p className="ma-expand-val">{appt.reason || appt.symptoms?.join(", ") || "General Consultation"}</p>
                     </div>
                     <div>
                       <p className="ma-expand-label">Doctor ID</p>

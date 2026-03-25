@@ -51,6 +51,9 @@ async def book_appointment(appointment_data: dict):
         raise HTTPException(status_code=400, detail="Doctor not found")
     if not doc.get("is_active", True) or doc.get("is_deleted", False):
         raise HTTPException(status_code=400, detail="Doctor is not active or deleted")
+    
+    if doc.get("verification_status") != "VERIFIED":
+        raise HTTPException(status_code=400, detail="Doctor not available for booking (Verification Pending/Rejected)")
         
     if not patient:
         raise HTTPException(status_code=400, detail="Patient profile not found")
@@ -77,7 +80,9 @@ async def book_appointment(appointment_data: dict):
         "status": "booked",
         "patient_id": ObjectId(patient_id_str),
         "doctor_id": ObjectId(doctor_id_str),
+        "date": date_str,
         "appointment_date": date_str,
+        "slot_time": time_str,
         "slot_start": appt_dt,
         "slot_end": slot_end,
         "is_active": True,
@@ -188,9 +193,9 @@ async def complete_appointment(appointment_id: str):
     if not appt:
         raise HTTPException(status_code=404, detail="Appointment not found")
         
-    current_status = appt.get("status", "booked")
+    current_status = str(appt.get("status", "booked")).lower()
     if "completed" not in ALLOWED_TRANSITIONS.get(current_status, []):
-        raise HTTPException(status_code=400, detail=f"Cannot transition from {current_status} to completed")
+        raise HTTPException(status_code=400, detail=f"Cannot transition from {appt.get('status')} to completed")
         
     await appointments_collection.update_one(
         {"_id": ObjectId(appointment_id)},
@@ -209,18 +214,25 @@ async def update_appointment_status(appointment_id: str, status: str):
     elif status == "no_show":
         appt = await appointments_collection.find_one({"_id": ObjectId(appointment_id)})
         if not appt: raise HTTPException(status_code=404, detail="Not found")
-        if "no_show" not in ALLOWED_TRANSITIONS.get(appt.get("status", "booked"), []):
-            raise HTTPException(status_code=400, detail="Invalid status transition to no_show")
+        
+        current_status = str(appt.get("status", "booked")).lower()
+        if "no_show" not in ALLOWED_TRANSITIONS.get(current_status, []):
+            raise HTTPException(status_code=400, detail=f"Invalid status transition from {appt.get('status')} to no_show")
+        
         await appointments_collection.update_one({"_id": ObjectId(appointment_id)}, {"$set": {"status": "no_show", "updated_at": datetime.now()}})
         return True
     
     raise HTTPException(status_code=400, detail=f"Unsupported status update: {status}")
 
 def _map_appt_for_frontend(appt):
-    appt["_id"] = str(appt["_id"])
-    appt["doctor_id"] = str(appt["doctor_id"])
-    appt["patient_id"] = str(appt["patient_id"])
-    # Map back fields for frontend
+    if not appt: return appt
+    
+    # 1. Standard conversions
+    for key in ["_id", "doctor_id", "patient_id", "user_id", "doctor_user_id"]:
+        if key in appt and appt[key]:
+            appt[key] = str(appt[key])
+            
+    # 2. Map back fields for frontend
     if "appointment_date" in appt:
         appt["date"] = appt["appointment_date"]
     else:
@@ -228,8 +240,25 @@ def _map_appt_for_frontend(appt):
         
     if "slot_start" in appt and isinstance(appt["slot_start"], datetime):
         appt["time"] = appt["slot_start"].strftime("%H:%M")
+    elif "slot_time" in appt:
+        appt["time"] = appt["slot_time"]
     else:
         appt["time"] = appt.get("time", "")
+
+    # Map symptoms to reason for frontend display
+    if "symptoms" in appt and not appt.get("reason"):
+        syms = appt["symptoms"]
+        appt["reason"] = ", ".join(syms) if isinstance(syms, list) else str(syms)
+
+    # Normalize status for frontend (always lowercase)
+    if "status" in appt:
+        appt["status"] = str(appt["status"]).lower()
+
+    # 3. Final safety check: Convert ANY remaining ObjectIds in the dict
+    for k, v in appt.items():
+        if isinstance(v, ObjectId):
+            appt[k] = str(v)
+            
     return appt
 
 async def get_patient_appointments(patient_id: str):
@@ -240,14 +269,18 @@ async def get_patient_appointments(patient_id: str):
     return appointments
 
 async def get_user_all_appointments(user_id: str):
+    from app.services import patient_service
     patients = await patient_service.get_my_patients(user_id)
     if not patients:
         return []
     patient_ids = [ObjectId(p["_id"]) for p in patients] + [str(p["_id"]) for p in patients]
     
     appointments = []
-    # Try to sort by slot_start at DB level
-    async for appt in appointments_collection.find({"patient_id": {"$in": patient_ids}}).sort("slot_start", -1):
+    # Try to sort by slot_start at DB level. Handle both 'booked' and 'BOOKED'
+    async for appt in appointments_collection.find({
+        "patient_id": {"$in": patient_ids},
+        "status": {"$in": ["booked", "BOOKED", "confirmed", "cancelled", "completed"]} # Broaden search
+    }).sort("slot_start", -1):
         appointments.append(_map_appt_for_frontend(appt))
     
     # Secondary sort in Python in case some legacy records don't have slot_start
@@ -256,7 +289,10 @@ async def get_user_all_appointments(user_id: str):
 
 async def get_doctor_appointments(doctor_id: str):
     appointments = []
-    async for appt in appointments_collection.find({"doctor_id": {"$in": [ObjectId(doctor_id), doctor_id]}}).sort("slot_start", 1):
+    async for appt in appointments_collection.find({
+        "doctor_id": {"$in": [ObjectId(doctor_id), doctor_id]},
+        "status": {"$in": ["booked", "BOOKED", "confirmed", "cancelled", "completed"]}
+    }).sort("slot_start", 1):
         appointments.append(_map_appt_for_frontend(appt))
     return appointments
 

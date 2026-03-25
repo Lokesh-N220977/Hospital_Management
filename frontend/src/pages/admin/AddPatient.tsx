@@ -37,8 +37,8 @@ function AddPatient() {
             <div className="ad-page">
                 <div className="ad-header">
                     <div className="ad-header-content">
-                        <h1>Register New Patient</h1>
-                        <p>Manually onboard new patients. They can link this record later using their phone number.</p>
+                        <h1 className="ad-page-title text-primary-gradient">Register New Patient</h1>
+                        <p className="ad-page-sub">Manually onboard new patients. They can link this record later using their phone number.</p>
                     </div>
                 </div>
 
@@ -48,14 +48,14 @@ function AddPatient() {
                     </div>
 
                     {error && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#fee2e2', color: '#b91c1c', borderRadius: '8px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: 'var(--status-error-bg)', color: 'var(--status-error-text)', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--status-error-text)' }}>
                             <AlertCircle size={20} />
                             {error}
                         </div>
                     )}
 
                     {success && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: '#dcfce7', color: '#166534', borderRadius: '8px', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', borderRadius: '8px', marginBottom: '16px', border: '1px solid var(--status-success-text)' }}>
                             <CheckCircle2 size={20} />
                             Patient registered successfully! Redirecting...
                         </div>
@@ -77,7 +77,7 @@ function AddPatient() {
                             <div className="ad-field">
                                 <label>Phone Number</label>
                                 <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                    <Phone size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                    <Phone size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                     <input 
                                         type="tel" 
                                         className="ad-input" 
@@ -100,7 +100,7 @@ function AddPatient() {
                             <div className="ad-field">
                                 <label>Age *</label>
                                 <div style={{ position: 'relative' }}>
-                                    <Calendar size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                    <Calendar size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                     <input 
                                         type="number" 
                                         className="ad-input" 
@@ -117,7 +117,7 @@ function AddPatient() {
                             <div className="ad-field" style={{ gridColumn: '1 / -1' }}>
                                 <label>Email (Optional)</label>
                                 <div className="pd-input-icon-wrap" style={{ position: 'relative' }}>
-                                    <Mail size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: '#64748b' }} />
+                                    <Mail size={16} style={{ position: 'absolute', left: '16px', top: '16px', color: 'var(--primary)' }} />
                                     <input 
                                         type="email" 
                                         className="ad-input" 
@@ -131,8 +131,8 @@ function AddPatient() {
                         </div>
 
                         <div className="pd-settings-footer" style={{ marginTop: '40px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-                            <button type="button" onClick={() => navigate("/admin/patients")} className="ad-btn-primary" style={{ background: '#f1f5f9', color: '#475569', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
-                            <button type="submit" className="ad-btn-duo" disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
+                            <button type="button" onClick={() => navigate("/admin/patients")} className="ad-btn-danger" style={{ padding: '10px 20px', borderRadius: '12px', cursor: 'pointer' }}>Cancel</button>
+                            <button type="submit" className="ad-btn-success" disabled={loading} style={{ opacity: loading ? 0.7 : 1, padding: '10px 25px', borderRadius: '12px' }}>
                                 <UserPlus size={18} />
                                 <span>{loading ? "Registering..." : "Register Patient"}</span>
                             </button>

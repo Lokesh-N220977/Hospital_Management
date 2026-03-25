@@ -32,13 +32,6 @@ async def send_email_otp(data: SendEmailOTPRequest):
 async def verify_email_otp(data: VerifyEmailOTPRequest):
     return await auth_service.verify_email_otp(data)
 
-@router.post("/send-phone-verify-otp")
-async def send_phone_verify_otp(data: SendOTPRequest):
-    return await auth_service.send_phone_verification_otp(data)
-
-@router.post("/verify-phone-verify-otp")
-async def verify_phone_verify_otp(data: VerifyOTPRequest):
-    return await auth_service.verify_phone_verification_otp(data)
 
 # ─────────────────────────────────────────────────────────────────────
 # EMAIL / Password Login  (Secondary)

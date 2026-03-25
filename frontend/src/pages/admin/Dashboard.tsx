@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { getAdminDashboardData, getAllAppointments } from "../../services/adminService"
 import { 
     ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
-    PieChart, Pie, Cell, Legend, BarChart as ReBarChart, Bar 
+    PieChart, Pie, Cell, Legend
 } from 'recharts'
 
 function AdminDashboard() {
@@ -50,8 +50,8 @@ function AdminDashboard() {
             <AdminLayout>
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
                     <div style={{ textAlign: 'center' }}>
-                        <Loader2 className="animate-spin" size={48} color="#3b82f6" />
-                        <p style={{ marginTop: '15px', color: '#64748b', fontWeight: 500 }}>Initializing analytics hub...</p>
+                        <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+                        <p style={{ marginTop: '15px', color: 'var(--text-gray)', fontWeight: 500 }}>Initializing analytics hub...</p>
                     </div>
                 </div>
             </AdminLayout>
@@ -71,7 +71,7 @@ function AdminDashboard() {
         value 
     })) : [];
 
-    const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+    const PIE_COLORS = ['var(--primary)', '#10b981', '#8b5cf6', '#f43f5e', '#0ea5e9'];
 
     return (
         <AdminLayout>
@@ -84,7 +84,18 @@ function AdminDashboard() {
                 </div>
 
                 {error && (
-                    <div style={{ marginBottom: '25px', padding: '12px 16px', borderRadius: '10px', background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
+                    <div style={{ 
+                        marginBottom: '25px', 
+                        padding: '12px 16px', 
+                        borderRadius: '10px', 
+                        background: 'var(--status-error-bg)', 
+                        color: 'var(--status-error-text)', 
+                        border: '1px solid var(--border-color)', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        fontSize: '0.9rem' 
+                    }}>
                         <Activity size={18} />
                         <span>{error}</span>
                     </div>
@@ -93,11 +104,18 @@ function AdminDashboard() {
                 <div className="ad-stats-grid">
                     {statCards.map((stat, i) => (
                         <div key={i} className={`ad-stat-card ad-stat--${stat.color}`}>
-                            <div className="ad-stat-icon-wrap">{stat.icon}</div>
+                            <div className="ad-stat-icon-wrap" style={{ 
+                                background: stat.color === 'blue' ? '#3b82f6' : 
+                                            stat.color === 'green' ? '#10b981' : 
+                                            stat.color === 'purple' ? '#8b5cf6' : 
+                                            '#f59e0b',
+                                color: '#fff',
+                                boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
+                            }}>{stat.icon}</div>
                             <div className="ad-stat-info">
                                 <span className="ad-stat-value">{stat.value}</span>
                                 <span className="ad-stat-label">{stat.title}</span>
-                                <span className="ad-stat-trend">{stat.trend}</span>
+                                <span className="ad-stat-trend" style={{ color: 'var(--status-success-text)' }}>{stat.trend}</span>
                             </div>
                         </div>
                     ))}
@@ -107,18 +125,27 @@ function AdminDashboard() {
                     {/* Weekly Trend Chart */}
                     <div className="ad-card" style={{ padding: '25px' }}>
                         <div className="ad-card-header" style={{ marginBottom: '20px' }}>
-                            <h2 className="ad-card-title"><BarChart size={20} style={{ marginRight: '8px' }} /> Booking Velocity (7D)</h2>
+                            <h2 className="ad-card-title">
+                                <span style={{ color: 'var(--primary)' }}><BarChart size={20} style={{ marginRight: '8px' }} /></span>
+                                Booking Velocity (7D)
+                            </h2>
                         </div>
                         <div style={{ width: '100%', height: '300px' }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={stats?.weekly_trend || []}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickFormatter={(val) => val.split('-').slice(1).join('/')} />
-                                    <YAxis stroke="#94a3b8" fontSize={12} allowDecimals={false} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
+                                    <XAxis dataKey="date" stroke="var(--chart-text)" fontSize={12} tickFormatter={(val) => val.split('-').slice(1).join('/')} />
+                                    <YAxis stroke="var(--chart-text)" fontSize={12} allowDecimals={false} />
                                     <Tooltip 
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                                        contentStyle={{ 
+                                            backgroundColor: 'var(--chart-tooltip-bg)', 
+                                            borderRadius: '12px', 
+                                            border: '1px solid var(--chart-tooltip-border)', 
+                                            boxShadow: 'var(--shadow-lg)' 
+                                        }}
+                                        itemStyle={{ color: 'var(--text-main)' }}
                                     />
-                                    <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
+                                    <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4, fill: 'var(--primary)' }} activeDot={{ r: 6 }} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
@@ -127,7 +154,10 @@ function AdminDashboard() {
                     {/* Status Breakdown Chart */}
                     <div className="ad-card" style={{ padding: '25px' }}>
                         <div className="ad-card-header" style={{ marginBottom: '20px' }}>
-                            <h2 className="ad-card-title"><PieIcon size={20} style={{ marginRight: '8px' }} /> Status Mix</h2>
+                            <h2 className="ad-card-title">
+                                <span style={{ color: '#8b5cf6' }}><PieIcon size={20} style={{ marginRight: '8px' }} /></span>
+                                Status Mix
+                            </h2>
                         </div>
                         <div style={{ width: '100%', height: '300px' }}>
                             <ResponsiveContainer width="100%" height="100%">
@@ -138,12 +168,19 @@ function AdminDashboard() {
                                         outerRadius={90}
                                         paddingAngle={5}
                                         dataKey="value"
+                                        stroke="none"
                                     >
                                         {pieData.map((_entry, index) => (
                                             <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                                         ))}
                                     </Pie>
-                                    <Tooltip />
+                                    <Tooltip 
+                                        contentStyle={{ 
+                                            backgroundColor: 'var(--chart-tooltip-bg)', 
+                                            borderRadius: '12px', 
+                                            border: '1px solid var(--chart-tooltip-border)' 
+                                        }}
+                                    />
                                     <Legend verticalAlign="bottom" height={36}/>
                                 </PieChart>
                             </ResponsiveContainer>
@@ -156,7 +193,7 @@ function AdminDashboard() {
                         <h2 className="ad-card-title">Real-time Activity Stream</h2>
                         <button 
                             className="ad-btn-primary" 
-                            style={{ padding: '8px 16px', fontSize: '0.85rem', background: '#f1f5f9', color: '#475569', border: 'none' }}
+                            style={{ padding: '8px 16px', fontSize: '0.85rem', background: 'var(--bg-soft)', color: 'var(--text-gray)', border: 'none' }}
                             onClick={() => navigate("/admin/appointments")}
                         >
                             Complete Register <ArrowRight size={16} />
@@ -188,7 +225,7 @@ function AdminDashboard() {
                                         </td>
                                         <td>
                                             <div className="ad-user-info">
-                                                <span className="ad-user-name" style={{ color: '#334155' }}>Dr. {appt.doctor_name || "Assessing"}</span>
+                                                <span className="ad-user-name" style={{ color: 'var(--text-main)' }}>Dr. {appt.doctor_name || "Assessing"}</span>
                                                 <span className="ad-user-sub">{appt.specialization || "Clinical"}</span>
                                             </div>
                                         </td>
@@ -207,7 +244,7 @@ function AdminDashboard() {
                                 ))}
                                 {appointments.length === 0 && !loading && (
                                     <tr>
-                                        <td colSpan={4} style={{ textAlign: 'center', padding: '60px', color: '#94a3b8' }}>
+                                        <td colSpan={4} style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
                                             <Calendar size={48} style={{ opacity: 0.1, margin: '0 auto 15px' }} />
                                             <p style={{ fontWeight: 500 }}>No active appointments found in the system registry.</p>
                                         </td>

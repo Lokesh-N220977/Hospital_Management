@@ -1,26 +1,84 @@
-from fastapi import APIRouter
-from app.services import appointment_service
+from fastapi import APIRouter, HTTPException
+from datetime import datetime
+from typing import List, Optional
+from bson import ObjectId
+from pydantic import BaseModel
+from app.services.dynamic_slot_service import DynamicSlotService
+from app.database.collections import appointments_collection
 
 router = APIRouter()
 
-def success_response(message: str, data=None):
-    return {"success": True, "message": message, "data": data}
+class BookingRequest(BaseModel):
+    doctor_id: str
+    patient_id: str
+    date: str
+    slot_time: str
 
-@router.get("/appointments/doctor/{doctor_id}")
-async def get_doctor_appts(doctor_id: str):
-    """Step 1: Get all appointments for a specific doctor."""
-    data = await appointment_service.get_doctor_appointments(doctor_id)
-    return success_response("Appointments fetched successfully", data)
+@router.post("/appointments/book")
+async def book_appointment(payload: dict):
+    """
+    Flexible booking endpoint supporting multiple slot field names and reasons.
+    """
+    try:
+        doctor_id = payload.get("doctor_id")
+        patient_id = payload.get("patient_id")
+        date = payload.get("date")
+        # Support both 'time' (common in admin) and 'slot_time' (common in patient)
+        slot_time = payload.get("slot_time") or payload.get("time")
+        reason = payload.get("reason")
+        
+        if not (doctor_id and patient_id and date and slot_time):
+            raise Exception("Missing required fields: doctor_id, patient_id, date, time")
 
-@router.patch("/appointments/{appointment_id}")
-async def update_status(appointment_id: str, status: str):
-    """Step 1: Update the status of an appointment."""
-    await appointment_service.update_appointment_status(appointment_id, status)
-    return success_response(f"Appointment status updated to {status}")
+        # Convert reason string to symptoms list for DynamicSlotService if needed
+        symptoms = [reason] if reason else None
+        
+        appt_id = await DynamicSlotService.book_appointment(
+            doctor_id,
+            date,
+            slot_time,
+            patient_id,
+            symptoms=symptoms
+        )
+        return {"id": appt_id, "message": "Appointment booked successfully", "success": True}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/appointments/doctor/{doctor_id}/patients")
-async def get_patients(doctor_id: str):
-    """Retrieve unique patients for a specific doctor."""
-    data = await appointment_service.get_doctor_patients(doctor_id)
-    return success_response("Patients fetched successfully", data)
+@router.post("/appointments/cancel/{appointment_id}")
+async def cancel_appointment(appointment_id: str):
+    """
+    Cancel an appointment and free up the dynamic slot.
+    """
+    # Support both case variations and multiple possible active states
+    result = await appointments_collection.update_one(
+        {"_id": ObjectId(appointment_id), "status": {"$in": ["booked", "BOOKED", "confirmed"]}},
+        {"$set": {
+            "status": "cancelled",
+            "updated_at": datetime.utcnow(),
+            "cancelled_by": "patient"
+        }}
+    )
+    if result.modified_count == 0:
+        # Check if it already exists but is in a different state
+        appt = await appointments_collection.find_one({"_id": ObjectId(appointment_id)})
+        if not appt:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        raise HTTPException(status_code=400, detail=f"Cannot cancel appointment in its current state: {appt.get('status')}")
+    return {"message": "Appointment cancelled successfully"}
 
+@router.get("/appointments/status/{appointment_id}")
+async def get_appt_status(appointment_id: str):
+    """
+    Fetch appointment status.
+    """
+    appt = await appointments_collection.find_one({"_id": ObjectId(appointment_id)})
+    if not appt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+        
+    return {
+        "id": str(appt["_id"]),
+        "status": appt.get("status"),
+        "doctor_id": str(appt.get("doctor_id")),
+        "date": appt.get("date"),
+        "slot_time": appt.get("slot_time")
+    }

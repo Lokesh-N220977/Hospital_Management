@@ -43,6 +43,19 @@ export const updatePortalProfileImage = (formData: FormData) =>
 export const getPortalSchedule = (doctorId: string) => 
     request(`/doctor/schedule/${doctorId}`);
 
+// Hardened Multiple Branch Scheduling
+export const getDoctorLocations = (doctorId: string) => 
+    request(`/schedule/hardened/doctors/${doctorId}/locations`);
+
+export const getHardenedSchedule = (doctorId: string, dayOfWeek: number) =>
+    request(`/schedules/${doctorId}?day_of_week=${dayOfWeek}`);
+
+export const saveHardenedSchedule = (schedule: any) => 
+    request(`/schedules`, {
+        method: 'POST',
+        body: JSON.stringify(schedule)
+    });
+
 export const savePortalSchedule = (schedule: any) => 
     request(`/doctor/schedule`, {
         method: 'POST',

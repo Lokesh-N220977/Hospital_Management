@@ -1,5 +1,5 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Search, Trash2, Bookmark, Clock, User, Loader2, CalendarDays, CheckCircle } from "lucide-react"
+import { Search, Trash2, Bookmark, Clock, Loader2, CalendarDays, CheckCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useCallback } from "react"
 import { getAllAppointments, deleteAppointment, updateAppointmentStatus } from "../../services/adminService"
@@ -60,7 +60,7 @@ function Appointments() {
             <div className="ad-page" style={{ animation: 'slideDownIn 0.4s ease-out' }}>
                 <div className="ad-header">
                     <div className="ad-header-content">
-                        <h1 className="ad-page-title">Appointment Management</h1>
+                        <h1 className="ad-page-title text-primary-gradient">Appointment Management</h1>
                         <p className="ad-page-sub">Monitor all hospital schedules, cancellations, and active bookings globally.</p>
                     </div>
                     <button className="ad-btn-duo" onClick={() => navigate("/admin/add-appointment")}>
@@ -72,7 +72,7 @@ function Appointments() {
                 <div className="ad-card">
                     <div className="ad-list-header">
                         <div className="ad-search-bar">
-                            <Search size={18} color="#94a3b8" />
+                            <Search size={18} color="var(--text-muted)" />
                             <input 
                                 type="text" 
                                 placeholder="Search by ID, Patient or Doctor..." 
@@ -109,12 +109,12 @@ function Appointments() {
                                 {loading ? (
                                     <tr>
                                         <td colSpan={6} style={{ textAlign: 'center', padding: '100px 0' }}>
-                                            <Loader2 className="animate-spin" size={32} style={{ color: '#3b82f6', margin: '0 auto' }} />
+                                            <Loader2 className="animate-spin" size={32} style={{ color: 'var(--primary)', margin: '0 auto' }} />
                                         </td>
                                     </tr>
                                 ) : appointments.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} style={{ textAlign: 'center', padding: '100px 0', color: '#94a3b8' }}>
+                                        <td colSpan={6} style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-muted)' }}>
                                             <CalendarDays size={48} style={{ opacity: 0.2, margin: '0 auto 15px' }} />
                                             <p>No appointments found matching your criteria.</p>
                                         </td>
@@ -124,17 +124,17 @@ function Appointments() {
                                         <tr key={apt._id || i} style={{ animation: `fadeIn 0.3s ease-out ${i*0.05}s forwards`, opacity: 0 }}>
                                             <td>
                                                 <div className="ad-user-info">
-                                                    <span className="ad-user-name" style={{ fontWeight: 800 }}>{apt._id?.slice(-6).toUpperCase() || "N/A"}</span>
+                                                    <span className="ad-user-name" style={{ fontWeight: 800, color: 'var(--text-main)' }}>{apt._id?.slice(-6).toUpperCase() || "N/A"}</span>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                        <span className="ad-user-sub">{apt.reason || "General Consult"}</span>
+                                                        <span className="ad-user-sub" style={{ color: 'var(--primary)' }}>{apt.reason || "General Consult"}</span>
                                                         {apt.urgent && <span style={{ fontSize: '0.6rem', color: '#fff', background: '#ef4444', padding: '1px 6px', borderRadius: '10px', textTransform: 'uppercase', fontWeight: 700 }}>Urgent</span>}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div className="ad-user-cell">
-                                                    <div className="ad-avatar" style={{ background: '#f1f5f9', color: '#3b82f6', width: '36px', height: '36px' }}>
-                                                        <User size={18} />
+                                                    <div className="ad-premium-avatar" style={{ width: '36px', height: '36px' }}>
+                                                        {(apt.patient_name || "P").charAt(0)}
                                                     </div>
                                                     <div>
                                                         <span className="ad-user-name" style={{ fontSize: '0.9rem' }}>{apt.patient_name || "Unknown"}</span>
@@ -144,14 +144,14 @@ function Appointments() {
                                             </td>
                                             <td>
                                                 <div className="ad-user-info">
-                                                    <span className="ad-user-name" style={{ fontSize: '0.9rem' }}>Dr. {apt.doctor_name || "Unknown"}</span>
+                                                    <span className="ad-user-name" style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>Dr. {apt.doctor_name || "Unknown"}</span>
                                                     <span className="ad-user-sub">{apt.specialization || ""}</span>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div className="ad-user-info">
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#1e293b', fontWeight: 600 }}>
-                                                        <Clock size={14} color="#64748b" /> {apt.time}
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                                                        <Clock size={14} color="var(--primary)" /> {apt.time}
                                                     </div>
                                                     <span className="ad-user-sub">{apt.date}</span>
                                                 </div>
@@ -166,18 +166,18 @@ function Appointments() {
                                                     {apt.status === "booked" && (
                                                         <>
                                                             <button 
-                                                                className="ad-icon-btn" 
+                                                                className="ad-btn-success" 
                                                                 title="Mark Completed" 
-                                                                style={{ color: '#10b981', background: '#10b98110' }}
+                                                                style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
                                                                 onClick={() => handleComplete(apt._id)}
                                                                 disabled={actionLoading === apt._id}
                                                             >
                                                                 <CheckCircle size={16} />
                                                             </button>
                                                             <button 
-                                                                className="ad-icon-btn danger" 
+                                                                className="ad-btn-danger" 
                                                                 title="Cancel Booking" 
-                                                                style={{ color: '#ef4444', background: '#ef444410' }}
+                                                                style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px' }}
                                                                 onClick={() => handleCancel(apt._id)}
                                                                 disabled={actionLoading === apt._id}
                                                             >
@@ -195,8 +195,8 @@ function Appointments() {
                         </table>
                     </div>
 
-                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9' }}>
-                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {appointments.length} appointments total</span>
+                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Showing {appointments.length} appointments total</span>
                     </div>
                 </div>
             </div>

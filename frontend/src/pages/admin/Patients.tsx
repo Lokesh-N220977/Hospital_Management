@@ -1,5 +1,5 @@
 import AdminLayout from "../../components/layout/admin/AdminLayout"
-import { Search, Edit2, Eye, Ban, Download, UserPlus, Loader2, X, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react"
+import { Search, Edit2, Eye, Ban, Download, UserPlus, Loader2, X, CheckCircle2, AlertTriangle, ShieldCheck, Mail, Phone } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useCallback } from "react"
 import { getAllPatients, updatePatient, deletePatient } from "../../services/adminService"
@@ -96,11 +96,11 @@ function Patients() {
             <div className="ad-page" style={{ animation: 'slideUp 0.4s ease-out' }}>
                 <div className="ad-header">
                     <div className="ad-header-content">
-                        <h1 className="ad-page-title">Patient Management</h1>
+                        <h1 className="ad-page-title text-primary-gradient">Patient Management</h1>
                         <p className="ad-page-sub">Centralized repository for patient records, medical history, and status tracking.</p>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
-                        <button className="ad-btn-primary" onClick={handleExport} style={{ background: '#fff', color: '#475569', border: '1px solid #e2e8f0' }}>
+                        <button className="ad-btn-primary" onClick={handleExport} style={{ background: 'var(--bg-soft)', color: 'var(--text-gray)', border: '1px solid var(--border-color)' }}>
                             <Download size={18} />
                             <span>Export CSV</span>
                         </button>
@@ -131,14 +131,14 @@ function Patients() {
 
                 <div className="ad-card" style={{ position: 'relative' }}>
                     {loading && (
-                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(2px)', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <Loader2 className="animate-spin" size={40} color="#3b82f6" />
+                        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(2px)', zIndex: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', borderRadius: '16px' }}>
+                            <Loader2 className="animate-spin" size={40} color="var(--primary)" />
                         </div>
                     )}
 
                     <div className="ad-list-header">
                         <div className="ad-search-bar" style={{ width: '400px' }}>
-                            <Search size={18} color="#94a3b8" />
+                            <Search size={18} color="var(--text-muted)" />
                             <input 
                                 type="text" 
                                 placeholder="Search patients by name, ID or email..." 
@@ -176,7 +176,7 @@ function Patients() {
                                 <tbody>
                                     {patients.length === 0 && !loading ? (
                                         <tr>
-                                            <td colSpan={5} style={{ textAlign: 'center', padding: '100px 0', color: '#94a3b8' }}>
+                                            <td colSpan={5} style={{ textAlign: 'center', padding: '100px 0', color: 'var(--text-muted)' }}>
                                                 <ShieldCheck size={48} style={{ opacity: 0.2, margin: '0 auto 15px' }} />
                                                 <p>No patient records found in search.</p>
                                             </td>
@@ -186,27 +186,21 @@ function Patients() {
                                             <tr key={pt._id || i} style={{ animation: `fadeIn 0.3s ease-out ${i*0.05}s forwards`, opacity: 0 }}>
                                                 <td>
                                                     <div className="ad-user-cell">
-                                                        <div className="ad-avatar" style={{
-                                                            background: `hsl(${i * 60 + 200}, 70%, 50%)`,
-                                                            width: '40px',
-                                                            height: '40px',
-                                                            fontSize: '0.9rem',
-                                                            fontWeight: 700
-                                                        }}>
+                                                        <div className="ad-premium-avatar">
                                                             {(pt.name || "P").charAt(0)}
                                                         </div>
                                                         <div className="ad-user-info">
                                                             <span className="ad-user-name" style={{ fontSize: '0.95rem' }}>{pt.name}</span>
                                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                                <span className="ad-user-sub" style={{ fontWeight: 600 }}>#{pt._id?.slice(-6).toUpperCase()}</span>
-                                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>•</span>
+                                                                <span className="ad-user-sub" style={{ fontWeight: 600, color: 'var(--primary)' }}>#{pt._id?.slice(-6).toUpperCase()}</span>
+                                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>•</span>
                                                                  {pt.age && <span className="ad-user-sub">{pt.age} Yrs</span>}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span className="ad-user-name" style={{ fontSize: '0.85rem', color: '#1e293b' }}>{pt.issue || "General Checkup"}</span>
+                                                    <span className="ad-user-name" style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>{pt.issue || "General Checkup"}</span>
                                                 </td>
                                                 <td>
                                                     <span className="ad-user-name" style={{ fontSize: '0.85rem' }}>{pt.phone || "N/A"}</span>
@@ -232,12 +226,12 @@ function Patients() {
                         </table>
                     </div>
 
-                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9' }}>
-                        <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Showing {patients.length} records</span>
+                    <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Showing {patients.length} records</span>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', cursor: 'pointer' }}>Previous</button>
-                            <button style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>1</button>
-                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: '#fff', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', cursor: 'pointer' }}>Next</button>
+                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-soft)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-gray)', cursor: 'pointer' }}>Previous</button>
+                            <button style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: 'var(--primary)', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>1</button>
+                            <button style={{ padding: '6px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-soft)', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-gray)', cursor: 'pointer' }}>Next</button>
                         </div>
                     </div>
                 </div>
@@ -245,90 +239,126 @@ function Patients() {
 
             {/* View Modal */}
             {showViewModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 1000, animation: 'fadeIn 0.2s' }}>
-                    <div className="ad-card" style={{ width: '100%', maxWidth: '500px', padding: '0', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.3)', margin: 'auto' }}>
-                        <div style={{ background: '#3b82f6', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Patient Summary</h3>
-                                <p style={{ opacity: 0.9, fontSize: '0.85rem' }}>ID: {selectedPatient._id}</p>
+                <div className="ad-modal-overlay">
+                    <div className="ad-modal-content" style={{ maxWidth: '650px', padding: 0, overflow: 'hidden' }}>
+                        <div className="ad-profile-banner" style={{ margin: 0, borderRadius: 0, padding: '40px' }}>
+                            <div className="ad-premium-avatar" style={{ width: '100px', height: '100px', fontSize: '2.5rem' }}>
+                                {(selectedPatient.name || "P").charAt(0)}
                             </div>
-                            <button onClick={() => setShowViewModal(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', color: '#fff', padding: '8px', cursor: 'pointer' }}><X size={20} /></button>
+                            <div className="ad-profile-name-group">
+                                <h3 style={{ color: '#fff', fontSize: '1.8rem' }}>{selectedPatient.name}</h3>
+                                <span className="ad-profile-spec" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
+                                    Patient ID: {selectedPatient._id?.slice(-8).toUpperCase()}
+                                </span>
+                            </div>
+                            <button onClick={() => setShowViewModal(false)} style={{ position: 'absolute', right: '30px', top: '30px', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: '#fff', padding: '10px' }}><X size={20} /></button>
                         </div>
-                        <div style={{ padding: '30px' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                                <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Full Name</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.name}</p>
+
+                        <div style={{ padding: '40px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+                                <div className="ad-field-premium">
+                                    <label>Email Address</label>
+                                    <div className="ad-profile-info-item" style={{ marginTop: '8px' }}>
+                                        <Mail size={18} />
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>{selectedPatient.email || "Not Provided"}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Phone Number</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.phone}</p>
+                                <div className="ad-field-premium">
+                                    <label>Contact Number</label>
+                                    <div className="ad-profile-info-item" style={{ marginTop: '8px' }}>
+                                        <Phone size={18} />
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>{selectedPatient.phone || "N/A"}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Email Address</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.email || "N/A"}</p>
+                                <div className="ad-field-premium">
+                                    <label>Primary Condition</label>
+                                    <p style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '8px' }}>{selectedPatient.issue || "General Observation"}</p>
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 800 }}>Current Status</label>
-                                    <p style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b' }}>{selectedPatient.status || "Active"}</p>
+                                <div className="ad-field-premium">
+                                    <label>Status</label>
+                                    <div style={{ marginTop: '8px' }}>
+                                        <span className={`ad-status ad-status--${selectedPatient.status || 'active'}`} style={{ fontSize: '0.9rem', padding: '6px 16px' }}>
+                                            {(selectedPatient.status || 'Active').toUpperCase()}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <button onClick={() => setShowViewModal(false)} className="ad-btn-duo" style={{ width: '100%', justifyContent: 'center' }}>Close Record</button>
+
+                            <div style={{ marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: '15px' }}>
+                                <button onClick={() => {setShowViewModal(false); setShowEditModal(true)}} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
+                                    <Edit2 size={18} />
+                                    <span>Edit Record</span>
+                                </button>
+                                <button onClick={() => setShowViewModal(false)} className="ad-btn-duo" style={{ flex: 1, justifyContent: 'center' }}>
+                                    <span>Dismiss Summary</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Edit Modal */}
             {showEditModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 20px', overflowY: 'auto', zIndex: 1000 }}>
-                    <div className="ad-card" style={{ width: '100%', maxWidth: '550px', padding: '0', overflow: 'hidden', margin: 'auto' }}>
-                        <div style={{ background: '#22c55e', padding: '25px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Modify Patient Info</h3>
-                            <button onClick={() => setShowEditModal(false)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', color: '#fff', padding: '8px', cursor: 'pointer', display: 'flex' }}><X size={20} /></button>
+                <div className="ad-modal-overlay">
+                    <div className="ad-modal-content" style={{ maxWidth: '650px', padding: 0, overflow: 'hidden' }}>
+                        <div style={{ background: 'var(--primary)', padding: '25px 40px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <h3 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Edit Patient Record</h3>
+                                <p style={{ opacity: 0.8, fontSize: '0.85rem' }}>Updating details for {selectedPatient.name}</p>
+                            </div>
+                            <button onClick={() => setShowEditModal(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', color: '#fff', padding: '10px', cursor: 'pointer' }}><X size={20} /></button>
                         </div>
-                        <div style={{ padding: '30px', maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
-                            <div className="ad-field">
-                                <label>Patient Name</label>
-                                <input className="ad-input" value={selectedPatient.name} onChange={(e) => setSelectedPatient({...selectedPatient, name: e.target.value})} />
+                        
+                        <div style={{ padding: '40px', maxHeight: '70vh', overflowY: 'auto' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
+                                <div className="ad-field-premium">
+                                    <label>Full Patient Name</label>
+                                    <input className="ad-input-premium" value={selectedPatient.name} onChange={(e) => setSelectedPatient({...selectedPatient, name: e.target.value})} />
+                                </div>
+                                <div className="ad-field-premium">
+                                    <label>Email ID</label>
+                                    <input type="email" className="ad-input-premium" value={selectedPatient.email || ""} onChange={e => setSelectedPatient({...selectedPatient, email: e.target.value})} />
+                                </div>
+                                <div className="ad-field-premium">
+                                    <label>Contact Number</label>
+                                    <input type="tel" className="ad-input-premium" value={selectedPatient.phone || ""} onChange={e => setSelectedPatient({...selectedPatient, phone: e.target.value})} />
+                                </div>
+                                <div className="ad-field-premium">
+                                    <label>Age (Years)</label>
+                                    <input type="number" className="ad-input-premium" value={selectedPatient.age || ""} onChange={e => setSelectedPatient({...selectedPatient, age: parseInt(e.target.value) || ""})} />
+                                </div>
+                                <div className="ad-field-premium">
+                                    <label>Gender Visibility</label>
+                                    <select className="ad-input-premium" value={selectedPatient.gender || "male"} onChange={e => setSelectedPatient({...selectedPatient, gender: e.target.value})}>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div className="ad-field-premium">
+                                    <label>Medical Classification</label>
+                                    <select className="ad-input-premium" value={selectedPatient.status} onChange={(e) => setSelectedPatient({...selectedPatient, status: e.target.value})}>
+                                        <option value="active">Active Treatment</option>
+                                        <option value="discharged">Discharged</option>
+                                        <option value="recovery">In Recovery</option>
+                                    </select>
+                                </div>
+                                <div className="ad-field-premium" style={{ gridColumn: 'span 2' }}>
+                                    <label>Primary Health Concern / Reason for Visit</label>
+                                    <textarea 
+                                        className="ad-input-premium" 
+                                        style={{ height: '80px', padding: '15px' }}
+                                        value={selectedPatient.issue || ""} 
+                                        onChange={(e) => setSelectedPatient({...selectedPatient, issue: e.target.value})} 
+                                    />
+                                </div>
                             </div>
-                            <div className="ad-field">
-                                <label>Email Address</label>
-                                <input type="email" className="ad-input" value={selectedPatient.email || ""} onChange={e => setSelectedPatient({...selectedPatient, email: e.target.value})} />
-                            </div>
-                            <div className="ad-field">
-                                <label>Phone Number</label>
-                                <input type="tel" className="ad-input" value={selectedPatient.phone || ""} onChange={e => setSelectedPatient({...selectedPatient, phone: e.target.value})} />
-                            </div>
-                            <div className="ad-field">
-                                <label>Age *</label>
-                                <input type="number" className="ad-input" required value={selectedPatient.age || ""} onChange={e => setSelectedPatient({...selectedPatient, age: parseInt(e.target.value) || ""})} />
-                            </div>
-                            <div className="ad-field">
-                                <label>Gender</label>
-                                <select className="ad-input" value={selectedPatient.gender || "male"} onChange={e => setSelectedPatient({...selectedPatient, gender: e.target.value})}>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div className="ad-field">
-                                <label>Primary Health Issue</label>
-                                <input className="ad-input" value={selectedPatient.issue} onChange={(e) => setSelectedPatient({...selectedPatient, issue: e.target.value})} />
-                            </div>
-                            <div className="ad-field">
-                                <label>Treatment Status</label>
-                                <select className="ad-input" value={selectedPatient.status} onChange={(e) => setSelectedPatient({...selectedPatient, status: e.target.value})}>
-                                    <option value="active">Active Treatment</option>
-                                    <option value="discharged">Discharged</option>
-                                    <option value="recovery">Recovery</option>
-                                </select>
-                            </div>
-                            <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-                                <button onClick={() => setShowEditModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
-                                <button onClick={handleUpdate} disabled={saving} className="ad-btn-duo" style={{ flex: 1.5, justifyContent: 'center', background: '#22c55e' }}>
+
+                            <div style={{ display: 'flex', gap: '15px', marginTop: '40px', paddingTop: '30px', borderTop: '1px solid var(--glass-border)' }}>
+                                <button onClick={() => setShowEditModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center', background: 'var(--bg-soft)', color: 'var(--text-gray)', border: '1px solid var(--glass-border)' }}>Discard</button>
+                                <button onClick={handleUpdate} disabled={saving} className="ad-btn-duo" style={{ flex: 1.5, justifyContent: 'center' }}>
                                     {saving ? <Loader2 size={20} className="animate-spin" /> : <ShieldCheck size={20} />}
-                                    <span>{saving ? 'Saving...' : 'Save Changes'}</span>
+                                    <span>{saving ? 'Saving...' : 'Commit Changes'}</span>
                                 </button>
                             </div>
                         </div>
@@ -338,20 +368,20 @@ function Patients() {
 
             {/* Delete Confirmation */}
             {showDeleteModal && selectedPatient && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', zIndex: 1000 }}>
-                    <div className="ad-card" style={{ width: '100%', maxWidth: '400px', textAlign: 'center', padding: '40px', margin: 'auto' }}>
-                        <div style={{ width: '70px', height: '70px', background: '#fef2f2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                            <AlertTriangle size={35} color="#ef4444" />
+                <div className="ad-modal-overlay">
+                    <div className="ad-modal-content" style={{ maxWidth: '450px', padding: '40px', borderRadius: '24px' }}>
+                        <div style={{ width: '80px', height: '80px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 25px' }}>
+                            <Ban size={40} />
                         </div>
-                        <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1e293b', marginBottom: '10px' }}>Remove Account?</h3>
-                        <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '30px' }}>
-                            You are about to permanently delete <strong>{selectedPatient.name}</strong>. This action cannot be undone.
+                        <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '12px' }}>Suspend Account</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '35px' }}>
+                            You are about to deactivate <strong>{selectedPatient.name}</strong>. Access will be revoked and all pending appointments will be cancelled. Past medical data will be preserved for hospital analytics.
                         </p>
                         <div style={{ display: 'flex', gap: '15px' }}>
-                            <button onClick={() => setShowDeleteModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
-                            <button onClick={handleDelete} disabled={saving} className="ad-btn-duo" style={{ flex: 1, justifyContent: 'center', background: '#ef4444' }}>
-                                {saving ? <Loader2 size={18} className="animate-spin" /> : <Ban size={18} />}
-                                <span>{saving ? 'Deleting...' : 'Confirm'}</span>
+                            <button onClick={() => setShowDeleteModal(false)} className="ad-btn-primary" style={{ flex: 1, justifyContent: 'center', background: 'var(--bg-soft)', color: 'var(--text-gray)', border: '1px solid var(--glass-border)' }}>Keep Active</button>
+                            <button onClick={handleDelete} disabled={saving} className="ad-btn-duo" style={{ flex: 1, justifyContent: 'center', background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+                                {saving ? <Loader2 size={18} className="animate-spin" /> : <ShieldCheck size={18} />}
+                                <span>{saving ? 'Processing...' : 'Confirm Suspension'}</span>
                             </button>
                         </div>
                     </div>

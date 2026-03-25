@@ -53,16 +53,10 @@ async def get_current_user(
         "must_change_password": user.get("must_change_password", False)
     }
 
-    # Security rule: enforce password change on protected routes
-    if current_user["must_change_password"]:
-        allowed_paths = [
-            "/api/v1/auth/change-password", 
-            "/api/v1/auth/my-profile",
-            "/api/v1/admin/dashboard",
-            "/api/v1/admin/settings",
-            "/api/v1/admin/appointments"
-        ]
-        if request.url.path not in allowed_paths:
+    # Security rule: enforce password change on non-GET protected routes
+    if current_user.get("must_change_password"):
+        if request.method != "GET" and request.url.path != "/api/v1/auth/change-password":
+            print(f"DEBUG: BLOCKED PATH {request.method} {request.url.path} due to must_change_password")
             raise HTTPException(status_code=403, detail="Password change required")
 
     return current_user

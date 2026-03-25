@@ -65,7 +65,7 @@ const Login: React.FC = () => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!identifier || !password) {
-            setError('Please enter your email/phone and password');
+            setError('Please enter your email and password');
             return;
         }
         setSubmitting(true);
@@ -181,9 +181,9 @@ const Login: React.FC = () => {
                     {/* ── Unified Form ── */}
                     <form className="sf-form sf-form--compact" onSubmit={handleLogin} style={{ marginBottom: '10px' }}>
                         <Input
-                            label="Email or Phone Number"
-                            type="text"
-                            placeholder="your@email.com or 9876543210"
+                            label="Email Address"
+                            type="email"
+                            placeholder="your@email.com"
                             required
                             value={identifier}
                             onChange={e => setIdentifier(e.target.value)}

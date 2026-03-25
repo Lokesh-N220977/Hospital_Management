@@ -12,7 +12,7 @@ function AdminLayout({ children }: Props) {
   const { theme } = useTheme()
 
   return (
-    <div className={`pl-wrapper admin-wrapper ${theme === 'dark' ? 'dark' : ''}`}>
+    <div className={`pl-wrapper admin-wrapper admin-portal ${theme === 'dark' ? 'dark' : ''}`}>
       <AdminSidebar
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
