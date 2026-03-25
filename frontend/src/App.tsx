@@ -10,6 +10,9 @@ import FindDoctors from "./pages/public/FindDoctors"
 import Login from "./pages/public/Login"
 import Register from "./pages/public/Register"
 
+// Shared
+import PrescriptionDocument from "./pages/shared/PrescriptionDocument"
+
 // Patient
 import Dashboard from "./pages/patient/Dashboard"
 import BookAppointment from "./pages/patient/BookAppointment"
@@ -49,6 +52,7 @@ import AdminSchedules from "./pages/admin/DoctorSchedules"
 import AdminEditDoctor from "./pages/admin/EditDoctor"
 const AdminLeaves = lazy(() => import("./pages/admin/LeaveRequests"))
 import AdminNotifications from "./pages/admin/Notifications"
+import AdminDoctorVerification from "./pages/admin/DoctorVerification"
 
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
@@ -69,6 +73,8 @@ function App() {
 
           {/* Protected Patient Routes */}
           <Route element={<ProtectedRoute />}>
+            <Route path="/prescription/:id/print" element={<PrescriptionDocument />} />
+            
             <Route element={<RoleProtectedRoute allowedRoles={['patient']} />}>
               <Route path="/patient/dashboard" element={<Dashboard />} />
               <Route path="/patient/book-appointment" element={<BookAppointment />} />
@@ -118,6 +124,7 @@ function App() {
               <Route path="/admin/schedules" element={<AdminSchedules />} />
               <Route path="/admin/leaves" element={<Suspense fallback={<div>Loading...</div>}><AdminLeaves /></Suspense>} />
               <Route path="/admin/notifications" element={<AdminNotifications />} />
+              <Route path="/admin/doctor-verification" element={<AdminDoctorVerification />} />
             </Route>
           </Route>
 

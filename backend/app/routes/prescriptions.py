@@ -52,6 +52,23 @@ async def update_status(
         raise HTTPException(status_code=400, detail="Update failed")
     return {"message": f"Status updated to {status}"}
 
+@router.get("/{presc_id}", response_model=dict)
+async def get_prescription(
+    presc_id: str
+):
+    """Fetch single prescription by ID."""
+    from app.database import prescriptions_collection
+    from bson import ObjectId
+    try:
+        presc = await prescriptions_collection.find_one({"_id": ObjectId(presc_id)})
+        if not presc:
+            raise HTTPException(status_code=404, detail="Prescription not found")
+        presc["id"] = str(presc["_id"])
+        presc.pop("_id", None)
+        return {"data": presc}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid Prescription ID format")
+
 @router.get("/{presc_id}/download")
 async def download_prescription(
     presc_id: str

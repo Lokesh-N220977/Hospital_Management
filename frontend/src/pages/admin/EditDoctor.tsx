@@ -187,82 +187,130 @@ function EditDoctor() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit} className="ad-card" style={{ padding: '40px' }}>
-                        <div style={{ display: 'flex', gap: '40px', marginBottom: '40px', alignItems: 'flex-start' }}>
+                    <form onSubmit={handleSubmit} className="ad-card" style={{ animationDelay: '0.1s' }}>
+                        {/* Profile Header Banner */}
+                        <div className="ad-profile-banner">
                             <div 
+                                className="ad-profile-photo-wrap" 
                                 onClick={() => isEditMode && document.getElementById('doctor-photo-input')?.click()}
-                                style={{ 
-                                    cursor: isEditMode ? 'pointer' : 'default', 
-                                    position: 'relative', 
-                                    border: isEditMode ? '2px dashed #cbd5e1' : '1px solid #e2e8f0',
-                                    width: '180px', height: '220px', display: 'flex',
-                                    flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                    overflow: 'hidden', borderRadius: '12px', backgroundColor: '#f8fafc',
-                                    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                                    transition: 'all 0.3s'
-                                }}
                             >
                                 {imagePreview ? (
                                     <img src={imagePreview} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
-                                    <>
-                                        <Image size={40} color="#94a3b8" />
-                                        <span style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '12px' }}>{isEditMode ? "Upload Photo" : "No Photo"}</span>
-                                    </>
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                                        <Image size={48} />
+                                        <span style={{ fontSize: '0.75rem', marginTop: '10px' }}>No Photo</span>
+                                    </div>
                                 )}
                                 {isEditMode && (
-                                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.4)', color: '#fff', padding: '6px', textAlign: 'center', fontSize: '0.7rem' }}>
-                                        Click to Change
+                                    <div className="ad-profile-photo-edit-overlay">
+                                        Change Photo
                                     </div>
                                 )}
-                                <input type="file" id="doctor-photo-input" hidden accept="image/*" onChange={handleFileChange} disabled={!isEditMode} />
+                                <input 
+                                    type="file" 
+                                    id="doctor-photo-input" 
+                                    hidden 
+                                    accept="image/*" 
+                                    onChange={handleFileChange} 
+                                    disabled={!isEditMode} 
+                                />
                             </div>
 
-                            <div style={{ flex: 1, pt: '10px' }}>
-                                <div style={{ marginBottom: '25px' }}>
-                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>{formData.name || "Unnamed Doctor"}</h3>
-                                    <p style={{ color: '#3b82f6', fontWeight: 700, fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{formData.specialization}</p>
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#64748b' }}>
-                                        <Mail size={16} /> <span>{formData.email}</span>
+                            <div className="ad-profile-name-group">
+                                <h3>{formData.name || "Doctor Profile"}</h3>
+                                <span className="ad-profile-spec">
+                                    {formData.specialization || "Specialization Not Set"}
+                                </span>
+                                
+                                <div className="ad-profile-info-grid">
+                                    <div className="ad-profile-info-item">
+                                        <Mail size={16} />
+                                        <span>{formData.email}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#64748b' }}>
-                                        <Phone size={16} /> <span>{formData.phone}</span>
+                                    <div className="ad-profile-info-item">
+                                        <Phone size={16} />
+                                        <span>{formData.phone}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#64748b' }}>
-                                        <Building size={16} /> <span>{formData.department}</span>
+                                    <div className="ad-profile-info-item">
+                                        <Building size={16} />
+                                        <span>{formData.department || "General Department"}</span>
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#64748b' }}>
-                                        <Award size={16} /> <span>{formData.degree}</span>
+                                    <div className="ad-profile-info-item">
+                                        <Award size={16} />
+                                        <span>{formData.degree || "Medical Degree"}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="ad-form-grid" style={{ mt: '20px', pt: '30px', borderTop: '1px solid #f1f5f9' }}>
-                            <div className="ad-field">
+                        {/* Details Sections */}
+                        <h4 className="ad-section-title">Personal Information</h4>
+                        <div className="ad-input-group">
+                            <div className="ad-field-premium">
                                 <label>Full Name</label>
-                                <input type="text" name="name" value={formData.name} onChange={handleChange} className="ad-input" required disabled={!isEditMode} />
+                                <input 
+                                    type="text" 
+                                    name="name" 
+                                    value={formData.name} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    required 
+                                    disabled={!isEditMode} 
+                                />
                             </div>
-                            <div className="ad-field">
+                            <div className="ad-field-premium">
                                 <label>Email Address</label>
-                                <input type="email" name="email" value={formData.email} onChange={handleChange} className="ad-input" required disabled={!isEditMode} />
+                                <input 
+                                    type="email" 
+                                    name="email" 
+                                    value={formData.email} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    required 
+                                    disabled={!isEditMode} 
+                                />
                             </div>
-                            <div className="ad-field">
-                                <label>Phone Number</label>
-                                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="ad-input" required disabled={!isEditMode} />
+                            <div className="ad-field-premium">
+                                <label>Contact Number</label>
+                                <input 
+                                    type="tel" 
+                                    name="phone" 
+                                    value={formData.phone} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    required 
+                                    disabled={!isEditMode} 
+                                />
                             </div>
-                            <div className="ad-field">
-                                <label>Status</label>
-                                <select name="status" value={formData.status} onChange={handleChange} className="ad-input" disabled={!isEditMode}>
-                                    <option value="active">Active / Available</option>
-                                    <option value="inactive">Inactive / On Hold</option>
+                            <div className="ad-field-premium">
+                                <label>Gender</label>
+                                <select 
+                                    name="gender" 
+                                    value={formData.gender} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    disabled={!isEditMode}
+                                >
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
-                            <div className="ad-field">
+                        </div>
+
+                        <h4 className="ad-section-title">Professional Credentials</h4>
+                        <div className="ad-input-group">
+                            <div className="ad-field-premium">
                                 <label>Specialization</label>
-                                <select name="specialization" value={formData.specialization} onChange={handleChange} className="ad-input" required disabled={!isEditMode}>
+                                <select 
+                                    name="specialization" 
+                                    value={formData.specialization} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    required 
+                                    disabled={!isEditMode}
+                                >
                                     <option value="Cardiology">Cardiology</option>
                                     <option value="Neurology">Neurology</option>
                                     <option value="Orthopedics">Orthopedics</option>
@@ -272,29 +320,89 @@ function EditDoctor() {
                                     <option value="Gastroenterology">Gastroenterology</option>
                                 </select>
                             </div>
-                            <div className="ad-field">
-                                <label>Medical Degree (e.g. MBBS, MD)</label>
-                                <input type="text" name="degree" value={formData.degree} onChange={handleChange} className="ad-input" required disabled={!isEditMode} />
+                            <div className="ad-field-premium">
+                                <label>Medical Qualification</label>
+                                <input 
+                                    type="text" 
+                                    name="degree" 
+                                    value={formData.degree} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    required 
+                                    disabled={!isEditMode} 
+                                    placeholder="e.g. MS, MBBS, MD"
+                                />
                             </div>
-                            <div className="ad-field">
-                                <label>Years of Experience</label>
-                                <input type="number" name="experience" value={formData.experience} onChange={handleChange} className="ad-input" required disabled={!isEditMode} />
+                            <div className="ad-field-premium">
+                                <label>Experience (Years)</label>
+                                <input 
+                                    type="number" 
+                                    name="experience" 
+                                    value={formData.experience} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    required 
+                                    disabled={!isEditMode} 
+                                />
                             </div>
-                            <div className="ad-field">
+                            <div className="ad-field-premium">
                                 <label>Consultation Fee</label>
                                 <div style={{ position: 'relative' }}>
-                                    <DollarSign size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
-                                    <input type="number" name="consultation_fee" value={formData.consultation_fee} onChange={handleChange} className="ad-input" style={{ paddingLeft: '40px' }} required disabled={!isEditMode} />
+                                    <DollarSign size={16} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+                                    <input 
+                                        type="number" 
+                                        name="consultation_fee" 
+                                        value={formData.consultation_fee} 
+                                        onChange={handleChange} 
+                                        className="ad-input-premium" 
+                                        style={{ paddingLeft: '40px' }} 
+                                        required 
+                                        disabled={!isEditMode} 
+                                    />
                                 </div>
+                            </div>
+                            <div className="ad-field-premium">
+                                <label>Department / Clinic</label>
+                                <input 
+                                    type="text" 
+                                    name="department" 
+                                    value={formData.department} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    disabled={!isEditMode} 
+                                />
+                            </div>
+                            <div className="ad-field-premium">
+                                <label>Operating Location</label>
+                                <input 
+                                    type="text" 
+                                    name="location" 
+                                    value={formData.location} 
+                                    onChange={handleChange} 
+                                    className="ad-input-premium" 
+                                    disabled={!isEditMode} 
+                                />
                             </div>
                         </div>
 
                         {isEditMode && (
                             <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'flex-end', gap: '15px' }}>
-                                <button type="button" onClick={() => setIsEditMode(false)} className="ad-btn-primary" style={{ background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}>Cancel Edits</button>
-                                <button type="submit" disabled={saving} className="ad-btn-duo" style={{ minWidth: '180px' }}>
-                                    {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-                                    <span>{saving ? "Updating Profile..." : "Commit Changes"}</span>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsEditMode(false)} 
+                                    className="ad-btn-primary" 
+                                    style={{ background: 'var(--bg-soft)', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }}
+                                >
+                                    Discard Changes
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    disabled={saving} 
+                                    className="ad-btn-duo" 
+                                    style={{ minWidth: '200px', justifyContent: 'center' }}
+                                >
+                                    {saving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                                    <span>{saving ? "Processing..." : "Commit Profile Updates"}</span>
                                 </button>
                             </div>
                         )}

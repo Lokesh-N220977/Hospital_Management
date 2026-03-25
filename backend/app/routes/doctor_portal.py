@@ -8,7 +8,8 @@ from app.database import doctors_collection, users_collection
 from bson import ObjectId
 import os
 import uuid
-from typing import List
+from app.models.leave_model import DoctorLeaveCreate
+from typing import List, Optional
 
 router = APIRouter(prefix="/api/v1/doctor", tags=["Doctor Portal"])
 
@@ -90,3 +91,25 @@ async def upload_profile_image(file: UploadFile = File(...), current_user=Depend
     )
 
     return {"image_url": image_url}
+
+@router.get("/leave/{doctor_id}")
+async def get_doctor_leaves(doctor_id: str, current_user=Depends(get_doctor_user)):
+    """Fetch all leave requests for a doctor."""
+    return await leave_service.get_doctor_leaves(doctor_id)
+
+@router.post("/leave")
+async def request_leave(payload: dict, current_user=Depends(get_doctor_user)):
+    """Request a leave (planned absence)."""
+    doctor_id = payload.get("doctor_id")
+    # Support both date and leave_date field names from various frontend versions
+    leave_date = payload.get("date") or payload.get("leave_date")
+    reason = payload.get("reason")
+    
+    if not (doctor_id and leave_date and reason):
+        raise HTTPException(status_code=400, detail="Missing required fields: doctor_id, date, reason")
+        
+    leave_id = await leave_service.request_leave(doctor_id, leave_date, reason)
+    if not leave_id:
+        raise HTTPException(status_code=400, detail="Leave request already exists for this date.")
+        
+    return {"message": "Leave request submitted successfully", "id": leave_id}

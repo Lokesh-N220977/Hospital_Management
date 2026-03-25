@@ -21,7 +21,11 @@ function AdminSettings() {
         hospital_name: "",
         email: "",
         mobile_number: "",
-        address: ""
+        address: "",
+        facebook_url: "",
+        twitter_url: "",
+        instagram_url: "",
+        linkedin_url: ""
     })
     const [generalLoading, setGeneralLoading] = useState(true)
     const [editMode, setEditMode] = useState(false)
@@ -119,7 +123,7 @@ function AdminSettings() {
             <div className="ad-page" style={{ animation: 'fadeIn 0.4s ease-out' }}>
                 <div className="ad-header">
                     <div>
-                        <h1 className="ad-page-title">System Settings</h1>
+                        <h1 className="ad-page-title text-primary-gradient">System Settings</h1>
                         <p className="ad-page-sub">Configure global platform rules, security, and alerts.</p>
                     </div>
                 </div>
@@ -152,12 +156,12 @@ function AdminSettings() {
                     <main className="pd-settings-content">
                         {/* Toast alerts */}
                         {error && (
-                            <div className="pd-alert-danger" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="pd-alert-danger" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--status-error-bg)', color: 'var(--status-error-text)', border: '1px solid var(--status-error-text)' }}>
                                 ⚠️ {error}
                             </div>
                         )}
                         {success && (
-                            <div className="pd-alert-info" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(13,203,110,0.08)', borderColor: 'rgba(13,203,110,0.2)', color: '#0dcb6e' }}>
+                            <div className="pd-alert-info" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--status-success-bg)', borderColor: 'var(--status-success-text)', color: 'var(--status-success-text)', border: '1px solid var(--status-success-text)' }}>
                                 <CheckCircle2 size={16} /> {success}
                             </div>
                         )}
@@ -166,11 +170,9 @@ function AdminSettings() {
                             <div className="ad-card">
                                 <h3 className="pd-card-subtitle">Global Platform Info</h3>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                    <p className="pd-page-sub mb-4" style={{ marginBottom: 0 }}>
-                                        This information represents the hospital and will be displayed publicly on the landing page footer.
-                                    </p>
+                                    <div />
                                     {!editMode && (
-                                        <button className="ad-btn-primary" onClick={() => setEditMode(true)} style={{ background: '#3b82f6', color: '#fff' }}>
+                                        <button className="ad-btn-primary" onClick={() => setEditMode(true)} style={{ background: 'var(--primary)', color: '#fff', boxShadow: 'var(--glow-primary)', border: 'none' }}>
                                             Edit Info
                                         </button>
                                     )}
@@ -228,10 +230,54 @@ function AdminSettings() {
                                                     onChange={e => setHospitalInfo({...hospitalInfo, address: e.target.value})} 
                                                 />
                                             </div>
+                                            <div className="ad-field">
+                                                <label>Facebook URL</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="ad-input"
+                                                    disabled={!editMode}
+                                                    style={{ opacity: !editMode ? 0.7 : 1 }}
+                                                    value={hospitalInfo.facebook_url} 
+                                                    onChange={e => setHospitalInfo({...hospitalInfo, facebook_url: e.target.value})} 
+                                                />
+                                            </div>
+                                            <div className="ad-field">
+                                                <label>Twitter URL</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="ad-input"
+                                                    disabled={!editMode}
+                                                    style={{ opacity: !editMode ? 0.7 : 1 }}
+                                                    value={hospitalInfo.twitter_url} 
+                                                    onChange={e => setHospitalInfo({...hospitalInfo, twitter_url: e.target.value})} 
+                                                />
+                                            </div>
+                                            <div className="ad-field">
+                                                <label>Instagram URL</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="ad-input"
+                                                    disabled={!editMode}
+                                                    style={{ opacity: !editMode ? 0.7 : 1 }}
+                                                    value={hospitalInfo.instagram_url} 
+                                                    onChange={e => setHospitalInfo({...hospitalInfo, instagram_url: e.target.value})} 
+                                                />
+                                            </div>
+                                            <div className="ad-field">
+                                                <label>LinkedIn URL</label>
+                                                <input 
+                                                    type="text" 
+                                                    className="ad-input"
+                                                    disabled={!editMode}
+                                                    style={{ opacity: !editMode ? 0.7 : 1 }}
+                                                    value={hospitalInfo.linkedin_url} 
+                                                    onChange={e => setHospitalInfo({...hospitalInfo, linkedin_url: e.target.value})} 
+                                                />
+                                            </div>
                                         </div>
                                         {editMode && (
                                             <div className="ad-form-actions" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                                                <button className="pd-action-btn-primary" type="submit" disabled={loading} style={{ background: '#0dcb6e', borderColor: '#0bba65' }}>
+                                                <button className="pd-action-btn-primary" type="submit" disabled={loading} style={{ background: 'var(--status-success-text)', color: '#fff', boxShadow: 'var(--glow-success)', border: 'none' }}>
                                                     {loading ? "Saving..." : "Save Changes"}
                                                 </button>
                                                 <button className="pd-action-btn-secondary" type="button" onClick={() => setEditMode(false)}>
@@ -317,7 +363,7 @@ function AdminSettings() {
                                                 type="checkbox" 
                                                 checked={notifications.new_doctor_alerts}
                                                 onChange={e => updateNotification('new_doctor_alerts', e.target.checked)}
-                                                style={{ width: '20px', height: '20px', accentColor: '#0dcb6e', cursor: 'pointer' }}
+                                                style={{ width: '20px', height: '20px', accentColor: 'var(--primary)', cursor: 'pointer' }}
                                             />
                                         </div>
                                         <div className="pd-notif-option" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '10px' }}>
@@ -329,7 +375,7 @@ function AdminSettings() {
                                                 type="checkbox" 
                                                 checked={notifications.critical_error_alerts}
                                                 onChange={e => updateNotification('critical_error_alerts', e.target.checked)}
-                                                style={{ width: '20px', height: '20px', accentColor: '#0dcb6e', cursor: 'pointer' }}
+                                                style={{ width: '20px', height: '20px', accentColor: 'var(--primary)', cursor: 'pointer' }}
                                             />
                                         </div>
                                         <div className="pd-notif-option" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
@@ -341,7 +387,7 @@ function AdminSettings() {
                                                 type="checkbox" 
                                                 checked={notifications.daily_analytics}
                                                 onChange={e => updateNotification('daily_analytics', e.target.checked)}
-                                                style={{ width: '20px', height: '20px', accentColor: '#0dcb6e', cursor: 'pointer' }}
+                                                style={{ width: '20px', height: '20px', accentColor: 'var(--primary)', cursor: 'pointer' }}
                                             />
                                         </div>
                                     </div>
@@ -359,57 +405,55 @@ function AdminSettings() {
                                     <div className="pd-field">
                                         <label style={{ marginBottom: '12px', display: 'block' }}>Theme</label>
                                         <div style={{ display: 'flex', gap: '14px' }}>
-                                            {/* Light button */}
                                             <button
                                                 onClick={() => setTheme('light')}
                                                 style={{
                                                     flex: 1, padding: '18px 20px', borderRadius: '14px', cursor: 'pointer',
-                                                    border: theme === 'light' ? '2px solid #0dcb6e' : '1px solid #334155',
-                                                    background: theme === 'light' ? 'rgba(13,203,110,0.08)' : 'transparent',
-                                                    color: theme === 'light' ? '#0dcb6e' : '#94a3b8',
+                                                    border: theme === 'light' ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                                                    background: theme === 'light' ? 'var(--primary-light)' : 'transparent',
+                                                    color: theme === 'light' ? 'var(--primary)' : 'var(--text-gray)',
                                                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
                                                     fontWeight: 700, fontSize: '15px', transition: 'all 0.2s',
                                                 }}
                                             >
                                                 <div style={{
                                                     width: '48px', height: '48px', borderRadius: '12px',
-                                                    background: theme === 'light' ? 'rgba(13,203,110,0.15)' : '#1e293b',
+                                                    background: theme === 'light' ? 'var(--primary-light)' : 'var(--bg-soft)',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    color: theme === 'light' ? '#0dcb6e' : '#64748b',
+                                                    color: theme === 'light' ? 'var(--primary)' : 'var(--text-muted)',
                                                 }}>
                                                     <Sun size={24} />
                                                 </div>
                                                 Light
                                                 {theme === 'light' && (
-                                                    <span style={{ fontSize: '11px', background: 'rgba(13,203,110,0.15)', color: '#0dcb6e', padding: '2px 10px', borderRadius: '20px' }}>
+                                                    <span style={{ fontSize: '11px', background: 'var(--primary-light)', color: 'var(--primary)', padding: '2px 10px', borderRadius: '20px' }}>
                                                         ✓ Active
                                                     </span>
                                                 )}
                                             </button>
 
-                                            {/* Dark button */}
                                             <button
                                                 onClick={() => setTheme('dark')}
                                                 style={{
                                                     flex: 1, padding: '18px 20px', borderRadius: '14px', cursor: 'pointer',
-                                                    border: theme === 'dark' ? '2px solid #0dcb6e' : '1px solid #334155',
-                                                    background: theme === 'dark' ? 'rgba(13,203,110,0.08)' : 'transparent',
-                                                    color: theme === 'dark' ? '#0dcb6e' : '#94a3b8',
+                                                    border: theme === 'dark' ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                                                    background: theme === 'dark' ? 'var(--primary-light)' : 'transparent',
+                                                    color: theme === 'dark' ? 'var(--primary)' : 'var(--text-gray)',
                                                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
                                                     fontWeight: 700, fontSize: '15px', transition: 'all 0.2s',
                                                 }}
                                             >
                                                 <div style={{
                                                     width: '48px', height: '48px', borderRadius: '12px',
-                                                    background: theme === 'dark' ? 'rgba(13,203,110,0.15)' : '#1e293b',
+                                                    background: theme === 'dark' ? 'var(--primary-light)' : 'var(--bg-soft)',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    color: theme === 'dark' ? '#0dcb6e' : '#64748b',
+                                                    color: theme === 'dark' ? 'var(--primary)' : 'var(--text-muted)',
                                                 }}>
                                                     <Moon size={24} />
                                                 </div>
                                                 Dark
                                                 {theme === 'dark' && (
-                                                    <span style={{ fontSize: '11px', background: 'rgba(13,203,110,0.15)', color: '#0dcb6e', padding: '2px 10px', borderRadius: '20px' }}>
+                                                    <span style={{ fontSize: '11px', background: 'var(--primary-light)', color: 'var(--primary)', padding: '2px 10px', borderRadius: '20px' }}>
                                                         ✓ Active
                                                     </span>
                                                 )}

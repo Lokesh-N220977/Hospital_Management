@@ -249,11 +249,15 @@
 
 .specialist-card-v {
     background: #fff;
-    border-radius: 24px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    border: 1px solid #f1f5f9;
-    transition: all 0.5s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 .specialist-card-v:hover {
@@ -262,9 +266,11 @@
 }
 
 .sc-img {
-    height: 380px;
+    width: 100%;
+    aspect-ratio: 4 / 3;
     position: relative;
     overflow: hidden;
+    background: #f1f5f9;
 }
 
 .sc-img img {
@@ -298,11 +304,16 @@
 .sc-img-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, transparent 50%);
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.4) 0%, transparent 40%);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 32px;
+    padding: 24px;
+    opacity: 0;
+    transition: 0.3s ease;
+}
+
+.specialist-card-v:hover .sc-img-overlay {
     opacity: 1;
 }
 
@@ -321,20 +332,35 @@
 
 .sc-verified {
     color: #3b82f6;
-    background: #fff;
-    border-radius: 50%;
-    padding: 2px;
+    font-size: 1rem;
 }
 
 .sc-spec {
-    color: #cbd5e0;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-top: 4px;
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.sc-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .sc-body {
-    padding: 32px;
+    padding: 24px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
 }
 
 .sc-meta {

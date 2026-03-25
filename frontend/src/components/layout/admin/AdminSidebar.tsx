@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom"
 import {
   Users, Stethoscope, Bookmark, Settings, LogOut, X, PieChart,
-  UserPlus, CalendarDays, BarChart, FileText
+  UserPlus, CalendarDays, BarChart, FileText, ShieldCheck
 } from "lucide-react"
 import logo from "../../../assets/logo.png"
 
@@ -22,6 +22,7 @@ const AdminSidebar = ({ mobileOpen = false, onClose }: AdminSidebarProps) => {
       label: "Doctor Management",
       links: [
         { title: "Add Doctor", path: "/admin/add-doctor", icon: <UserPlus size={20} /> },
+        { title: "Doctor Verification", path: "/admin/doctor-verification", icon: <ShieldCheck size={20} /> },
         { title: "Manage Doctors", path: "/admin/doctors", icon: <Stethoscope size={20} />, end: true },
         { title: "Doctor Schedules", path: "/admin/schedules", icon: <CalendarDays size={20} /> },
         { title: "Leave Requests", path: "/admin/leaves", icon: <FileText size={20} /> }

@@ -5,7 +5,7 @@ import {
   Search, Download, Star, CheckCircle2,
   Calendar, Loader2
 } from "lucide-react"
-import { getPatientVisitHistory, getPrescriptionUrl } from "../../services/visitService"
+import { getPatientVisitHistory } from "../../services/visitService"
 
 interface Visit {
   _id: string
@@ -54,8 +54,9 @@ function VisitHistory() {
     v.diagnosis.toLowerCase().includes(search.toLowerCase())
   )
 
-  const handleDownload = (visitId: string, type: string = "visit") => {
-    window.open(getPrescriptionUrl(visitId, type), '_blank')
+  const handleDownload = (visitId: string) => {
+    // Both types forward to the standard global prescription renderer
+    window.open(`/prescription/${visitId}/print`, '_blank')
   }
 
   // Generate a consistent color/avatar based on doctor name

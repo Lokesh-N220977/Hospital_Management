@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, File, UploadFile, Form
+from typing import Optional
 from app.core.role_checker import get_admin_user
 from app.database import doctor_leaves_collection, doctors_collection
 from app.models.doctor_model import DoctorCreate, DoctorUpdate
@@ -10,20 +11,141 @@ import uuid
 
 router = APIRouter(prefix="/api/v1/admin", tags=["Admin"], dependencies=[Depends(get_admin_user)])
 
+def serialize_mongo_doc(doc):
+    """Recursively converts ObjectIds to strings in a dictionary."""
+    if not doc:
+        return doc
+    if isinstance(doc, list):
+        return [serialize_mongo_doc(d) for d in doc]
+    if isinstance(doc, dict):
+        for k, v in doc.items():
+            if isinstance(v, ObjectId):
+                doc[k] = str(v)
+            elif isinstance(v, (dict, list)):
+                serialize_mongo_doc(v)
+    return doc
+
 @router.post("/add-doctor")
-async def add_doctor(doctor: DoctorCreate):
-    logger.info(f"Admin adding new doctor: {doctor.email}")
-    password, doctor_id = await doctor_service.create_doctor(doctor)
+async def add_doctor(
+    name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(...),
+    gender: str = Form("Male"),
+    specialization: str = Form(...),
+    degree: str = Form(...),
+    experience: int = Form(...),
+    registration_number: str = Form(...),
+    qualification: str = Form(...),
+    consultation_fee: int = Form(500),
+    department: Optional[str] = Form(None),
+    location: Optional[str] = Form(None),
+    proof_document: UploadFile = File(...),
+    profile_photo: Optional[UploadFile] = File(None)
+):
+    logger.info(f"Admin adding new doctor with document: {email}")
+    
+    # Save proof document
+    UPLOAD_DOCS_DIR = "uploads/doctors"
+    os.makedirs(UPLOAD_DOCS_DIR, exist_ok=True)
+    
+    proof_ext = proof_document.filename.split(".")[-1]
+    proof_name = f"proof_{uuid.uuid4()}.{proof_ext}"
+    proof_path = os.path.join(UPLOAD_DOCS_DIR, proof_name)
+    
+    with open(proof_path, "wb") as f:
+        f.write(await proof_document.read())
+    
+    proof_url = f"/uploads/doctors/{proof_name}"
+
+    # Save profile photo if provided
+    profile_url = None
+    if profile_photo:
+        UPLOAD_PROFILES_DIR = "uploads/doctor_profiles"
+        os.makedirs(UPLOAD_PROFILES_DIR, exist_ok=True)
+        
+        photo_ext = profile_photo.filename.split(".")[-1]
+        photo_name = f"profile_{uuid.uuid4()}.{photo_ext}"
+        photo_path = os.path.join(UPLOAD_PROFILES_DIR, photo_name)
+        
+        with open(photo_path, "wb") as f:
+            f.write(await profile_photo.read())
+        
+        profile_url = f"/uploads/doctor_profiles/{photo_name}"
+
+    doctor_data = DoctorCreate(
+        name=name,
+        email=email,
+        phone=phone,
+        gender=gender,
+        specialization=specialization,
+        degree=degree,
+        experience=experience,
+        registration_number=registration_number,
+        qualification=qualification,
+        consultation_fee=consultation_fee,
+        department=department,
+        location=location,
+        proof_document_url=proof_url,
+        profile_image_url=profile_url,
+        profile_image_source="admin"
+    )
+
+    password, doctor_id = await doctor_service.create_doctor(doctor_data)
     return {
-        "message": "Doctor account and profile created successfully",
+        "message": "Doctor account created and pending verification",
         "temp_password": password,
-        "doctor_id": str(doctor_id)
+        "doctor_id": str(doctor_id),
+        "proof_document_url": proof_url
     }
+
+@router.get("/pending-doctors")
+async def get_pending_doctors():
+    from app.database import doctors_collection
+    doctors = await doctors_collection.find({"verification_status": "PENDING"}).to_list(100)
+    return serialize_mongo_doc(doctors)
+
+@router.post("/verify-doctor/{doctor_id}")
+async def verify_doctor(doctor_id: str, payload: dict, current_admin=Depends(get_admin_user)):
+    from app.database import doctors_collection, users_collection
+    from datetime import datetime
+    
+    status = payload.get("status")
+    if status not in ["VERIFIED", "REJECTED"]:
+        raise HTTPException(status_code=400, detail="Invalid status. Use 'VERIFIED' or 'REJECTED'.")
+    
+    doctor = await doctors_collection.find_one({"_id": ObjectId(doctor_id)})
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    
+    update_data = {
+        "verification_status": status,
+        "is_verified": (status == "VERIFIED"),
+        "verified_at": datetime.utcnow(),
+        "verified_by": str(current_admin["_id"]),
+        "available": (status == "VERIFIED")
+    }
+    
+    await doctors_collection.update_one({"_id": ObjectId(doctor_id)}, {"$set": update_data})
+    
+    # Update associated user account
+    user_active = (status == "VERIFIED")
+    await users_collection.update_one(
+        {"_id": ObjectId(doctor["user_id"])},
+        {"$set": {"is_active": user_active}}
+    )
+    
+    return {"message": f"Doctor status updated to {status}"}
 
 @router.post("/doctor/{doctor_id}/image")
 async def upload_doctor_image(doctor_id: str, file: UploadFile = File(...)):
     logger.info(f"Admin uploading image for doctor: {doctor_id}")
     
+    try:
+        oid = ObjectId(doctor_id)
+    except Exception:
+        logger.error(f"Invalid doctor ID format: {doctor_id}")
+        raise HTTPException(status_code=400, detail="Invalid doctor ID format")
+
     # Ensure upload directory exists
     UPLOAD_DIR = "uploads/doctor_profiles"
     os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -37,8 +159,8 @@ async def upload_doctor_image(doctor_id: str, file: UploadFile = File(...)):
 
     image_url = f"/uploads/doctor_profiles/{file_name}"
 
-    await doctors_collection.update_one(
-        {"_id": ObjectId(doctor_id)},
+    result = await doctors_collection.update_one(
+        {"_id": oid},
         {
             "$set": {
                 "profile_image_url": image_url,
@@ -47,7 +169,13 @@ async def upload_doctor_image(doctor_id: str, file: UploadFile = File(...)):
         }
     )
 
-    return {"image_url": image_url}
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Doctor not found")
+
+    return {
+        "message": "Profile image updated successfully",
+        "profile_image_url": image_url
+    }
 
 @router.get("/leaves")
 async def get_all_leaves(status: str = None):
@@ -97,9 +225,10 @@ async def get_all_leaves(status: str = None):
     # Attach names to leaves
     for leave in leaves:
         leave["_id"] = str(leave["_id"])
-        leave["doctor_name"] = doc_map.get(str(leave["doctor_id"]), doc_map.get(leave["doctor_id"], "Unknown Doctor"))
+        leave["doctor_id"] = str(leave["doctor_id"])
+        leave["doctor_name"] = doc_map.get(leave["doctor_id"], doc_map.get(str(leave["doctor_id"]), "Unknown Doctor"))
         
-    return leaves
+    return serialize_mongo_doc(leaves)
 
 @router.patch("/leaves/{leave_id}")
 async def update_leave_status(leave_id: str, payload: dict):
@@ -140,6 +269,11 @@ async def get_analytics_slots():
     data = await analytics_service.get_peak_slots()
     return {"success": True, "data": data}
 
+@router.get("/analytics/departments")
+async def get_analytics_departments():
+    data = await analytics_service.get_department_workload()
+    return {"success": True, "data": data}
+
 @router.put("/update-doctor/{doctor_id}")
 async def update_doctor(doctor_id: str, data: DoctorUpdate):
     logger.info(f"Admin updating doctor: {doctor_id}")
@@ -168,8 +302,7 @@ async def get_doctor_by_id_endpoint(doctor_id: str):
         doc = await doctors_collection.find_one({"_id": ObjectId(doctor_id)})
         if not doc:
             raise HTTPException(status_code=404, detail="Doctor not found")
-        doc["_id"] = str(doc["_id"])
-        return doc
+        return serialize_mongo_doc(doc)
     except Exception as e:
         logger.error(f"Error fetching doctor: {e}")
         raise HTTPException(status_code=400, detail="Invalid doctor ID format")
@@ -193,9 +326,7 @@ async def get_all_doctors(search: str = None, specialization: str = None, status
     
     skip = (page - 1) * limit
     doctors = await doctors_collection.find(query).sort("name", 1).skip(skip).limit(limit).to_list(limit)
-    for d in doctors:
-        d["_id"] = str(d["_id"])
-    return doctors
+    return serialize_mongo_doc(doctors)
 
 @router.get("/patients")
 async def get_all_patients(search: str = None, status: str = None):
@@ -211,23 +342,26 @@ async def get_all_patients(search: str = None, status: str = None):
         query["status"] = status
         
     patients = await patients_collection.find(query).to_list(100)
-    for p in patients:
-        p["_id"] = str(p["_id"])
-    return patients
+    return serialize_mongo_doc(patients)
 
 @router.put("/update-patient/{patient_id}")
-async def update_patient(patient_id: str, payload: dict):
-    from app.database import patients_collection
-    from bson import ObjectId
+async def update_patient_endpoint(patient_id: str, payload: dict):
+    from app.services import patient_service
+    # Keep some internal fields safe
     payload.pop("_id", None)
-    await patients_collection.update_one({"_id": ObjectId(patient_id)}, {"$set": payload})
+    payload.pop("user_id", None)
+    payload.pop("phone", None) # Phone is identity usually, but admin can update it in some systems. Here let's keep it if they want.
+    
+    await patient_service.update_patient(patient_id, payload)
     return {"message": "Patient updated successfully"}
 
 @router.delete("/delete-patient/{patient_id}")
-async def delete_patient(patient_id: str):
+async def delete_patient_endpoint(patient_id: str):
     from app.services import patient_service
-    await patient_service.delete_patient(patient_id)
-    return {"message": "Patient suspended/inactivated successfully"}
+    success = await patient_service.delete_patient(patient_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Patient record not found")
+    return {"message": "Patient suspended and future appointments cancelled successfully"}
 
 @router.patch("/activate-patient/{patient_id}")
 async def activate_patient(patient_id: str):
@@ -285,6 +419,35 @@ async def get_all_appointments(search: str = None, status: str = None):
     appointments_cursor = appointments_collection.find(query).sort("slot_start", -1).limit(100)
     appointments = await appointments_cursor.to_list(100)
     
+    # Self-healing: Enrich missing names from records for analytics consistency
+    from app.database import doctors_collection, patients_collection
+    for apt in appointments:
+        needs_update = False
+        update_fields = {}
+        
+        # Repair Patient Name
+        if not apt.get("patient_name") or apt.get("patient_name") == "Unknown":
+            p_id = apt.get("patient_id")
+            if p_id:
+                p = await patients_collection.find_one({"_id": ObjectId(p_id) if isinstance(p_id, str) else p_id})
+                if p:
+                    apt["patient_name"] = p.get("name", "Deleted Patient")
+                    update_fields["patient_name"] = apt["patient_name"]
+                    needs_update = True
+        
+        # Repair Doctor Name
+        if not apt.get("doctor_name") or apt.get("doctor_name") == "Unknown":
+            d_id = apt.get("doctor_id")
+            if d_id:
+                d = await doctors_collection.find_one({"_id": ObjectId(d_id) if isinstance(d_id, str) else d_id})
+                if d:
+                    apt["doctor_name"] = d.get("name", "Deleted Doctor")
+                    update_fields["doctor_name"] = apt["doctor_name"]
+                    needs_update = True
+        
+        if needs_update:
+            await appointments_collection.update_one({"_id": apt["_id"]}, {"$set": update_fields})
+
     return [_map_appt_for_frontend(a) for a in appointments]
 
 @router.patch("/appointments/{appointment_id}/status")
@@ -368,7 +531,5 @@ async def get_all_schedules(search: str = None):
             {"doctor_id": {"$regex": search, "$options": "i"}}
         ]
     schedules = await doctor_schedules_collection.find(query).to_list(100)
-    for s in schedules:
-        s["_id"] = str(s["_id"])
-    return schedules
+    return serialize_mongo_doc(schedules)
 

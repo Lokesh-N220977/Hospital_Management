@@ -86,50 +86,66 @@ function Leaves() {
     return (
         <DoctorLayout>
             <div className="pd-page">
+                {/* Modern Header Section */}
                 <div className="pd-header">
                     <div className="pd-header-content">
-                        <h1 className="pd-page-title">Manage Absences</h1>
-                        <p className="pd-page-sub">Mark specific dates for planned leave. Approved dates automatically override your weekly schedule.</p>
+                        <h1 className="pd-page-title">Calendar Management</h1>
+                        <p className="pd-page-sub">Plan your availability and manage practice leaves with full administrative sync.</p>
                     </div>
                     <div className="pd-header-actions">
                         <button className="pd-action-btn-primary" onClick={() => setIsAdding(true)}>
                             <Plus size={18} />
-                            <span>Mark New Absence</span>
+                            <span>Register Absence</span>
                         </button>
                     </div>
                 </div>
 
                 <div className="pd-main-grid">
                     <div className="pd-card pd-card--main">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 className="pd-card-subtitle" style={{ margin: 0 }}>Absence History</h2>
-                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', background: '#f8fafc', padding: '4px 12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>DATE OVERRIDES</span>
+                        <div className="pd-card-header">
+                            <div className="pd-card-title-wrap">
+                                <Calendar className="pd-card-icon" />
+                                <h2 className="pd-card-title">Leave Registry</h2>
+                            </div>
+                            <span className="pd-badge-outline">ALL ENTRIES</span>
                         </div>
 
                         {leaves.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '10px 20px', color: '#64748b' }}>
-                                <Calendar size={48} style={{ opacity: 0.2, marginBottom: '16px' }} />
-                                <p style={{ fontWeight: 600 }}>No planned absences recorded yet.</p>
-                                <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>Use the button above to request dates where you are unavailable.</p>
+                            <div className="pd-empty-state">
+                                <div className="pd-empty-icon-wrap">
+                                    <Calendar size={42} />
+                                </div>
+                                <h3 className="pd-empty-title">Clean Calendar</h3>
+                                <p className="pd-empty-text">No planned absences recorded in the registry. Your regular weekly schedule is fully operational.</p>
+                                <button className="pd-btn-ghost" onClick={() => setIsAdding(true)}>Add Perspective Leave</button>
                             </div>
                         ) : (
-                            <div className="pd-break-list">
-                                {leaves.map(leave => (
-                                    <div key={leave._id} className="pd-break-item" style={{ padding: '16px', borderRadius: '14px', marginBottom: '16px', border: '1px solid #f1f5f9' }}>
-                                        <div className="pd-break-date" style={{ background: '#fef2f2', color: '#ef4444', width: '60px', height: '60px', borderRadius: '12px' }}>
-                                            <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>
-                                                {new Date(leave.date || leave.leave_date).getDate() || "?"}
-                                            </span>
-                                            <span style={{ fontSize: '0.7rem', fontWeight: 800 }}>
-                                                {leave.date || leave.leave_date ? new Date(leave.date || leave.leave_date).toLocaleDateString(undefined, { month: 'short' }).toUpperCase() : "N/A"}
-                                            </span>
+                            <div className="pd-leave-stack">
+                                {leaves.map((leave, idx) => (
+                                    <div key={leave._id || idx} className="pd-leave-card">
+                                        <div className="pd-leave-calendar-cell">
+                                            <div className="pd-calendar-glyph">
+                                                <span className="pd-glyph-month">
+                                                    {leave.date || leave.leave_date ? new Date(leave.date || leave.leave_date).toLocaleDateString(undefined, { month: 'short' }).toUpperCase() : "N/A"}
+                                                </span>
+                                                <span className="pd-glyph-day">
+                                                    {new Date(leave.date || leave.leave_date).getDate() || "?"}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="pd-break-info" style={{ flex: 1, paddingLeft: '16px' }}>
-                                            <h4 style={{ margin: '0 0 6px 0', fontSize: '1.05rem', fontWeight: 800 }}>{leave.reason}</h4>
-                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '8px' }}>
-                                                {leave.status === 'pending' && <span style={{ color: '#eab308', background: '#fef9c3', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>Waiting for approval</span>}
-                                                {leave.status === 'approved' && <span style={{ color: '#22c55e', background: '#dcfce7', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>Leave confirmed</span>}
-                                                {leave.status === 'rejected' && <span style={{ color: '#ef4444', background: '#fee2e2', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 800 }}>Leave rejected</span>}
+                                        <div className="pd-leave-main-cell">
+                                            <div className="pd-leave-header-row">
+                                                <h4 className="pd-leave-reason">{leave.reason}</h4>
+                                                <div className={`pd-status-tag pd-status-tag--${(leave.status || 'pending').toLowerCase()}`}>
+                                                    <div className="pd-status-dot" />
+                                                    {leave.status || 'Pending'}
+                                                </div>
+                                            </div>
+                                            <div className="pd-leave-meta-row">
+                                                <div className="pd-meta-item">
+                                                    <Calendar size={13} />
+                                                    <span>Registered on {new Date(leave.created_at || Date.now()).toLocaleDateString()}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -139,54 +155,88 @@ function Leaves() {
                     </div>
 
                     <div className="pd-side-stack">
-                        <div className="pd-card pd-card--premium">
-                            <AlertCircle className="pd-premium-star" size={32} />
-                            <h3 style={{ margin: '16px 0 8px 0', fontWeight: 800 }}>Approval Protocols</h3>
-                            <p style={{ fontSize: '0.9rem', opacity: 0.9, lineHeight: 1.6 }}>Marking an absence will submit a request to the admin. Once approved, it will automatically block all consulting slots for that date and cancel overlapping appointments.</p>
+                        {/* Protocol Card */}
+                        <div className="pd-card pd-card--glass-green">
+                            <div className="pd-card-icon-circle">
+                                <AlertCircle size={20} />
+                            </div>
+                            <h3 className="pd-side-title">Absence Protocol</h3>
+                            <p className="pd-side-text">Once you register a leave, the system performs a conflict check against existing bookings. Approved leaves will automatically notify affected patients and remove slots from the public portal.</p>
+                            <div className="pd-side-divider" />
+                            <ul className="pd-side-list">
+                                <li>Automatic Conflict Resolution</li>
+                                <li>Instant Patient Alerts</li>
+                                <li>Calendar Sync across devices</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {/* Premium Registration Modal */}
             {isAdding && (
-                <div className="pd-modal-overlay">
-                    <div className="pd-modal" style={{ maxWidth: '500px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800 }}>Mark Planned Absence</h3>
-                            <div onClick={() => setIsAdding(false)} style={{ cursor: 'pointer', color: '#94a3b8' }}><X size={24} /></div>
+                <div className="pd-modal-overlay pd-modal-overlay--blur">
+                    <div className="pd-modal pd-modal--premium animate-slide-up">
+                        <div className="pd-modal-header">
+                            <div className="pd-modal-title-wrap">
+                                <div className="pd-modal-icon-wrap">
+                                    <Calendar className="text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="pd-modal-title">Planned Absence</h3>
+                                    <p className="pd-modal-subtitle">Configure your unavailability window</p>
+                                </div>
+                            </div>
+                            <button className="pd-modal-close" onClick={() => setIsAdding(false)}>
+                                <X size={20} />
+                            </button>
                         </div>
 
-                        <div className="pd-field" style={{ marginBottom: '20px' }}>
-                            <label style={{ fontWeight: 800, color: '#1e293b', display: 'block', marginBottom: '8px' }}>Absence Date</label>
-                            <input 
-                                type="date" 
-                                className="pd-input" 
-                                value={leaveDate} 
-                                onChange={(e) => setLeaveDate(e.target.value)} 
-                                onClick={(e) => (e.target as any).showPicker && (e.target as any).showPicker()}
-                                style={{ padding: '14px' }} 
-                            />
-                        </div>
-                        <div className="pd-field" style={{ marginBottom: '32px' }}>
-                            <label style={{ fontWeight: 800, color: '#1e293b', display: 'block', marginBottom: '8px' }}>Reason for Absence</label>
-                            <textarea 
-                                className="pd-textarea" 
-                                value={leaveReason} 
-                                onChange={(e) => setLeaveReason(e.target.value)} 
-                                placeholder="e.g. Continuing Medical Education, Personal Time Off"
-                                style={{ padding: '14px', minHeight: '100px' }}
-                            />
+                        <div className="pd-modal-body">
+                            <div className="pd-form-group">
+                                <label className="pd-form-label">ABSENCE DATE</label>
+                                <div className="pd-date-input-wrap">
+                                    <Calendar className="pd-input-icon" size={18} />
+                                    <input 
+                                        type="date" 
+                                        className="pd-date-input" 
+                                        value={leaveDate} 
+                                        onChange={(e) => setLeaveDate(e.target.value)} 
+                                        onClick={(e) => (e.target as any).showPicker?.()}
+                                    />
+                                </div>
+                                <p className="pd-input-help">Select the full date you will be unavailable for consultation.</p>
+                            </div>
+
+                            <div className="pd-form-group">
+                                <label className="pd-form-label">REASON FOR ABSENCE</label>
+                                <textarea 
+                                    className="pd-modern-textarea" 
+                                    value={leaveReason} 
+                                    onChange={(e) => setLeaveReason(e.target.value)} 
+                                    placeholder="e.g., Medical Conference, Personal Leave, Operational Maintenance..."
+                                />
+                                <div className="pd-textarea-footer">
+                                    <span>Professional reasoning helps administrators process requests faster.</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="pd-modal-actions">
-                            <button className="pd-action-btn-secondary" onClick={() => setIsAdding(false)}>Cancel</button>
+                        <div className="pd-modal-footer">
+                            <button className="pd-btn-cancel" onClick={() => setIsAdding(false)}>Dismiss</button>
                             <button 
-                                className="pd-action-btn-primary" 
+                                className="pd-btn-confirm" 
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                style={{ padding: '12px 32px' }}
                             >
-                                {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <><CheckCircle size={18} /><span>Confirm Absence</span></>}
+                                {isSubmitting ? (
+                                    <Loader2 className="animate-spin" size={20} />
+                                ) : (
+                                    <>
+                                        <CheckCircle size={18} />
+                                        <span>Initialize Protocol</span>
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

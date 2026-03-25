@@ -28,18 +28,21 @@ async def request_leave(doctor_id: str, date: str, reason: str):
     result = await doctor_leaves_collection.insert_one(leave_data)
     
     # Notify Admin
-    from app.database import users_collection
+    from app.database import users_collection, doctors_collection
     admin_user = await users_collection.find_one({"role": "admin"})
+    doctor = await doctors_collection.find_one({"_id": ObjectId(doctor_id)})
+    doctor_name = doctor.get("name", doctor_id) if doctor else doctor_id
+    
     if admin_user:
         await NotificationService.create_notification(
             str(admin_user["_id"]),
             "admin",
             "Leave Request",
-            f"Doctor {doctor_id} has requested leave for {date}.",
+            f"Dr. {doctor_name} has requested leave for {date}.",
             "doctor_leave_request"
         )
     
-    logger.info(f"Leave requested (pending) for doctor {doctor_id} on {date}.")
+    logger.info(f"Leave requested (pending) for doctor {doctor_name} on {date}.")
     return str(result.inserted_id)
 
 async def approve_leave(leave_id: str):
@@ -102,6 +105,21 @@ async def approve_leave(leave_id: str):
                 "doctor_leave"
             )
             
+    # Notify doctor
+    from app.database import doctors_collection
+    doc = await doctors_collection.find_one({"_id": ObjectId(doc_id_val)})
+    doctor_user_id = doc.get("user_id") if doc else None
+    if doctor_user_id:
+        await NotificationService.create_notification(
+            str(doctor_user_id),
+            "doctor",
+            "Leave Approved",
+            f"Your leave request for {date_val} has been approved. Affected appointments have been cancelled.",
+            "doctor_leave_approved"
+        )
+
+    # 3. Handle Slots: (No longer needed to delete as slots are dynamic)
+    # The generate_slots service will check the leave collection dynamically.
     logger.info(f"Leave approved for doctor {doc_id_val} on {date_val}. {result.modified_count} appointments cancelled.")
     return True
 

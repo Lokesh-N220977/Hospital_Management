@@ -3,7 +3,6 @@ from .collections import (
     doctors_collection,
     appointments_collection,
     doctor_schedules_collection,
-    doctor_slots_collection,
     doctor_leaves_collection,
     visit_history_collection,
     patients_collection,

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.routes import users, doctors, appointments as legacy_appointments, admin, visit_history, doctor_portal, prescriptions, patients, notifications, reviews
-from app.api.v1 import doctor_schedule, appointments
+from app.api.v1 import dynamic_scheduling, recommendation
 from app.services.scheduler_service import start_scheduler, stop_scheduler
 from app.core.logger import logger
 
@@ -15,6 +15,7 @@ if not DATABASE_NAME:
 from fastapi.staticfiles import StaticFiles
 import os
 
+print(f"DEBUG: DATABASE_NAME={DATABASE_NAME}")
 app = FastAPI(title="Hospital Management System", version="1.0.0")
 
 # Ensure upload directory exists
@@ -54,6 +55,7 @@ async def create_db_indexes():
         await patients_collection.create_index([("user_id", ASCENDING)])
         await patients_collection.create_index([("email", ASCENDING)])
         await patients_collection.create_index([("phone", ASCENDING)])
+        await patients_collection.create_index([("name", ASCENDING)])
         await patients_collection.create_index([("is_active", ASCENDING)])
         
         # Appointments indexes
@@ -71,12 +73,14 @@ async def create_db_indexes():
         )
 
         # Schedules and Leaves
-        await doctor_schedules_collection.create_index([("doctor_id", ASCENDING)], unique=True)
+        await doctor_schedules_collection.create_index([("doctor_id", ASCENDING), ("day_of_week", ASCENDING)], unique=True)
         await doctor_leaves_collection.create_index([("doctor_id", ASCENDING), ("date", ASCENDING)])
 
-        # Visit History
-        await visit_history_collection.create_index([("patient_id", ASCENDING)])
-        await visit_history_collection.create_index([("appointment_id", ASCENDING)], unique=True)
+        # Appointments dynamic index
+        await appointments_collection.create_index([("doctor_id", ASCENDING), ("date", ASCENDING), ("slot_time", ASCENDING)])
+
+        # 2. Unique Appointments (Idempotency): (idempotency_key)
+        await appointments_collection.create_index([("idempotency_key", ASCENDING)], unique=True)
         
         # Drop legacy unique index if it exists
         try:
@@ -125,7 +129,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Global Error: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
-        content={"message": "Internal server error"}
+        content={"message": "Internal server error", "detail": str(exc)}
     )
 
 # Routers
@@ -137,8 +141,10 @@ app.include_router(visit_history.router)
 app.include_router(doctor_portal.router)
 app.include_router(prescriptions.router)
 app.include_router(patients.router)
-app.include_router(doctor_schedule.router, prefix="/api/v1")
-app.include_router(appointments.router, prefix="/api/v1") # This refers to the v1 appointments router
+app.include_router(dynamic_scheduling.router, prefix="/api/v1")
+app.include_router(recommendation.router, prefix="/api/v1")
+from app.api.v1 import appointments as internal_appointments
+app.include_router(internal_appointments.router, prefix="/api/v1", tags=["Appointment Engine"])
 app.include_router(notifications.router)
 app.include_router(reviews.router)
 from app.routes import settings, doctor_settings, admin_settings

@@ -166,42 +166,40 @@ const Home: React.FC = () => {
                     <h2 className="section-title">Meet Our <span className="blue">Specialists</span></h2>
                     <p className="section-subtitle">Consult with our top-rated specialists who are dedicated to your overall well-being.</p>
                     <div className="specialists-grid-v">
-                        {specialists.length > 0 ? specialists.map((s, idx) => (
-                            <div key={idx} className="specialist-card-v">
-                                {/* Top part: Image with name overlay */}
-                                <div className="sc-img">
-                                    <img 
-                                        src={s.profile_image_url 
-                                            ? (s.profile_image_url.startsWith('http') ? s.profile_image_url : `${SERVER_URL}${s.profile_image_url}`)
-                                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(s.name)}&background=random&size=500`
-                                        } 
-                                        alt={s.name} 
-                                    />
-                                    <div className="sc-img-badge">{s.specialization}</div>
-                                    <div className="sc-img-overlay">
-                                        <div className="sc-name-row">
-                                            <h3 className="sc-name">{s.name}</h3>
-                                            <FaUserCheck className="sc-verified" />
+                        {specialists.length > 0 ? specialists.map((s, idx) => {
+                            const fallbackImage = `https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=800`;
+                            const imageUrl = s.profile_image_url 
+                                ? (s.profile_image_url.startsWith('http') ? s.profile_image_url : `${SERVER_URL}${s.profile_image_url}`)
+                                : fallbackImage;
+
+                            return (
+                                <div key={idx} className="specialist-card-v">
+                                    <div className="sc-img">
+                                        <img src={imageUrl} alt={s.name} />
+                                        <div className="sc-img-badge">{s.specialization}</div>
+                                        <div className="sc-img-overlay" />
+                                    </div>
+                                    <div className="sc-body">
+                                        <span className="sc-spec">{s.specialization}</span>
+                                        <h3 className="sc-name">
+                                            {s.name}
+                                            <FaUserCheck className="sc-verified" title="Verified Professional" />
+                                        </h3>
+                                        <div className="sc-meta">
+                                            <span className="sc-meta-item">
+                                                <FaBriefcase /> {String(s.experience).split(' ')[0]} Yrs Exp.
+                                            </span>
+                                            <span className="sc-meta-item">
+                                                <FaStar className="sc-star" /> 4.9
+                                            </span>
                                         </div>
-                                        <p className="sc-spec">{s.specialization}</p>
+                                        <Link to="/login" className="sc-btn">
+                                            Book Appointment <FaArrowRight />
+                                        </Link>
                                     </div>
                                 </div>
-                                {/* Bottom part: Details in white space */}
-                                <div className="sc-body">
-                                    <div className="sc-meta">
-                                        <span className="sc-meta-item">
-                                            <FaBriefcase /> {String(s.experience).split(' ')[0]} Years
-                                        </span>
-                                        <span className="sc-meta-item">
-                                            <FaStar className="sc-star" /> 4.9
-                                        </span>
-                                    </div>
-                                    <Link to="/login" className="sc-btn">
-                                        Book Appointment <FaArrowRight />
-                                    </Link>
-                                </div>
-                            </div>
-                        )) : (
+                            );
+                        }) : (
                             <div className="loading-placeholder">Loading specialists...</div>
                         )}
                     </div>
