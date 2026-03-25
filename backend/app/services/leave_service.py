@@ -93,17 +93,15 @@ async def approve_leave(leave_id: str):
     # Notify affected patients
     for appt in affected_appointments:
         patient_id_str = str(appt.get("patient_id"))
-        patient = await patient_service.get_patient_by_id(patient_id_str)
-        if patient:
-            user_id_to_notify = str(patient.get("user_id")) if patient.get("user_id") else patient_id_str
-            doc_name = appt.get("doctor_name", "your doctor")
-            await NotificationService.create_notification(
-                user_id_to_notify,
-                "patient",
-                "Doctor Unavailable",
-                f"Your appointment with Dr. {doc_name} on {date_val} has been cancelled due to doctor leave.",
-                "doctor_leave"
-            )
+        user_id_to_notify = await NotificationService.get_recipient_id(patient_id_str)
+        doc_name = appt.get("doctor_name", "your doctor")
+        await NotificationService.create_notification(
+            user_id_to_notify,
+            "patient",
+            "Doctor Unavailable",
+            f"Your appointment with Dr. {doc_name} on {date_val} has been cancelled due to doctor leave.",
+            "doctor_leave"
+        )
             
     # Notify doctor
     from app.database import doctors_collection

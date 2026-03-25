@@ -63,3 +63,15 @@ class NotificationService:
             return result.modified_count
         except Exception as e:
             return 0
+
+    @staticmethod
+    async def get_recipient_id(patient_id: str) -> str:
+        """Helper to find the User Account ID that owns this patient profile."""
+        try:
+            from app.database.collections import patients_collection
+            pat = await patients_collection.find_one({"_id": ObjectId(patient_id)})
+            if pat and pat.get("user_id"):
+                return str(pat["user_id"])
+            return patient_id # fallback to patient id if no user linked
+        except:
+            return patient_id

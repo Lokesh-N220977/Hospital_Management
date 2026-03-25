@@ -5,6 +5,8 @@ from pymongo.errors import DuplicateKeyError
 from app.database.collections import doctor_schedules_collection, appointments_collection
 from app.models.dynamic_scheduling import SlotAvailability, Appointment
 from app.core.logger import logger
+from app.services.notification_service import NotificationService
+import asyncio
 
 class DynamicSlotService:
     @staticmethod
@@ -186,6 +188,31 @@ class DynamicSlotService:
 
         try:
             result = await appointments_collection.insert_one(new_appointment)
+            
+            # TRIGGER NOTIFICATIONS (Background)
+            async def send_booking_notifications():
+                try:
+                    # 1. Notify Patient Owner (User)
+                    user_id_to_notify = await NotificationService.get_recipient_id(patient_id)
+                    await NotificationService.create_notification(
+                        user_id_to_notify, "patient", "Appointment Confirmed",
+                        f"Your appointment for {pat.get('name')} with Dr. {doc.get('name')} is confirmed for {date_str} at {slot_time}.",
+                        "appointment_booked"
+                    )
+                    
+                    # 2. Notify Doctor
+                    doctor_user_id = doc.get("user_id")
+                    if doctor_user_id:
+                        await NotificationService.create_notification(
+                            str(doctor_user_id), "doctor", "New Patient Booking",
+                            f"Appointment scheduled: {pat.get('name')} on {date_str} at {slot_time}.",
+                            "new_appointment"
+                        )
+                except Exception as ne:
+                    logger.error(f"Failed to send booking notifications: {ne}")
+
+            asyncio.create_task(send_booking_notifications())
+            
             return str(result.inserted_id)
         except DuplicateKeyError:
             raise Exception("Duplicate booking prevented")

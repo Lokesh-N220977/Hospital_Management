@@ -104,7 +104,7 @@ async def book_appointment(appointment_data: dict):
         async def send_notifications():
             try:
                 # 1. Patient notification
-                user_id_to_notify = str(patient.get("user_id")) if patient.get("user_id") else patient_id_str
+                user_id_to_notify = await NotificationService.get_recipient_id(patient_id_str)
                 await NotificationService.create_notification(
                     user_id_to_notify, "patient", "Appointment Confirmed",
                     f"Your appointment with Dr. {doc.get('name')} is confirmed for {date_str} at {time_str}.",
@@ -165,7 +165,7 @@ async def cancel_appointment(appointment_id: str, cancel_reason: str = "Cancelle
     appt_date = appt.get("appointment_date", appt.get("date", ""))
     
     if patient:
-        user_id_to_notify = str(patient.get("user_id")) if patient.get("user_id") else patient_id_str
+        user_id_to_notify = await NotificationService.get_recipient_id(patient_id_str)
         await NotificationService.create_notification(
             user_id_to_notify,
             "patient",
