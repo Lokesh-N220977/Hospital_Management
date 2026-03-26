@@ -45,6 +45,15 @@ async def get_slots(doctor_id: str, date: str):
     slots = await scheduling_service.get_available_slots(doctor_id, date)
     return {"slots": slots}
 
+@router.get("/{doctor_id}")
+async def get_doctor_details(doctor_id: str):
+    logger.info(f"Fetching public profile for doctor {doctor_id}")
+    doctor = await doctor_service.get_doctor_by_id(doctor_id)
+    if not doctor:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Doctor not found")
+    return doctor
+
 @router.get("/profile/me")
 async def get_my_profile(current_user=Depends(get_doctor_user)):
     logger.info(f"Fetching profile for doctor user: {current_user['email']}")

@@ -278,7 +278,33 @@ function Profile() {
   const [verifyingPhoneOtp, setVerifyingPhoneOtp] = useState(false)
   const [otpPhoneError, setOtpPhoneError] = useState("")
 
-  useEffect(() => { fetchProfile(); fetchFamily(); }, [])
+  // Privacy setting
+  const [shareDetails, setShareDetails] = useState(true)
+  const [privacyLoading, setPrivacyLoading] = useState(false)
+
+  useEffect(() => { fetchProfile(); fetchFamily(); fetchPrivacySettings(); }, [])
+
+  const fetchPrivacySettings = async () => {
+    try {
+      const res = await api.get("/patient/settings");
+      if (res.data) {
+        setShareDetails(res.data.share_personal_details ?? true);
+      }
+    } catch { /* silent fallback */ }
+  }
+
+  const togglePrivacy = async () => {
+    setPrivacyLoading(true);
+    try {
+      const newVal = !shareDetails;
+      await api.put("/patient/settings", { share_personal_details: newVal });
+      setShareDetails(newVal);
+      setSuccess("Privacy preference updated");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch {
+      setError("Failed to update privacy setting");
+    } finally { setPrivacyLoading(false); }
+  }
 
   const fetchProfile = async () => {
     try {
@@ -588,6 +614,41 @@ function Profile() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* ═══════════════════════ PRIVACY SETTINGS ═══════════════════════ */}
+        <div className="pf-section-block">
+          <h3 className="pf-section-heading">
+            <Shield size={16} color="#3b82f6" /> Privacy & Data
+          </h3>
+          <div style={{ background: "#f8fafc", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ flex: 1, paddingRight: "20px" }}>
+              <p style={{ margin: "0 0 4px", fontWeight: 600, fontSize: "14px", color: "#1e293b" }}>Share details with doctors</p>
+              <p style={{ margin: 0, fontSize: "12px", color: "#64748b", lineHeight: 1.5 }}>
+                When disabled, your phone number and personal identity details will be hidden from doctors in their dashboard.
+              </p>
+            </div>
+            <div 
+              onClick={!privacyLoading ? togglePrivacy : undefined}
+              style={{ 
+                width: "48px", 
+                height: "26px", 
+                background: shareDetails ? "#3b82f6" : "#cbd5e1", 
+                borderRadius: "20px", 
+                position: "relative", 
+                cursor: privacyLoading ? "not-allowed" : "pointer",
+                transition: "background 0.3s ease",
+                opacity: privacyLoading ? 0.6 : 1
+              }}
+            >
+              <div style={{ 
+                width: "20px", height: "20px", background: "white", borderRadius: "50%", 
+                position: "absolute", top: "3px", left: shareDetails ? "25px" : "3px",
+                transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+              }} />
+            </div>
+          </div>
         </div>
 
         {/* ═══════════════════════ DANGER ZONE ═══════════════════════ */}

@@ -6,6 +6,8 @@ export interface Doctor {
   specialization: string;
   experience: string;
   consultation_fee: string;
+  degree?: string;
+  about?: string;
   available: boolean;
   avatar?: string;
 }

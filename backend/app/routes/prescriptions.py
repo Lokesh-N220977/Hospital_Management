@@ -20,8 +20,23 @@ async def create_new_prescription(
 
     data = prescription.dict()
     presc_id = await prescription_service.create_prescription(data)
-    if not presc_id:
-        raise HTTPException(status_code=500, detail="Failed to create prescription")
+    
+    if presc_id:
+        # Notify patient via email
+        try:
+            from app.services import patient_service
+            patient = await patient_service.get_patient_by_id(prescription.patient_id)
+            if patient and patient.get("email"):
+                from app.services.email_service import EmailService
+                import asyncio
+                asyncio.create_task(EmailService.send_prescription_notification(
+                    to_email=patient["email"],
+                    patient_name=patient.get("name", "Valued Patient"),
+                    doctor_name=current_user.get("name", "Doctor")
+                ))
+        except Exception as e:
+            print(f"Prescription email notification failed: {e}")
+
     return {"message": "Prescription issued successfully", "id": presc_id}
 
 @router.get("/doctor/{doctor_id}", response_model=List[dict])

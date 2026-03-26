@@ -5,7 +5,7 @@ import {
   Search, ChevronRight,
   CheckCircle2, User, Loader2, Activity,
   Zap, Calendar, HeartPulse, ChevronLeft,
-  Clock, AlertTriangle, Users
+  Clock, AlertTriangle, Users, Info, X
 } from "lucide-react"
 import { appointmentService, type Doctor } from "../../services/appointment.service"
 
@@ -60,6 +60,10 @@ function BookAppointment() {
   const [selectedSlot, setSelectedSlot] = useState<any>(null)
 
   const [idempotencyKey] = useState(crypto.randomUUID())
+
+  // Doctor Detail Modal
+  const [showDocDetail, setShowDocDetail] = useState(false)
+  const [detailDoctor, setDetailDoctor] = useState<any>(null)
 
   // Initialization
   useEffect(() => {
@@ -499,24 +503,38 @@ function BookAppointment() {
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px', maxHeight: '500px', overflowY: 'auto', paddingRight: '10px' }}>
                             {doctorsList.filter(d => d.name.toLowerCase().includes(doctorSearch.toLowerCase())).map(doc => (
-                                <div key={doc._id} onClick={() => handleDoctorChange(doc)} className={`pt-doc-card ${selectedDoctor?._id === doc._id ? 'active' : ''}`}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-                                        <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.6rem', boxShadow: '0 8px 15px rgba(59,130,246,0.2)' }}>
-                                            {doc.name.replace('Dr. ', '').charAt(0)}
+                                <div key={doc._id} className={`pt-doc-card ${selectedDoctor?._id === doc._id ? 'active' : ''}`} style={{ position: 'relative' }}>
+                                    <div onClick={() => handleDoctorChange(doc)} style={{ cursor: 'pointer' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                                            <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: '#3b82f6', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '1.6rem', boxShadow: '0 8px 15px rgba(59,130,246,0.2)' }}>
+                                                {doc.name.replace('Dr. ', '').charAt(0)}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <h4 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--text-dark)', margin: 0 }}>
+                                                    {doc.name}{(doc as any).degree ? `, ${(doc as any).degree}` : ""}
+                                                </h4>
+                                                <p style={{ color: '#3b82f6', fontSize: '0.95rem', fontWeight: 900, marginTop: '2px' }}>{doc.specialization}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h4 style={{ fontWeight: 900, fontSize: '1.2rem', color: 'var(--text-dark)', margin: 0 }}>{doc.name}</h4>
-                                            <p style={{ color: '#3b82f6', fontSize: '0.95rem', fontWeight: 900, marginTop: '2px' }}>{doc.specialization}</p>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '15px', borderTop: '1px solid var(--border-color)' }}>
+                                            <div style={{ color: 'var(--text-gray)', fontSize: '0.9rem', fontWeight: 700 }}>
+                                                <Clock size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
+                                                {doc.experience} Years Exp.
+                                            </div>
+                                            <span style={{ fontWeight: 800, color: '#10b981', fontSize: '0.9rem' }}>₹{doc.consultation_fee || 500}</span>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px', paddingTop: '15px', borderTop: '1px solid var(--border-color)' }}>
-                                        <div style={{ color: 'var(--text-gray)', fontSize: '0.9rem', fontWeight: 700 }}>
-                                            <Clock size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }} />
-                                            {doc.experience} Years Exp.
-                                        </div>
-                                        <span style={{ padding: '6px 14px', background: 'var(--status-success-bg)', color: 'var(--status-success-text)', borderRadius: '20px', fontWeight: 800, fontSize: '0.8rem', border: '1px solid var(--status-success-text)' }}>Fast Booking</span>
-                                    </div>
-                                    {selectedDoctor?._id === doc._id && <div style={{ position: 'absolute', top: '20px', right: '20px' }}><CheckCircle2 color="#3b82f6" size={20} /></div>}
+                                    
+                                    {/* Detail Button */}
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setDetailDoctor(doc); setShowDocDetail(true); }}
+                                        style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--bg-soft)', border: '1px solid var(--border-color)', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6', cursor: 'pointer', zIndex: 10 }}
+                                        title="View Professional Bio"
+                                    >
+                                        <Info size={16} />
+                                    </button>
+
+                                    {selectedDoctor?._id === doc._id && <div style={{ position: 'absolute', top: '45px', right: '15px' }}><CheckCircle2 color="#3b82f6" size={20} /></div>}
                                 </div>
                             ))}
                         </div>
@@ -679,6 +697,41 @@ function BookAppointment() {
                 </div>
             )}
         </div>
+        
+        {/* Doctor Detail Modal */}
+        {showDocDetail && detailDoctor && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(5px)' }} onClick={() => setShowDocDetail(false)}>
+                <div style={{ background: 'var(--bg-white)', width: '100%', maxWidth: '600px', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ padding: '25px', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: 'white', position: 'relative' }}>
+                        <button onClick={() => setShowDocDetail(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', padding: '8px', borderRadius: '10px' }}><X size={20} /></button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                            <div style={{ width: '80px', height: '80px', borderRadius: '20px', background: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 900 }}>{detailDoctor.name.replace('Dr. ', '').charAt(0)}</div>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>{detailDoctor.name}{detailDoctor.degree ? `, ${detailDoctor.degree}` : ""}</h3>
+                                <p style={{ margin: '5px 0 0', color: '#60a5fa', fontWeight: 700 }}>{detailDoctor.specialization}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ padding: '30px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
+                            <div style={{ background: 'var(--bg-soft)', padding: '15px', borderRadius: '15px' }}>
+                                <div style={{ fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600, textTransform: 'uppercase' }}>Professional Experience</div>
+                                <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)' }}>{detailDoctor.experience} Years</div>
+                            </div>
+                            <div style={{ background: 'var(--bg-soft)', padding: '15px', borderRadius: '15px' }}>
+                                <div style={{ fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600, textTransform: 'uppercase' }}>Consultation Fee</div>
+                                <div style={{ fontSize: '16px', fontWeight: 800, color: '#10b981' }}>₹{detailDoctor.consultation_fee || 500}</div>
+                            </div>
+                        </div>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '12px' }}>Personal Bio & Expertise</h4>
+                        <div style={{ fontSize: '14px', color: 'var(--text-gray)', lineHeight: 1.6, marginBottom: '30px' }}>
+                            {detailDoctor.about || `Dr. ${detailDoctor.name} is dedicated to providing high-quality care in ${detailDoctor.specialization}. With extensive experience across various complex medical cases, they ensure a personalized approach for every patient.`}
+                        </div>
+                        <button onClick={() => setShowDocDetail(false)} className="btn-primary" style={{ width: '100%', padding: '16px', borderRadius: '12px', fontWeight: 800 }}>Close Bio</button>
+                    </div>
+                </div>
+            </div>
+        )}
       </div>
     </PatientLayout>
   )

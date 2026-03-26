@@ -9,6 +9,7 @@ import Home from "./pages/public/Home"
 import FindDoctors from "./pages/public/FindDoctors"
 import Login from "./pages/public/Login"
 import Register from "./pages/public/Register"
+import DoctorDetail from "./pages/public/DoctorDetail"
 
 // Shared
 import PrescriptionDocument from "./pages/shared/PrescriptionDocument"
@@ -68,6 +69,7 @@ function App() {
           <Route path="/doctors" element={<FindDoctors />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/doctor/:id" element={<DoctorDetail />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
 

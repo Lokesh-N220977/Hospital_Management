@@ -54,6 +54,17 @@ async def check_upcoming_appointments():
                     "reminder"
                 )
                 
+                # 2. Email Reminder (New)
+                patient_email = patient.get("email")
+                if patient_email:
+                    from app.services.email_service import EmailService
+                    await EmailService.send_appointment_reminder(
+                        to_email=patient_email,
+                        patient_name=patient.get("name", "Valued Patient"),
+                        doctor_name=doc_name,
+                        time=time_str
+                    )
+                
                 # Mark reminder as sent
                 await appointments_collection.update_one(
                     {"_id": appt["_id"]},

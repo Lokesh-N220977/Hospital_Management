@@ -1,4 +1,3 @@
-
 import { request } from './apiClient';
 
 // Public/Patient facing
@@ -12,8 +11,11 @@ export const getAllDoctors = (params?: {
     if (paramsCopy.location === 'Any Location') delete paramsCopy.location;
     
     const query = new URLSearchParams(paramsCopy as any).toString();
-    return request(`/doctors${query ? `?${query}` : ""}`);
+    // Use trailing slash to match FastAPI exactly and avoid 307 redirects
+    return request(`/doctors/${query ? `?${query}` : ""}`);
 };
+
+export const getDoctorById = (id: string) => request(`/doctors/${id}`);
 
 export const getSpecializations = () => request(`/doctors/specializations`);
 export const getLocations = () => request(`/doctors/locations`);
@@ -94,7 +96,7 @@ export const issuePrescription = (data: any) =>
 export const getIssuedPrescriptions = (doctorId: string) =>
     request(`/prescriptions/doctor/${doctorId}`);
 
-// Legacy/Deprecated (to be removed after transition)
+// Legacy/Deprecated
 export const getDoctorProfile = () => request(`/doctors/me`);
 export const getDoctorSchedule = () => request(`/doctors/schedule`);
 export const updateDoctorSchedule = (schedule: any) => 

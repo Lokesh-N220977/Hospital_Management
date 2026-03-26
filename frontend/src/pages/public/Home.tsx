@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PublicNavbar from '../../components/layout/public/PublicNavbar';
 import PublicFooter from '../../components/layout/public/PublicFooter';
-import { 
-    FaSearch, FaCalendarCheck, FaClinicMedical, 
+import {
+    FaSearch, FaCalendarCheck, FaClinicMedical,
     FaHeartbeat, FaHandSparkles, FaTooth, FaUserMd,
     FaStar, FaCalendarAlt, FaUserCheck, FaShieldAlt, FaClock,
     FaArrowRight, FaUsers, FaHospital, FaHeadset, FaBriefcase
@@ -49,7 +49,7 @@ const Home: React.FC = () => {
                         const expB = parseInt(String(b.experience)) || 0;
                         return expB - expA;
                     }).slice(0, 3);
-                    
+
                     setSpecialists(topSpecialists);
                 }
             } catch (error) {
@@ -60,23 +60,23 @@ const Home: React.FC = () => {
     }, []);
 
     const whyChooseUs = [
-        { icon: <FaCalendarAlt />, title: "Easy Appointment Booking",  desc: "Schedule your visits in just a few clicks. Reschedule or cancel anytime without any hassle." },
-        { icon: <FaUserCheck />,   title: "Verified Doctors",          desc: "Every practitioner is thoroughly vetted to ensure you receive care from certified professionals." },
-        { icon: <FaShieldAlt />,   title: "Secure Medical Records",    desc: "Your privacy is our priority. We use strict encryption for all patient data." },
-        { icon: <FaClock />,       title: "24/7 Access",               desc: "Access your health dashboard, lab results, and upcoming appointments at any time." },
+        { icon: <FaCalendarAlt />, title: "Easy Appointment Booking", desc: "Schedule your visits in just a few clicks. Reschedule or cancel anytime without any hassle." },
+        { icon: <FaUserCheck />, title: "Verified Doctors", desc: "Every practitioner is thoroughly vetted to ensure you receive care from certified professionals." },
+        { icon: <FaShieldAlt />, title: "Secure Medical Records", desc: "Your privacy is our priority. We use strict encryption for all patient data." },
+        { icon: <FaClock />, title: "24/7 Access", desc: "Access your health dashboard, lab results, and upcoming appointments at any time." },
     ];
 
     const specialties = [
-        { icon: <FaHeartbeat />,    name: "Cardiologist",      desc: "Heart & blood vessel specialists" },
-        { icon: <FaHandSparkles />, name: "Dermatologist",     desc: "Skin, hair, & nail specialists" },
-        { icon: <FaTooth />,        name: "Dentist",           desc: "Oral health & hygiene specialists" },
-        { icon: <FaUserMd />,       name: "General Physician", desc: "Primary care & family medicine" },
+        { icon: <FaHeartbeat />, name: "Cardiologist", desc: "Heart & blood vessel specialists" },
+        { icon: <FaHandSparkles />, name: "Dermatologist", desc: "Skin, hair, & nail specialists" },
+        { icon: <FaTooth />, name: "Dentist", desc: "Oral health & hygiene specialists" },
+        { icon: <FaUserMd />, name: "General Physician", desc: "Primary care & family medicine" },
     ];
 
     const testimonials = [
-        { text: "Booking an appointment for my mother was incredibly easy. We didn't have to wait in long queues, and the doctor was very professional.", author: "Jane Doe",    role: "Patient", initials: "JD", color: "#007bff" },
-        { text: "The app is so user-friendly! I was able to find a great dermatologist near me and schedule a visit the very next day. Highly recommended.", author: "Mark Smith",  role: "Patient", initials: "MS", color: "#dc3545" },
-        { text: "Having all my medical records in one secure place is a game changer. The 24/7 access makes managing my health so much simpler.",           author: "Robert Brown", role: "Patient", initials: "RB", color: "#28a745" },
+        { text: "Booking an appointment for my mother was incredibly easy. We didn't have to wait in long queues, and the doctor was very professional.", author: "Jane Doe", role: "Patient", initials: "JD", color: "#007bff" },
+        { text: "The app is so user-friendly! I was able to find a great dermatologist near me and schedule a visit the very next day. Highly recommended.", author: "Mark Smith", role: "Patient", initials: "MS", color: "#dc3545" },
+        { text: "Having all my medical records in one secure place is a game changer. The 24/7 access makes managing my health so much simpler.", author: "Robert Brown", role: "Patient", initials: "RB", color: "#28a745" },
     ];
 
     return (
@@ -168,7 +168,7 @@ const Home: React.FC = () => {
                     <div className="specialists-grid-v">
                         {specialists.length > 0 ? specialists.map((s, idx) => {
                             const fallbackImage = `https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=800`;
-                            const imageUrl = s.profile_image_url 
+                            const imageUrl = s.profile_image_url
                                 ? (s.profile_image_url.startsWith('http') ? s.profile_image_url : `${SERVER_URL}${s.profile_image_url}`)
                                 : fallbackImage;
 

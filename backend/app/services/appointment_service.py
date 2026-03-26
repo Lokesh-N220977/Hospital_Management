@@ -103,7 +103,7 @@ async def book_appointment(appointment_data: dict):
         # Move notifications to background tasks to speed up response
         async def send_notifications():
             try:
-                # 1. Patient notification
+                # 1. Patient Dashboard Notification
                 user_id_to_notify = await NotificationService.get_recipient_id(patient_id_str)
                 await NotificationService.create_notification(
                     user_id_to_notify, "patient", "Appointment Confirmed",
@@ -111,7 +111,19 @@ async def book_appointment(appointment_data: dict):
                     "appointment_booked"
                 )
                 
-                # 2. Doctor notification
+                # 2. Email Notification (New)
+                patient_email = patient.get("email")
+                if patient_email:
+                    from app.services.email_service import EmailService
+                    await EmailService.send_appointment_confirmation(
+                        to_email=patient_email,
+                        patient_name=patient.get("name", "Valued Patient"),
+                        doctor_name=doc.get('name', 'Doctor'),
+                        date=date_str,
+                        time=time_str
+                    )
+
+                # 3. Doctor Dashboard Notification
                 doctor_user_id = doc.get("user_id")
                 if doctor_user_id:
                     await NotificationService.create_notification(
@@ -174,6 +186,17 @@ async def cancel_appointment(appointment_id: str, cancel_reason: str = "Cancelle
             "appointment_cancelled"
         )
         
+        # Email notification (New)
+        if patient.get("email"):
+            from app.services.email_service import EmailService
+            import asyncio
+            asyncio.create_task(EmailService.send_appointment_cancellation(
+                to_email=patient["email"],
+                patient_name=patient.get("name", "Valued Patient"),
+                doctor_name=doc_name,
+                date=appt_date
+            ))
+        
     # Notify doctor
     doctor_id_str = str(appt.get("doctor_id"))
     doc = await doctor_service.get_doctor_by_id(doctor_id_str)
@@ -224,7 +247,7 @@ async def update_appointment_status(appointment_id: str, status: str):
     
     raise HTTPException(status_code=400, detail=f"Unsupported status update: {status}")
 
-def _map_appt_for_frontend(appt):
+def _map_appt_for_frontend(appt, privacy_map=None):
     if not appt: return appt
     
     # 1. Standard conversions
@@ -253,6 +276,19 @@ def _map_appt_for_frontend(appt):
     # Normalize status for frontend (always lowercase)
     if "status" in appt:
         appt["status"] = str(appt["status"]).lower()
+
+    # Apply privacy mask if requested
+    if privacy_map is not None:
+        patient_id = str(appt.get("patient_id"))
+        # We need to know which user this patient belongs to.
+        # For simplicity, we can assume the appointment document might have user_id, 
+        # but if not, we rely on the map containing patient_id instead of user_id.
+        share = privacy_map.get(patient_id, True)
+        if not share:
+            if "patient_phone" in appt:
+                raw_phone = str(appt["patient_phone"])
+                appt["patient_phone"] = "********" + raw_phone[-4:] if len(raw_phone) >= 4 else "********"
+            # You can also mask gender if it was in the appt, though it's usually just patient_name/phone
 
     # 3. Final safety check: Convert ANY remaining ObjectIds in the dict
     for k, v in appt.items():
@@ -289,12 +325,31 @@ async def get_user_all_appointments(user_id: str):
 
 async def get_doctor_appointments(doctor_id: str):
     appointments = []
+    # 1. Fetch appointments
     async for appt in appointments_collection.find({
         "doctor_id": {"$in": [ObjectId(doctor_id), doctor_id]},
         "status": {"$in": ["booked", "BOOKED", "confirmed", "cancelled", "completed"]}
     }).sort("slot_start", 1):
-        appointments.append(_map_appt_for_frontend(appt))
-    return appointments
+        appointments.append(appt)
+
+    if not appointments:
+        return []
+
+    # 2. Fetch privacy settings for these patients
+    patient_ids = [ObjectId(a["patient_id"]) for a in appointments if "patient_id" in a]
+    from app.database import patients_collection, patient_settings_collection
+    patients_list = await patients_collection.find({"_id": {"$in": patient_ids}}).to_list(length=1000)
+    
+    user_ids = list(set([str(p["user_id"]) for p in patients_list if p.get("user_id")]))
+    settings_list = await patient_settings_collection.find({"user_id": {"$in": user_ids}}).to_list(length=1000)
+    
+    # Map user_id to setting
+    user_privacy = {str(s["user_id"]): s.get("share_personal_details", True) for s in settings_list}
+    # Map patient_id to setting
+    patient_privacy = {str(p["_id"]): user_privacy.get(str(p.get("user_id")), True) for p in patients_list}
+
+    # 3. Map for frontend with privacy
+    return [_map_appt_for_frontend(a, privacy_map=patient_privacy) for a in appointments]
 
 async def get_doctor_patients(doctor_id: str):
     # Find all unique patient IDs for this doctor
@@ -319,13 +374,20 @@ async def get_doctor_patients(doctor_id: str):
         "_id": {"$in": obj_ids},
         "is_active": {"$ne": False}
     }).to_list(length=1000)
+
+    # Fetch privacy settings for associated users
+    user_ids = list(set([str(p["user_id"]) for p in patients_list if p.get("user_id")]))
+    from app.database import patient_settings_collection
+    settings_list = await patient_settings_collection.find({"user_id": {"$in": user_ids}}).to_list(length=1000)
+    # Map user_id to share_personal_details setting
+    privacy_map = {str(s["user_id"]): s.get("share_personal_details", True) for s in settings_list}
     
     return [
         {
             "id": str(p["_id"]),
             "name": p.get("name"),
-            "phone": p.get("phone"),
-            "gender": p.get("gender")
+            "phone": p.get("phone") if privacy_map.get(str(p.get("user_id")), True) else "********" + str(p.get("phone", ""))[-4:],
+            "gender": p.get("gender") if privacy_map.get(str(p.get("user_id")), True) else "Hidden"
         } for p in patients_list
     ]
 

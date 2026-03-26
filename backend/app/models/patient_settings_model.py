@@ -9,9 +9,11 @@ class PatientNotifications(BaseModel):
 class PatientSettings(BaseModel):
     user_id: str
     notifications: PatientNotifications = Field(default_factory=PatientNotifications)
+    share_personal_details: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class PatientSettingsUpdate(BaseModel):
     appointment_reminders: Optional[bool] = None
     reminder_time_minutes: Optional[int] = None
+    share_personal_details: Optional[bool] = None
