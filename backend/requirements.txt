@@ -1,14 +1,27 @@
-fastapi
-uvicorn
-motor
-httpx
-pydantic[email]
-python-dotenv
-google-auth
-passlib
-bcrypt<4.0.0
-python-multipart
-python-jose[cryptography]
-requests
-reportlab
-apscheduler
+# Core Backend Framework
+fastapi==0.135.1
+uvicorn==0.42.0
+
+# Database & Async Drivers
+motor==3.7.1
+pymongo==4.16.0
+
+# Authentication & Security
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+python-jose[cryptography]==3.5.0
+python-multipart==0.0.22
+
+# Data Validation & Env
+pydantic[email]==2.12.5
+python-dotenv==1.2.2
+
+# Task Scheduling
+APScheduler==3.11.2
+
+# Utilities
+httpx==0.28.1
+requests==2.32.5
+reportlab==4.4.10
+google-auth==2.49.1
+pillow==12.1.1

@@ -15,7 +15,6 @@ if not DATABASE_NAME:
 from fastapi.staticfiles import StaticFiles
 import os
 
-print(f"DEBUG: DATABASE_NAME={DATABASE_NAME}")
 app = FastAPI(title="Hospital Management System", version="1.0.0")
 
 # Ensure upload directory exists

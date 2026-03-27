@@ -1,57 +1,74 @@
-# Hospital Management System
+# MedicPulse: Advanced Hospital Management System
 
-A production-ready comprehensive platform designed to streamline hospital operations, facilitating end-to-end appointment bookings, doctor schedule management, leave tracking, and real-time patient history monitoring.
+A high-performance, asynchronous healthcare platform designed to simplify clinical workflows, optimize patient scheduling, and provide real-time operational analytics for medical institutions.
 
-## 🚀 Features
+---
 
-### **Patients**
-- **Unified Login**: Sign in using either **Email** or **Phone Number** seamlessly.
-- **Google OAuth**: One-click registration and login using your Google account.
-- **SMS Verification**: Real-time OTP verification via a local Android SMS Gateway.
-- **Family Accounts:** Single account to manage all family members' appointments
-- **Streamlined Bookings:** Real-time slot availability, built to prevent double-booking
-- **Dashboard:** At-a-glance view of upcoming & past appointments
+### 🔥 Core System Capabilities
 
-### **Doctors**
-- **Detailed Profiles:** Specialization, consulting fee, experience
-- **Schedule Management:** Flexible availability and intelligent leave requests
-- **Patient History:** Secure tracking of consults and diagnoses for regular patients
+#### 🧠 Smart Availability Engine (The "Brain")
+*   **Static Slot Ticker**: Slots are dynamically calculated in real-time based on physician shifts, break times, and current load. 
+*   **Atomic Booking Protection**: Prevents double-booking through high-concurrency checks and **Idempotency Keys**.
+*   **Unique Constraint Logic**: Enforces a strict one-visit-per-physician-per-day rule for individual patient profiles to maintain schedule integrity.
 
-### **Admin**
-- **Centralized Management:** Approve/reject doctor leaves, oversee active members
-- **System Deletions:** Safe cascading deletes—if a doctor or patient is deactivated, active reservations are intuitively halted.
-- **Analytics Dashboard:** Understand system performance natively
+#### 🚑 Intelligent Emergency Triage
+*   **Symptom-Based Fast-Slotting**: Automatically scans the global physician panel to find the earliest possible arrival slot for urgent patients.
+*   **Priority Triage**: Handles high-priority cases (chest pain, breathing difficulty) with instantaneous allocation.
 
-## 🛠️ Tech Stack
+#### 📅 Comprehensive Leave & Recommendation System
+*   **Seamless Redirection**: If a physician is on approved leave, the system intelligently recommends **other specialists from the same department** to ensure continuity of care.
+*   **Smart Alerts**: Patients receive proactive notifications if their preferred date conflicts with a physician's availability.
 
-**Frontend:** React (Vite)
-**Backend:** FastAPI (Python 3.10+)
-**Database:** MongoDB (Motor / Async)
-**Auth:** Google OAuth 2.0, Unified JWT, Role-Based Access Control (RBAC)
+#### 🏥 Operations & Admin Control
+*   **PDF Prescriptions**: Integrated **ReportLab** module for generating professional, printable digital prescriptions with medical charting.
+*   **RBAC (Role Based Access Control)**: Tiered security for Patients, Doctors, and Administrators with JWT-secured endpoints.
+*   **Historical Precision**: Logically suspends deleted accounts while preserving all historical medical data for analytics and reporting.
 
-## 🏎️ How to Run
+---
 
-### 1. Database
-Ensure MongoDB is running locally (default: `localhost:27017`).
+### 🛠️ Technology Stack
 
-### 2. Backend Server
-1. Navigate to backend: `cd backend`
-2. Install dependencies: `pip install -r requirements.txt`
-3. Set `.env` environment overrides (like `DATABASE_NAME`)
-4. Start: `uvicorn app.main:app --reload`
+*   **Frontend**: React 19 (Vite), TypeScript, Axios, Lucide UI, Recharts.
+*   **Backend**: Python 3.12, FastAPI (Asynchronous Framework), Uvicorn.
+*   **Database**: MongoDB (NoSQL), Motor (Async Driver).
+*   **Services**: APScheduler (Background Jobs), python-jose (JWT), Passlib (Bcrypt).
+*   **Documents**: ReportLab (PDF Generation).
 
-### 3. Frontend Client
-1. Navigate to frontend: `cd frontend`
-2. Install packages: `npm install`
-3. Start dev server: `npm run dev`
+---
 
-## 📖 API Endpoints (Basic)
+### 🏎️ Installation & Setup (For Review)
 
-| Purpose | Method | Endpoint | Detail |
-|---|---|---|---|
-| **Book Slot** | `POST` | `/api/v1/appointments/book` | Book a specific time and date |
-| **Get Appts** | `GET` | `/api/v1/appointments/me` | Fetch active user's appointments |
-| **Request Leave** | `POST` | `/api/v1/doctors/request-leave` | Doctor submit leave request |
-| **Cancel Appt** | `PUT` | `/api/v1/appointments/{id}/status` | Sets `status: cancelled` safely |
+#### 1. Global Pre-requisites
+*   **MongoDB Server**: Ensure `mongod` is running on `localhost:27017`.
+*   **Database Name**: The system defaults to `hospital_db` (configurable in `.env`).
 
-> **Note:** Swagger/OpenAPI documentation is auto-generated by FastAPI at `http://localhost:8000/docs`. Wait, `http://localhost:8000/docs` is standard.
+#### 2. Backend Initialization
+```bash
+cd backend
+# 1. Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # or .\venv\Scripts\activate on Windows
+# 2. Install production-pinned dependencies
+pip install -r requirements.txt
+# 3. Launch API Server
+uvicorn app.main:app --reload
+```
+
+#### 3. Frontend Initialization
+```bash
+cd frontend
+# 1. Install Node packages
+npm install
+# 2. Start Development Client
+npm run dev
+```
+
+---
+
+### 📖 API Documentation & Review
+The system uses **Standardized JSON Responses** across all endpoints.
+*   **Interactive Swagger UI**: Accessible at [http://localhost:8000/docs](http://localhost:8000/docs) during development.
+*   **Re-Docs**: Alternative documentation at [http://localhost:8000/redoc](http://localhost:8000/redoc).
+
+---
+**MedicPulse Hospital 🩺** | *Built for Precision. Scaled for Care.*
